@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Kino Kolleksiya</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&subset=latin,cyrillic&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#E50914;--red-dark:#B20710;--red-dim:rgba(229,9,20,.15);--red-b:rgba(229,9,20,.4);
+  --bg:#141414;--s1:#1F1F1F;--s2:#2A2A2A;--s3:#333;
+  --border:rgba(255,255,255,.1);--text:#fff;--muted:#B3B3B3;--r:12px;
+}
+html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;flex-direction:column}
+.screen.active{display:flex}
+
+/* ── LANG ── */
+#screen-lang{align-items:center;justify-content:center;padding:36px 28px;position:relative;overflow:hidden}
+.glow{position:absolute;width:380px;height:380px;border-radius:50%;background:radial-gradient(circle,rgba(229,9,20,.1) 0%,transparent 70%);top:38%;left:50%;transform:translate(-50%,-55%);pointer-events:none}
+.logo-big{text-transform:uppercase;font-family:'Oswald',sans-serif;font-weight:700;font-size:52px;letter-spacing:3px;color:var(--red);text-align:center;line-height:1.05;margin-bottom:40px;animation:fD .5s ease both}
+.tagline{font-size:11px;color:var(--muted);text-align:center;letter-spacing:1.5px;margin-bottom:46px;animation:fD .5s .08s ease both}
+.lang-hint{font-size:13px;color:var(--muted);text-align:center;margin-bottom:16px;letter-spacing:.4px;animation:fU .45s .15s ease both}
+.lang-list{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px;animation:fU .45s .22s ease both}
+.lang-btn{display:flex;align-items:center;gap:16px;padding:18px 22px;background:var(--s1);border:1px solid var(--border);border-radius:14px;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.lang-btn:active{transform:scale(.97);border-color:var(--red-b);background:var(--s2)}
+.flag{font-size:28px;line-height:1;flex-shrink:0}
+.lang-info{flex:1}
+.lang-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:21px;letter-spacing:0.5px;color:var(--text);display:block;line-height:1.1}
+.lang-sub{font-size:12px;color:var(--muted);display:block;margin-top:2px}
+.arr{color:var(--muted);opacity:.35;font-size:20px}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:100;background:rgba(20,20,20,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 18px 12px}
+.hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.hdr-left{display:flex;align-items:center;gap:10px}
+.back{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--border);border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s;flex-shrink:0}
+.back:active{background:var(--s3)}
+.logo{text-transform:uppercase;font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;letter-spacing:1px;color:var(--red);cursor:pointer;user-select:none}
+.lang-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--s2);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--muted);-webkit-tap-highlight-color:transparent}
+.lang-chip:active{border-color:var(--red-b)}
+.badge{font-size:12px;color:var(--muted);background:var(--s2);padding:4px 10px;border-radius:20px;border:1px solid var(--border)}
+.srch-wrap{position:relative}
+.srch-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.35;pointer-events:none}
+.srch{width:100%;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:9px 12px 9px 38px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;transition:border-color .2s}
+.srch::placeholder{color:var(--muted)}
+.srch:focus{border-color:var(--red-b)}
+
+/* ── COLLECTIONS ── */
+.sec-lbl{padding:14px 18px 8px;font-size:12px;color:var(--muted);letter-spacing:.5px}
+.col-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:4px 14px 100px}
+.col-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .18s,border-color .18s;-webkit-tap-highlight-color:transparent;animation:fU .35s ease both}
+.col-card:nth-child(1){animation-delay:.04s}.col-card:nth-child(2){animation-delay:.09s}.col-card:nth-child(3){animation-delay:.14s}.col-card:nth-child(4){animation-delay:.19s}.col-card:nth-child(5){animation-delay:.24s}
+.col-card:active{transform:scale(.98);border-color:var(--red-b)}
+.col-banner{width:100%;padding-top:56.25%;position:relative;overflow:hidden;background:var(--s2)}
+.col-banner img{position:absolute;top:0;left:0;right:0;bottom:0;width:100%;height:100%;object-fit:cover;display:block}
+.col-banner-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:linear-gradient(to top,rgba(0,0,0,.78) 0%,rgba(0,0,0,.15) 55%,transparent 100%);display:flex;align-items:flex-end;padding:14px 16px;z-index:2}
+.col-banner-emoji{position:absolute;right:12px;top:10px;font-size:42px;opacity:.6;filter:drop-shadow(0 2px 8px rgba(0,0,0,.5));z-index:3}
+.col-banner-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:26px;letter-spacing:0.5px;line-height:1.1;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.6);max-width:75%;position:relative;z-index:3}
+.col-body{padding:12px 16px 14px;display:flex;align-items:center;justify-content:space-between}
+.col-meta{display:flex;flex-direction:column;gap:4px}
+.col-count{font-size:13px;color:var(--muted)}
+.col-count strong{color:var(--text);font-weight:500}
+.col-years{font-size:11px;color:var(--muted);opacity:.65}
+.col-arrow{width:36px;height:36px;background:var(--red-dim);border:1px solid var(--red-b);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--red);flex-shrink:0}
+
+/* ── MOVIES ── */
+.mov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:0 12px 100px}
+.mov-card{background:var(--s1);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;cursor:pointer;position:relative;transition:transform .18s,border-color .18s;-webkit-tap-highlight-color:transparent;animation:fU .3s ease both}
+.mov-card:nth-child(1){animation-delay:.03s}.mov-card:nth-child(2){animation-delay:.07s}.mov-card:nth-child(3){animation-delay:.11s}.mov-card:nth-child(4){animation-delay:.15s}.mov-card:nth-child(5){animation-delay:.18s}.mov-card:nth-child(6){animation-delay:.21s}
+.mov-card:active{transform:scale(.97);border-color:var(--red-b)}
+.mov-poster{width:100%;padding-top:150%;position:relative;background:var(--s2);overflow:hidden}
+.mov-poster img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
+.mov-poster-emoji{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:52px}
+.q-badge{position:absolute;top:8px;right:8px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(20,20,20,.85);border:1px solid var(--red-b);color:var(--red)}
+.mov-body{padding:10px 10px 12px}
+.mov-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:0.3px;line-height:1.25;color:var(--text);margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mov-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.mov-year{font-size:11px;color:var(--muted)}
+.mov-rating{font-size:11px;font-weight:500;color:var(--red)}
+.mov-size{font-size:10px;color:var(--muted);margin-bottom:9px}
+.shr-btn{width:100%;padding:8px;background:var(--red-dim);border:1px solid var(--red-b);border-radius:8px;color:var(--red);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.shr-btn:active{background:rgba(229,9,20,.25);transform:scale(.97)}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,20,20,.98);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:100}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 0;-webkit-tap-highlight-color:transparent}
+.ni-ico{font-size:20px;line-height:1}
+.ni-lbl{font-size:10px;color:var(--muted);letter-spacing:.3px}
+.ni.active .ni-lbl{color:var(--red)}
+.ni.active .ni-ico{filter:drop-shadow(0 0 4px rgba(229,9,20,.5))}
+
+/* ── MODAL ── */
+.modal-ov{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.8);
+  backdrop-filter:blur(6px);
+  z-index:200;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  opacity:0;pointer-events:none;
+  transition:opacity .25s;
+}
+.modal-ov.open{opacity:1;pointer-events:all}
+.modal{
+  width:100%;max-width:680px;
+  background:var(--s1);
+  border-radius:20px;
+  border:1px solid var(--border);
+  overflow:hidden;
+  transform:scale(.94) translateY(16px);
+  transition:transform .3s cubic-bezier(.34,1.4,.64,1);
+  max-height:90vh;
+  overflow-y:auto;
+}
+.modal-ov.open .modal{transform:scale(1) translateY(0)}
+
+/* Poster — 16:9 */
+.modal-poster-wrap{
+  width:100%;
+  padding-top:42%;
+  position:relative;
+  overflow:hidden;
+  background:var(--s2);
+}
+.modal-poster-wrap img{
+  position:absolute;top:0;left:0;
+  width:100%;height:100%;
+  object-fit:cover;display:block;
+}
+.modal-poster-wrap .modal-poster-emoji{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:80px;
+}
+.modal-poster-gradient{
+  position:absolute;bottom:0;left:0;right:0;height:60%;
+  background:linear-gradient(to top,var(--s1) 0%,transparent 100%);
+}
+
+/* Content */
+.modal-ct{padding:20px 24px 24px}
+.modal-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+.modal-close{
+  width:34px;height:34px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:50%;cursor:pointer;color:var(--muted);
+  font-size:16px;line-height:1;
+  transition:background .2s;
+}
+.modal-close:active{background:var(--s3)}
+.modal-franchise{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:4px;font-weight:500}
+.modal-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:24px;letter-spacing:0.5px;line-height:1.2}
+.modal-stats{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.modal-stat{
+  display:flex;align-items:center;gap:5px;
+  font-size:12px;color:var(--muted);
+  background:var(--s2);
+  padding:5px 10px;border-radius:20px;
+  border:1px solid var(--border);
+}
+.modal-stat strong{color:var(--text);font-weight:500}
+.modal-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
+.modal-acts{display:flex;gap:10px}
+.btn-p{flex:1;padding:13px;background:var(--red);border:none;border-radius:12px;color:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .2s}
+.btn-p:active{opacity:.85}
+.btn-p:hover{opacity:.9}
+.btn-s{padding:13px 16px;background:var(--s2);border:1px solid var(--border);border-radius:12px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;cursor:pointer;transition:background .2s}
+.btn-s:active{background:var(--s3)}
+.btn-s:hover{background:var(--s3)}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--s3);border:1px solid var(--red-b);border-radius:30px;padding:10px 20px;font-size:13px;color:var(--red);opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:300}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:60px 20px;grid-column:1/-1}
+.empty-ico{font-size:48px;margin-bottom:14px}
+.empty-t{font-family:'Oswald',sans-serif;font-weight:600;font-size:18px;letter-spacing:0.5px;color:var(--muted);margin-bottom:6px}
+.empty-s{font-size:13px;color:var(--muted);opacity:.6}
+
+/* ── ADMIN ── */
+#screen-admin-login{align-items:center;justify-content:center;padding:32px 28px}
+.admin-logo{font-family:'Oswald',sans-serif;font-weight:700;font-size:30px;letter-spacing:1px;color:var(--red);text-align:center;margin-bottom:6px}
+.admin-sub{font-size:12px;color:var(--muted);text-align:center;margin-bottom:36px;letter-spacing:1px}
+.admin-form{width:100%;max-width:320px;display:flex;flex-direction:column;gap:12px}
+.a-input{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:13px 16px;color:var(--text);font-family:'Inter',sans-serif;font-size:14px;outline:none;width:100%;transition:border-color .2s}
+.a-input:focus{border-color:var(--red-b)}
+.a-input::placeholder{color:var(--muted)}
+.a-btn{padding:13px;background:var(--red);border:none;border-radius:12px;color:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .2s;width:100%}
+.a-btn:active{opacity:.85}
+.a-err{font-size:13px;color:var(--red);text-align:center;display:none}
+
+#screen-admin{background:var(--bg)}
+.admin-hdr{background:rgba(20,20,20,.97);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.admin-hdr-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;letter-spacing:0.5px;color:var(--red)}
+.admin-tabs{display:flex;gap:8px;padding:14px 18px 0}
+.a-tab{padding:8px 18px;border-radius:30px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.a-tab.active{background:var(--red-dim);border-color:var(--red-b);color:var(--red)}
+.a-tab:active{transform:scale(.96)}
+.admin-content{padding:14px 14px 100px}
+
+/* admin cards */
+.db-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:12px;animation:fU .3s ease both}
+.db-card-hdr{padding:14px 16px;display:flex;align-items:center;gap:12px}
+.db-thumb{width:80px;height:45px;border-radius:8px;object-fit:cover;background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden}
+.db-thumb img{width:100%;height:100%;object-fit:cover}
+.db-info{flex:1;min-width:0}
+.db-name{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:0.2px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.db-meta{font-size:11px;color:var(--muted);margin-top:2px}
+.db-actions{display:flex;gap:6px;flex-shrink:0}
+.db-edit{padding:6px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.db-edit:active{background:var(--s3)}
+.db-del{padding:6px 10px;background:rgba(229,9,20,.1);border:1px solid var(--red-b);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.db-del:active{background:var(--red-dim)}
+
+/* add button */
+.add-btn{width:100%;padding:14px;background:var(--red-dim);border:1px dashed var(--red-b);border-radius:14px;color:var(--red);font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;transition:background .2s;-webkit-tap-highlight-color:transparent}
+.add-btn:active{background:rgba(229,9,20,.25)}
+
+/* form modal */
+.form-ov{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:flex;align-items:flex-end;opacity:0;pointer-events:none;transition:opacity .25s}
+.form-ov.open{opacity:1;pointer-events:all}
+.form-sheet{width:100%;background:var(--s1);border-radius:20px 20px 0 0;border-top:1px solid var(--border);padding:0 0 max(24px,env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.56,.64,1);max-height:92vh;overflow-y:auto}
+.form-ov.open .form-sheet{transform:translateY(0)}
+.form-hdr{padding:20px 18px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--s1);z-index:5}
+.form-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:20px;letter-spacing:0.3px;color:var(--text)}
+.form-close{width:30px;height:30px;display:flex;align-items:center;justify-content:center;background:var(--s2);border-radius:50%;border:1px solid var(--border);cursor:pointer;color:var(--muted);font-size:16px}
+.form-close:active{background:var(--s3)}
+.form-body{padding:16px 18px}
+.f-group{margin-bottom:14px}
+.f-label{font-size:12px;color:var(--muted);margin-bottom:6px;display:block;letter-spacing:.4px}
+.f-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.f-row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.f-save{width:100%;padding:13px;background:var(--red);border:none;border-radius:12px;color:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;margin-top:8px}
+.f-save:active{opacity:.85}
+.f-section{font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:0.2px;color:var(--muted);margin:18px 0 10px;padding-top:14px;border-top:1px solid var(--border)}
+
+/* movie filter in admin */
+.a-col-filter{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:10px;margin-bottom:4px}
+.a-col-filter::-webkit-scrollbar{display:none}
+.a-cf-btn{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.a-cf-btn.active{background:var(--red-dim);border-color:var(--red-b);color:var(--red)}
+
+@keyframes fU{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fD{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- ═══ SCREEN 1: TIL TANLASH ═══ -->
+<div class="screen active" id="screen-lang">
+  <div class="glow"></div>
+  <div class="logo-big">KINO<br>KOLLEKSIYA</div>
+  <div class="lang-list">
+    <div class="lang-btn" onclick="selectLang('uz')">
+      <span class="flag">🇺🇿</span>
+      <div class="lang-info"><span class="lang-name">O'ZBEK TILI</span><span class="lang-sub">O'zbekcha interfeys</span></div>
+      <span class="arr">›</span>
+    </div>
+    <div class="lang-btn" onclick="selectLang('ru')">
+      <span class="flag">🇷🇺</span>
+      <div class="lang-info"><span class="lang-name">РУССКИЙ ЯЗЫК</span><span class="lang-sub">Русскоязычный интерфейс</span></div>
+      <span class="arr">›</span>
+    </div>
+    <div class="lang-btn" onclick="selectLang('en')">
+      <span class="flag">🇬🇧</span>
+      <div class="lang-info"><span class="lang-name">ENGLISH</span><span class="lang-sub">English interface</span></div>
+      <span class="arr">›</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 2: KOLLEKSIYALAR ═══ -->
+<div class="screen" id="screen-collections">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div class="logo" id="logo-tap" onclick="logoTap()">Kino Kolleksiya</div>
+      <div class="lang-chip" onclick="goToLang()">
+        <span id="cur-flag">🇺🇿</span>
+        <span id="cur-code" style="font-size:11px;font-weight:500">UZ</span>
+      </div>
+    </div>
+    <div class="srch-wrap">
+      <svg class="srch-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="srch" id="col-srch" type="text" placeholder="Kolleksiya qidirish...">
+    </div>
+  </div>
+  <div class="sec-lbl" id="col-sec-lbl">Barcha kolleksiyalar</div>
+  <div class="col-grid" id="col-grid"></div>
+  <div class="bnav">
+    <div class="ni active"><div class="ni-ico">🎬</div><div class="ni-lbl" data-k="nav_home">Bosh sahifa</div></div>
+    <div class="ni"><div class="ni-ico">🔖</div><div class="ni-lbl" data-k="nav_saved">Saqlangan</div></div>
+    <div class="ni"><div class="ni-ico">🔍</div><div class="ni-lbl" data-k="nav_search">Qidirish</div></div>
+    <div class="ni"><div class="ni-ico">⚙️</div><div class="ni-lbl" data-k="nav_settings">Sozlamalar</div></div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 3: FILMLAR ═══ -->
+<div class="screen" id="screen-movies">
+  <div class="hdr">
+    <div class="hdr-row">
+      <div class="hdr-left">
+        <div class="back" onclick="goBack()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M5 12l7 7M5 12l7-7"/></svg>
+        </div>
+        <div class="logo" id="mov-title">Harry Potter</div>
+      </div>
+      <div class="badge" id="mov-badge">8 ta film</div>
+    </div>
+    <div class="srch-wrap">
+      <svg class="srch-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="srch" id="mov-srch" type="text" placeholder="Film qidirish...">
+    </div>
+  </div>
+  <div style="padding:10px 18px 4px;display:flex;align-items:center;justify-content:space-between">
+    <span style="font-size:12px;color:var(--muted)" id="mov-sec-lbl">Barcha filmlar</span>
+    <button style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:6px" onclick="toggleSort()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+      <span id="sort-lbl">Yilga ko'ra ↓</span>
+    </button>
+  </div>
+  <div class="mov-grid" id="mov-grid"></div>
+  <div class="bnav">
+    <div class="ni active"><div class="ni-ico">🎬</div><div class="ni-lbl" data-k="nav_home">Bosh sahifa</div></div>
+    <div class="ni"><div class="ni-ico">🔖</div><div class="ni-lbl" data-k="nav_saved">Saqlangan</div></div>
+    <div class="ni"><div class="ni-ico">🔍</div><div class="ni-lbl" data-k="nav_search">Qidirish</div></div>
+    <div class="ni"><div class="ni-ico">⚙️</div><div class="ni-lbl" data-k="nav_settings">Sozlamalar</div></div>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 4: ADMIN LOGIN ═══ -->
+<div class="screen" id="screen-admin-login">
+  <div class="admin-logo">Admin Panel</div>
+  <div class="admin-sub">Kino Kolleksiya · Boshqaruv tizimi</div>
+  <div class="admin-form">
+    <input class="a-input" id="a-pass" type="password" placeholder="Parol..." onkeydown="if(event.key==='Enter')adminLogin()">
+    <button class="a-btn" onclick="adminLogin()">Kirish</button>
+    <div class="a-err" id="a-err">Parol noto'g'ri!</div>
+    <button style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:4px" onclick="showScreen('screen-collections')">← Orqaga qaytish</button>
+  </div>
+</div>
+
+<!-- ═══ SCREEN 5: ADMIN PANEL ═══ -->
+<div class="screen" id="screen-admin">
+  <div class="admin-hdr">
+    <div class="admin-hdr-title">Admin Panel</div>
+    <button style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px" onclick="adminLogout()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+      Chiqish
+    </button>
+  </div>
+  <div class="admin-tabs">
+    <div class="a-tab active" id="tab-col" onclick="switchAdminTab('collections')">Kolleksiyalar</div>
+    <div class="a-tab" id="tab-mov" onclick="switchAdminTab('movies')">Filmlar</div>
+  </div>
+  <div class="admin-content" id="admin-content"></div>
+</div>
+
+<!-- MOVIE MODAL -->
+<div class="modal-ov" id="modal" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <div id="modal-poster"></div>
+    <div class="modal-ct" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- FORM SHEET -->
+<div class="form-ov" id="form-ov" onclick="closeFormOutside(event)">
+  <div class="form-sheet">
+    <div class="form-hdr">
+      <div class="form-title" id="form-title">Kolleksiya qo'shish</div>
+      <div class="form-close" onclick="closeForm()">✕</div>
+    </div>
+    <div class="form-body" id="form-body"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════
+   TELEGRAM
+═══════════════════════════════════════ */
+const tg = window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();tg.setHeaderColor('#141414');tg.setBackgroundColor('#141414')}
+
+/* ═══════════════════════════════════════
+   I18N
+═══════════════════════════════════════ */
+const T = {
+  uz:{
+    search_col:"Kolleksiya qidirish...",search_mov:"Film qidirish...",
+    all_col:"Barcha kolleksiyalar",all_mov:"Barcha filmlar",
+    count:n=>`${n} ta film`,
+    sort_yd:"Yilga ko'ra ↓",sort_r:"Reytingga ko'ra",sort_ya:"Yilga ko'ra ↑",
+    download:"⬇ Yuklab olish",share:"Ulashish",
+    nav_home:"Bosh sahifa",nav_saved:"Saqlangan",nav_search:"Qidirish",nav_settings:"Sozlamalar",
+    empty_t:"Topilmadi",empty_s:"Boshqa so'z bilan qidiring",
+    toast_share:t=>`"${t}" ulashildi ✅`,
+  },
+  ru:{
+    search_col:"Поиск коллекции...",search_mov:"Поиск фильма...",
+    all_col:"Все коллекции",all_mov:"Все фильмы",
+    count:n=>`${n} фильм(ов)`,
+    sort_yd:"По году ↓",sort_r:"По рейтингу",sort_ya:"По году ↑",
+    download:"⬇ Скачать",share:"Поделиться",
+    nav_home:"Главная",nav_saved:"Сохранённые",nav_search:"Поиск",nav_settings:"Настройки",
+    empty_t:"Ничего не найдено",empty_s:"Попробуйте другой запрос",
+    toast_share:t=>`«${t}» отправлено ✅`,
+  },
+  en:{
+    search_col:"Search collections...",search_mov:"Search movies...",
+    all_col:"All collections",all_mov:"All movies",
+    count:n=>`${n} movie${n!==1?'s':''}`,
+    sort_yd:"By year ↓",sort_r:"By rating",sort_ya:"By year ↑",
+    download:"⬇ Download",share:"Share",
+    nav_home:"Home",nav_saved:"Saved",nav_search:"Search",nav_settings:"Settings",
+    empty_t:"Nothing found",empty_s:"Try a different search",
+    toast_share:t=>`"${t}" shared ✅`,
+  }
+};
+
+/* ═══════════════════════════════════════
+   DEFAULT DATA
+═══════════════════════════════════════ */
+const DEFAULT_COLLECTIONS = [
+  {id:'hp',emoji:'🧙',thumbnail:'https://image.tmdb.org/t/p/original/gOduLS90AehfJPoJMizaRkC3Hoz.jpg',
+   name:{uz:"Harry Potter",ru:"Гарри Поттер",en:"Harry Potter"},
+   sub:{uz:"Sehrgar dunyosi",ru:"Мир волшебников",en:"Wizarding World"},
+   years:[2001,2011]},
+  {id:'marvel',emoji:'⚡',thumbnail:'',
+   name:{uz:"Marvel",ru:"Марвел",en:"Marvel"},
+   sub:{uz:"Super qahramonlar olami",ru:"Вселенная супергероев",en:"Marvel Cinematic Universe"},
+   years:[2008,2023]},
+  {id:'lotr',emoji:'💍',thumbnail:'',
+   name:{uz:"Uzuk Egasi",ru:"Властелин Колец",en:"Lord of the Rings"},
+   sub:{uz:"O'rta Yer eposasi",ru:"Эпос Средиземья",en:"Middle-earth Saga"},
+   years:[2001,2003]},
+  {id:'sw',emoji:'⭐',thumbnail:'',
+   name:{uz:"Yulduz Urushlari",ru:"Звёздные Войны",en:"Star Wars"},
+   sub:{uz:"Galaktika eposasi",ru:"Эпос галактики",en:"Galaxy Saga"},
+   years:[1977,2019]},
+];
+
+const DEFAULT_MOVIES = [
+  {id:1,col:'hp',year:2001,rating:7.6,quality:'1080p',size:'4.2 GB',emoji:'🧙',thumbnail:'',fileId:'hp_1',
+   title:{uz:"Harry Potter va Faylasuf Toshi",ru:"Гарри Поттер и философский камень",en:"Harry Potter and the Philosopher's Stone"},
+   desc:{uz:"Yosh sehrgar Harry Potter Hogvarts maktabiga qabul qilinadi.",ru:"Юный волшебник Гарри Поттер поступает в Хогвартс.",en:"Young wizard Harry Potter is admitted to Hogwarts."}},
+  {id:2,col:'hp',year:2002,rating:7.4,quality:'1080p',size:'4.5 GB',emoji:'🐍',thumbnail:'',fileId:'hp_2',
+   title:{uz:"Harry Potter va Sirlar Xonasi",ru:"Гарри Поттер и тайная комната",en:"Harry Potter and the Chamber of Secrets"},
+   desc:{uz:"Hogvartsda sirli hujumlar boshlanadi.",ru:"В Хогвартсе начинаются таинственные нападения.",en:"Mysterious attacks plague Hogwarts."}},
+  {id:3,col:'hp',year:2004,rating:7.9,quality:'4K',size:'15 GB',emoji:'🌙',thumbnail:'',fileId:'hp_3',
+   title:{uz:"Harry Potter va Azkaban Mahbusi",ru:"Гарри Поттер и узник Азкабана",en:"Harry Potter and the Prisoner of Azkaban"},
+   desc:{uz:"Xavfli mahbus Azkabandan qochdi.",ru:"Опасный заключённый сбежал из Азкабана.",en:"A dangerous prisoner escapes Azkaban."}},
+  {id:4,col:'hp',year:2005,rating:7.7,quality:'1080p',size:'5.1 GB',emoji:'🏆',thumbnail:'',fileId:'hp_4',
+   title:{uz:"Harry Potter va O't Qadahi",ru:"Гарри Поттер и кубок огня",en:"Harry Potter and the Goblet of Fire"},
+   desc:{uz:"Hogvarts uch ta maktab o'rtasidagi musobaqaga mezbonlik qiladi.",ru:"Хогвартс принимает Турнир Трёх Волшебников.",en:"Hogwarts hosts the Triwizard Tournament."}},
+  {id:5,col:'hp',year:2007,rating:7.5,quality:'1080p',size:'4.8 GB',emoji:'🦅',thumbnail:'',fileId:'hp_5',
+   title:{uz:"Harry Potter va Feniks Ordeni",ru:"Гарри Поттер и орден Феникса",en:"Harry Potter and the Order of the Phoenix"},
+   desc:{uz:"Voldemort qaytib kelganiga hech kim ishonmaydi.",ru:"Никто не верит в возвращение Волдеморта.",en:"Nobody believes Voldemort has returned."}},
+  {id:6,col:'hp',year:2009,rating:7.6,quality:'4K',size:'14 GB',emoji:'🧪',thumbnail:'',fileId:'hp_6',
+   title:{uz:"Harry Potter va Yarim Qon Shahzoda",ru:"Гарри Поттер и принц-полукровка",en:"Harry Potter and the Half-Blood Prince"},
+   desc:{uz:"Harry Dumbledordan maxfiy ta'lim oladi.",ru:"Гарри получает тайные уроки от Дамблдора.",en:"Harry receives secret lessons from Dumbledore."}},
+  {id:7,col:'hp',year:2010,rating:7.7,quality:'4K',size:'16 GB',emoji:'⚔️',thumbnail:'',fileId:'hp_7a',
+   title:{uz:"Harry Potter va O'lim Sovg'alari: 1-qism",ru:"Гарри Поттер и Дары Смерти: Часть 1",en:"Harry Potter and the Deathly Hallows: Part 1"},
+   desc:{uz:"Harry, Ron va Hermiona maktabni tark etib, gorksinlalarni izlashga otlanadi.",ru:"Гарри, Рон и Гермиона покидают школу и ищут крестражи.",en:"Harry, Ron and Hermione leave Hogwarts to hunt Horcruxes."}},
+  {id:8,col:'hp',year:2011,rating:8.1,quality:'4K',size:'17 GB',emoji:'🏰',thumbnail:'',fileId:'hp_7b',
+   title:{uz:"Harry Potter va O'lim Sovg'alari: 2-qism",ru:"Гарри Поттер и Дары Смерти: Часть 2",en:"Harry Potter and the Deathly Hallows: Part 2"},
+   desc:{uz:"Hogvarts jangida yakuniy to'qnashuv sodir bo'ladi.",ru:"В битве за Хогвартс происходит финальное противостояние.",en:"The final battle at Hogwarts."}},
+  {id:9,col:'marvel',year:2008,rating:7.9,quality:'4K',size:'14 GB',emoji:'🦾',thumbnail:'',fileId:'mcu_im1',
+   title:{uz:"Temir Odam",ru:"Железный человек",en:"Iron Man"},
+   desc:{uz:"Tony Stark asirlikda zirhli kostyum yaratadi.",ru:"Тони Старк в плену создаёт бронекостюм.",en:"Tony Stark builds an armored suit in captivity."}},
+  {id:10,col:'marvel',year:2012,rating:8.0,quality:'4K',size:'16 GB',emoji:'⚡',thumbnail:'',fileId:'mcu_av1',
+   title:{uz:"Qasoskorlar",ru:"Мстители",en:"The Avengers"},
+   desc:{uz:"Olti super qahramon Lokining bosqiniga qarshi kurashadi.",ru:"Шесть супергероев объединяются против Локи.",en:"Six superheroes unite to stop Loki's invasion."}},
+  {id:11,col:'marvel',year:2018,rating:8.4,quality:'4K',size:'18 GB',emoji:'💎',thumbnail:'',fileId:'mcu_iw',
+   title:{uz:"Qasoskorlar: Sonsizlik Urushi",ru:"Мстители: Война бесконечности",en:"Avengers: Infinity War"},
+   desc:{uz:"Thanos olti Sonsizlik Toshini to'plash uchun yo'lga chiqadi.",ru:"Танос отправляется собрать все камни Бесконечности.",en:"Thanos sets out to collect all six Infinity Stones."}},
+  {id:12,col:'marvel',year:2019,rating:8.4,quality:'4K',size:'17 GB',emoji:'🕰️',thumbnail:'',fileId:'mcu_eg',
+   title:{uz:"Qasoskorlar: Oxirat",ru:"Мстители: Финал",en:"Avengers: Endgame"},
+   desc:{uz:"Qolgan qahramonlar so'nggi kurashar.",ru:"Оставшиеся герои вступают в финальную битву.",en:"The remaining heroes make one final stand."}},
+  {id:13,col:'lotr',year:2001,rating:8.8,quality:'4K',size:'22 GB',emoji:'💍',thumbnail:'',fileId:'lotr_1',
+   title:{uz:"Uzuk Egasi: Uzuk Hamdo'stligi",ru:"Властелин колец: Братство кольца",en:"The Lord of the Rings: The Fellowship of the Ring"},
+   desc:{uz:"Frodo Baggins Qudrat Uzugini yo'q qilish uchun yo'lga chiqadi.",ru:"Фродо отправляется уничтожить Кольцо Всевластья.",en:"Frodo embarks on a journey to destroy the One Ring."}},
+  {id:14,col:'lotr',year:2002,rating:8.7,quality:'4K',size:'23 GB',emoji:'🏰',thumbnail:'',fileId:'lotr_2',
+   title:{uz:"Uzuk Egasi: Ikkita Minora",ru:"Властелин колец: Две крепости",en:"The Lord of the Rings: The Two Towers"},
+   desc:{uz:"Hamdo'stlik bo'lingan. Frodo va Sam Mordorga yaqinlashmoqda.",ru:"Братство разделилось. Фродо и Сэм приближаются к Мордору.",en:"The Fellowship is broken. Frodo and Sam draw closer to Mordor."}},
+  {id:15,col:'lotr',year:2003,rating:9.0,quality:'4K',size:'24 GB',emoji:'👑',thumbnail:'',fileId:'lotr_3',
+   title:{uz:"Uzuk Egasi: Qirolning Qaytishi",ru:"Властелин колец: Возвращение короля",en:"The Lord of the Rings: The Return of the King"},
+   desc:{uz:"Yakuniy jang. Frodo Mordorga, Aragon esa taxtga.",ru:"Финальная битва. Фродо идёт к Мордору, Арагорн — к трону.",en:"Final battle. Frodo pushes to Mordor, Aragorn reclaims the throne."}},
+  {id:16,col:'sw',year:1977,rating:8.6,quality:'4K',size:'20 GB',emoji:'⭐',thumbnail:'',fileId:'sw_4',
+   title:{uz:"Yulduz Urushlari: Yangi Umid",ru:"Звёздные войны: Новая надежда",en:"Star Wars: A New Hope"},
+   desc:{uz:"Luke Skywalker Imperiyaga qarshi Isyonchilar bilan qo'shiladi.",ru:"Люк Скайуокер присоединяется к повстанцам против Империи.",en:"Luke Skywalker joins rebels in the fight against the Empire."}},
+  {id:17,col:'sw',year:1980,rating:8.7,quality:'4K',size:'19 GB',emoji:'🌌',thumbnail:'',fileId:'sw_5',
+   title:{uz:"Yulduz Urushlari: Imperiya Zarba Beradi",ru:"Звёздные войны: Империя наносит ответный удар",en:"Star Wars: The Empire Strikes Back"},
+   desc:{uz:"Imperiya qahramonlarni quvib yuradi. Luke Jedi ustozidan ta'lim oladi.",ru:"Империя преследует героев. Люк обучается у мастера-джедая.",en:"The Empire strikes back. Luke trains with a Jedi Master."}},
+  {id:18,col:'sw',year:1983,rating:8.3,quality:'4K',size:'18 GB',emoji:'🐻',thumbnail:'',fileId:'sw_6',
+   title:{uz:"Yulduz Urushlari: Jedi Qaytadi",ru:"Звёздные войны: Возвращение джедая",en:"Star Wars: Return of the Jedi"},
+   desc:{uz:"Luke Darth Veyderga qarshi yakuniy duelga chiqadi.",ru:"Люк вступает в финальную дуэль с Дартом Вейдером.",en:"Luke faces Darth Vader in the final duel."}},
+];
+
+/* ═══════════════════════════════════════
+   DATABASE (localStorage)
+═══════════════════════════════════════ */
+const DB_KEY_COL = 'kk_collections_v3';
+const DB_KEY_MOV = 'kk_movies_v3';
+const ADMIN_PASS = 'kino2025'; // ← Parolni shu yerda o'zgartiring
+
+function loadCollections(){
+  try{const d=localStorage.getItem(DB_KEY_COL);return d?JSON.parse(d):JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS))}
+  catch{return JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS))}
+}
+
+function loadMovies(){
+  try{const d=localStorage.getItem(DB_KEY_MOV);return d?JSON.parse(d):JSON.parse(JSON.stringify(DEFAULT_MOVIES))}
+  catch{return JSON.parse(JSON.stringify(DEFAULT_MOVIES))}
+}
+
+function saveCollections(data){localStorage.setItem(DB_KEY_COL,JSON.stringify(data))}
+function saveMovies(data){localStorage.setItem(DB_KEY_MOV,JSON.stringify(data))}
+
+let COLLECTIONS = loadCollections();
+let MOVIES = loadMovies();
+
+/* ═══════════════════════════════════════
+   STATE
+═══════════════════════════════════════ */
+let lang='uz', curCol=null, sortIdx=0, colQ='', movQ='';
+let logoTapCount=0, logoTapTimer=null;
+let adminTab='collections', adminColFilter=null;
+let editingColId=null, editingMovId=null;
+const FLAGS={uz:'🇺🇿',ru:'🇷🇺',en:'🇬🇧'};
+const CODES={uz:'UZ',ru:'RU',en:'EN'};
+const SORTS=['year','rating','year_asc'];
+const BG={hp:'#1A0000',marvel:'#1C0000',lotr:'#071205',sw:'#050B14'};
+
+/* ═══════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════ */
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function selectLang(l){
+  lang=l;
+  document.getElementById('cur-flag').textContent=FLAGS[l];
+  document.getElementById('cur-code').textContent=CODES[l];
+  applyLang();
+  showScreen('screen-collections');
+  renderCollections();
+}
+
+function goToLang(){showScreen('screen-lang')}
+
+function applyLang(){
+  const t=T[lang];
+  document.getElementById('col-srch').placeholder=t.search_col;
+  document.getElementById('mov-srch').placeholder=t.search_mov;
+  document.getElementById('col-sec-lbl').textContent=t.all_col;
+  document.getElementById('sort-lbl').textContent=t.sort_yd;
+  document.querySelectorAll('[data-k]').forEach(el=>{
+    const k=el.dataset.k;if(t[k])el.textContent=t[k];
+  });
+}
+
+function goBack(){
+  curCol=null;movQ='';
+  document.getElementById('mov-srch').value='';
+  showScreen('screen-collections');
+}
+
+/* ═══════════════════════════════════════
+   LOGO TAP → ADMIN
+═══════════════════════════════════════ */
+function logoTap(){
+  logoTapCount++;
+  clearTimeout(logoTapTimer);
+  logoTapTimer=setTimeout(()=>logoTapCount=0,1500);
+  if(logoTapCount>=5){
+    logoTapCount=0;
+    document.getElementById('a-pass').value='';
+    document.getElementById('a-err').style.display='none';
+    showScreen('screen-admin-login');
+  }
+}
+
+/* ═══════════════════════════════════════
+   ADMIN AUTH
+═══════════════════════════════════════ */
+function adminLogin(){
+  const pw=document.getElementById('a-pass').value;
+  if(pw===ADMIN_PASS){
+    document.getElementById('a-err').style.display='none';
+    showScreen('screen-admin');
+    switchAdminTab('collections');
+  } else {
+    document.getElementById('a-err').style.display='block';
+    document.getElementById('a-pass').value='';
+  }
+}
+
+function adminLogout(){
+  showScreen('screen-collections');
+}
+
+/* ═══════════════════════════════════════
+   RENDER COLLECTIONS
+═══════════════════════════════════════ */
+function renderCollections(){
+  const t=T[lang];
+  const q=colQ.toLowerCase();
+  COLLECTIONS=loadCollections();
+  const list=COLLECTIONS.filter(c=>!q||c.name[lang].toLowerCase().includes(q));
+  const grid=document.getElementById('col-grid');
+
+  if(!list.length){
+    grid.innerHTML=`<div class="empty"><div class="empty-ico">🎞️</div><div class="empty-t">${t.empty_t}</div><div class="empty-s">${t.empty_s}</div></div>`;
+    return;
+  }
+
+  grid.innerHTML=list.map(c=>{
+    const cnt=MOVIES.filter(m=>m.col===c.id).length;
+    const bg = BG[c.id]||'#1A1A1A';
+    const bannerContent = `<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:56px">${c.emoji}</div>` +
+      (c.thumbnail ? `<img src="${c.thumbnail}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+    return `<div class="col-card" onclick="openCollection('${c.id}')">
+      <div class="col-banner" style="background-color:${bg}">
+        ${bannerContent}
+        <div class="col-banner-overlay">
+          <div class="col-banner-title">${esc(c.name[lang])}</div>
+          <div class="col-banner-emoji">${c.emoji}</div>
+        </div>
+      </div>
+      <div class="col-body">
+        <div class="col-meta">
+          <div class="col-count">${esc(c.sub[lang])} · <strong>${t.count(cnt)}</strong></div>
+          <div class="col-years">${c.years[0]} – ${c.years[1]}</div>
+        </div>
+        <div class="col-arrow">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ═══════════════════════════════════════
+   RENDER MOVIES
+═══════════════════════════════════════ */
+function openCollection(id){
+  curCol=id; sortIdx=0; movQ='';
+  document.getElementById('mov-srch').value='';
+  const col=COLLECTIONS.find(c=>c.id===id);
+  document.getElementById('mov-title').textContent=col.name[lang];
+  document.getElementById('sort-lbl').textContent=T[lang].sort_yd;
+  document.getElementById('mov-sec-lbl').textContent=T[lang].all_mov;
+  showScreen('screen-movies');
+  renderMovies();
+}
+
+function renderMovies(){
+  const t=T[lang];
+  const q=movQ.toLowerCase();
+  MOVIES=loadMovies();
+  const grid=document.getElementById('mov-grid');
+  let list=MOVIES.filter(m=>m.col===curCol&&(!q||m.title[lang].toLowerCase().includes(q)));
+  const s=SORTS[sortIdx];
+  if(s==='year')list.sort((a,b)=>b.year-a.year);
+  else if(s==='year_asc')list.sort((a,b)=>a.year-b.year);
+  else list.sort((a,b)=>b.rating-a.rating);
+  document.getElementById('mov-badge').textContent=t.count(list.length);
+
+  if(!list.length){
+    grid.innerHTML=`<div class="empty"><div class="empty-ico">🎞️</div><div class="empty-t">${t.empty_t}</div><div class="empty-s">${t.empty_s}</div></div>`;
+    return;
+  }
+  grid.innerHTML=list.map(m=>{
+    const bg=BG[m.col]||'#1A1A1A';
+    const posterContent = `<div class="mov-poster-emoji">${m.emoji}</div>` +
+      (m.thumbnail ? `<img src="${m.thumbnail}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+    return `<div class="mov-card" onclick="openModal(${m.id})">
+      <div class="mov-poster" style="background-color:${bg}">${posterContent}</div>
+      <span class="q-badge">${esc(m.quality)}</span>
+      <div class="mov-body">
+        <div class="mov-title">${esc(m.title[lang])}</div>
+        <div class="mov-meta"><span class="mov-year">${m.year}</span><span class="mov-rating">★ ${m.rating}</span></div>
+        <div class="mov-size">📦 ${esc(m.size)}</div>
+        <button class="shr-btn" onclick="shareMovie(event,${m.id})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          ${t.share}
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleSort(){
+  sortIdx=(sortIdx+1)%3;
+  const t=T[lang];
+  document.getElementById('sort-lbl').textContent=[t.sort_yd,t.sort_r,t.sort_ya][sortIdx];
+  renderMovies();
+}
+
+document.getElementById('col-srch').addEventListener('input',e=>{colQ=e.target.value;renderCollections()});
+document.getElementById('mov-srch').addEventListener('input',e=>{movQ=e.target.value;renderMovies()});
+
+/* ═══════════════════════════════════════
+   MODAL
+═══════════════════════════════════════ */
+function openModal(id){
+  MOVIES=loadMovies();
+  const m=MOVIES.find(x=>x.id===id);
+  if(!m)return;
+  const t=T[lang];
+  const col=COLLECTIONS.find(c=>c.id===m.col);
+  const bg=BG[m.col]||'#1A1A1A';
+
+  // Poster
+  const posterInner = `<div class="modal-poster-emoji">${m.emoji}</div>` +
+    (m.thumbnail ? `<img src="${m.thumbnail}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+
+  document.getElementById('modal-poster').innerHTML=`
+    <div class="modal-poster-wrap" style="background:${bg}">
+      ${posterInner}
+      <div class="modal-poster-gradient"></div>
+    </div>`;
+
+  // Body
+  document.getElementById('modal-body').innerHTML=`
+    <div class="modal-top">
+      <div>
+        <div class="modal-franchise">${esc(col.name[lang])}</div>
+        <div class="modal-title">${esc(m.title[lang])}</div>
+      </div>
+      <div class="modal-close" onclick="closeModal()">✕</div>
+    </div>
+    <div class="modal-stats">
+      <div class="modal-stat">⭐ <strong>${m.rating}</strong></div>
+      <div class="modal-stat">📅 <strong>${m.year}</strong></div>
+      <div class="modal-stat">💿 <strong>${esc(m.quality)}</strong></div>
+      <div class="modal-stat">📦 <strong>${esc(m.size)}</strong></div>
+    </div>
+    <div class="modal-desc">${esc(m.desc[lang])}</div>
+    <div class="modal-acts">
+      <button class="btn-p" onclick="downloadMovie(${m.id})">${t.download}</button>
+      <button class="btn-s" onclick="shareMovieModal(${m.id})">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      </button>
+    </div>`;
+
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('open')}
+function closeModalOutside(e){if(e.target===document.getElementById('modal'))closeModal()}
+
+/* ═══════════════════════════════════════
+   ACTIONS
+═══════════════════════════════════════ */
+function downloadMovie(id){
+  const m=loadMovies().find(x=>x.id===id);
+  closeModal();
+  if(tg)tg.sendData(JSON.stringify({action:'download',movieId:id,fileId:m.fileId}));
+  else showToast(T[lang].download+'...');
+}
+
+function shareMovie(event,id){
+  event.stopPropagation();
+  const m=loadMovies().find(x=>x.id===id);
+  if(tg?.switchInlineQuery)tg.switchInlineQuery(`film_${id}`,['users','groups']);
+  else showToast(T[lang].toast_share(m.title[lang]));
+}
+
+function shareMovieModal(id){closeModal();setTimeout(()=>shareMovie({stopPropagation:()=>{}},id),300)}
+
+function showToast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+/* ═══════════════════════════════════════
+   ADMIN — TABS
+═══════════════════════════════════════ */
+function switchAdminTab(tab){
+  adminTab=tab;
+  document.getElementById('tab-col').classList.toggle('active',tab==='collections');
+  document.getElementById('tab-mov').classList.toggle('active',tab==='movies');
+  if(tab==='collections')renderAdminCollections();
+  else renderAdminMovies();
+}
+
+/* ═══════════════════════════════════════
+   ADMIN — COLLECTIONS LIST
+═══════════════════════════════════════ */
+function renderAdminCollections(){
+  COLLECTIONS=loadCollections();
+  const ct=document.getElementById('admin-content');
+  ct.innerHTML=`<button class="add-btn" onclick="openColForm(null)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Yangi kolleksiya qo'shish
+  </button>`+COLLECTIONS.map((c,i)=>{
+    const cnt=loadMovies().filter(m=>m.col===c.id).length;
+    const thumb=c.thumbnail
+      ?`<div class="db-thumb"><img src="${esc(c.thumbnail)}" onerror="this.parentElement.textContent='${c.emoji}'"></div>`
+      :`<div class="db-thumb" style="font-size:22px">${c.emoji}</div>`;
+    return `<div class="db-card" style="animation-delay:${i*0.04}s">
+      <div class="db-card-hdr">
+        ${thumb}
+        <div class="db-info">
+          <div class="db-name">${esc(c.name.uz)}</div>
+          <div class="db-meta">${c.years[0]}–${c.years[1]} · ${cnt} ta film</div>
+        </div>
+        <div class="db-actions">
+          <div class="db-edit" onclick="openColForm('${c.id}')">✏️ Tahrir</div>
+          <div class="db-del" onclick="deleteCollection('${c.id}')">🗑</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function deleteCollection(id){
+  if(!confirm('Bu kolleksiyani o\'chirishni tasdiqlaysizmi?'))return;
+  let cols=loadCollections().filter(c=>c.id!==id);
+  let movs=loadMovies().filter(m=>m.col!==id);
+  saveCollections(cols);saveMovies(movs);
+  COLLECTIONS=cols;MOVIES=movs;
+  renderAdminCollections();
+  showToast('Kolleksiya o\'chirildi');
+}
+
+/* ═══════════════════════════════════════
+   ADMIN — MOVIES LIST
+═══════════════════════════════════════ */
+function renderAdminMovies(){
+  COLLECTIONS=loadCollections();MOVIES=loadMovies();
+  const ct=document.getElementById('admin-content');
+  if(!adminColFilter&&COLLECTIONS.length)adminColFilter=COLLECTIONS[0].id;
+
+  const filterBtns=COLLECTIONS.map(c=>`<div class="a-cf-btn${adminColFilter===c.id?' active':''}" onclick="setAdminColFilter('${c.id}')">${esc(c.name.uz)}</div>`).join('');
+  const movs=MOVIES.filter(m=>m.col===adminColFilter);
+
+  ct.innerHTML=`<button class="add-btn" onclick="openMovForm(null)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Yangi film qo'shish
+  </button>
+  <div class="a-col-filter">${filterBtns}</div>`+
+  (movs.length?movs.map((m,i)=>{
+    const thumb=m.thumbnail
+      ?`<div class="db-thumb"><img src="${esc(m.thumbnail)}" onerror="this.parentElement.textContent='${m.emoji}'"></div>`
+      :`<div class="db-thumb" style="font-size:22px">${m.emoji}</div>`;
+    return `<div class="db-card" style="animation-delay:${i*0.03}s">
+      <div class="db-card-hdr">
+        ${thumb}
+        <div class="db-info">
+          <div class="db-name">${esc(m.title.uz)}</div>
+          <div class="db-meta">${m.year} · ${esc(m.quality)} · ${esc(m.size)} · ★${m.rating}</div>
+        </div>
+        <div class="db-actions">
+          <div class="db-edit" onclick="openMovForm(${m.id})">✏️</div>
+          <div class="db-del" onclick="deleteMovie(${m.id})">🗑</div>
+        </div>
+      </div>
+    </div>`;
+  }).join(''):`<div class="empty"><div class="empty-ico">🎬</div><div class="empty-t">Film yo'q</div><div class="empty-s">Yangi film qo'shing</div></div>`);
+}
+
+function setAdminColFilter(id){adminColFilter=id;renderAdminMovies()}
+
+function deleteMovie(id){
+  if(!confirm('Bu filmni o\'chirishni tasdiqlaysizmi?'))return;
+  const movs=loadMovies().filter(m=>m.id!==id);
+  saveMovies(movs);MOVIES=movs;
+  renderAdminMovies();showToast('Film o\'chirildi');
+}
+
+/* ═══════════════════════════════════════
+   ADMIN — COLLECTION FORM
+═══════════════════════════════════════ */
+function openColForm(id){
+  editingColId=id;
+  const cols=loadCollections();
+  const c=id?cols.find(x=>x.id===id):{id:'',emoji:'🎬',thumbnail:'',name:{uz:'',ru:'',en:''},sub:{uz:'',ru:'',en:''},years:[2000,2024]};
+  document.getElementById('form-title').textContent=id?'Kolleksiyani tahrirlash':'Yangi kolleksiya';
+  document.getElementById('form-body').innerHTML=`
+    <div class="f-group">
+      <label class="f-label">Kolleksiya ID (lotin, bo'sh joysiz, masalan: hp)</label>
+      <input class="a-input" id="f-col-id" value="${esc(c.id)}" placeholder="hp" ${id?'readonly style="opacity:.5"':''}>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Emoji</label>
+      <input class="a-input" id="f-col-emoji" value="${c.emoji}" placeholder="🎬" style="font-size:20px">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Thumbnail URL (16:9 rasm)</label>
+      <input class="a-input" id="f-col-thumb" value="${esc(c.thumbnail)}" placeholder="https://...">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Yillar</label>
+      <div class="f-row">
+        <input class="a-input" id="f-col-y1" type="number" value="${c.years[0]}" placeholder="2001">
+        <input class="a-input" id="f-col-y2" type="number" value="${c.years[1]}" placeholder="2024">
+      </div>
+    </div>
+    <div class="f-section">Nomi (3 tilda)</div>
+    <div class="f-group">
+      <label class="f-label">🇺🇿 O'zbek</label>
+      <input class="a-input" id="f-col-nuz" value="${esc(c.name.uz)}" placeholder="Harry Potter">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇷🇺 Rus</label>
+      <input class="a-input" id="f-col-nru" value="${esc(c.name.ru)}" placeholder="Гарри Поттер">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇬🇧 Ingliz</label>
+      <input class="a-input" id="f-col-nen" value="${esc(c.name.en)}" placeholder="Harry Potter">
+    </div>
+    <div class="f-section">Tavsif (3 tilda)</div>
+    <div class="f-group">
+      <label class="f-label">🇺🇿 O'zbek</label>
+      <input class="a-input" id="f-col-suz" value="${esc(c.sub.uz)}" placeholder="Sehrgar dunyosi">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇷🇺 Rus</label>
+      <input class="a-input" id="f-col-sru" value="${esc(c.sub.ru)}" placeholder="Мир волшебников">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇬🇧 Ingliz</label>
+      <input class="a-input" id="f-col-sen" value="${esc(c.sub.en)}" placeholder="Wizarding World">
+    </div>
+    <button class="f-save" onclick="saveColForm()">💾 Saqlash</button>`;
+  openForm();
+}
+
+function saveColForm(){
+  const cid=document.getElementById('f-col-id').value.trim().replace(/\s/g,'_');
+  if(!cid)return showToast('ID kiritilmagan!');
+  const cols=loadCollections();
+  const entry={
+    id:cid,
+    emoji:document.getElementById('f-col-emoji').value.trim()||'🎬',
+    thumbnail:document.getElementById('f-col-thumb').value.trim(),
+    years:[
+      parseInt(document.getElementById('f-col-y1').value)||2000,
+      parseInt(document.getElementById('f-col-y2').value)||2024
+    ],
+    name:{
+      uz:document.getElementById('f-col-nuz').value.trim(),
+      ru:document.getElementById('f-col-nru').value.trim(),
+      en:document.getElementById('f-col-nen').value.trim(),
+    },
+    sub:{
+      uz:document.getElementById('f-col-suz').value.trim(),
+      ru:document.getElementById('f-col-sru').value.trim(),
+      en:document.getElementById('f-col-sen').value.trim(),
+    },
+  };
+  const idx=cols.findIndex(c=>c.id===cid);
+  if(idx>=0)cols[idx]=entry;else cols.push(entry);
+  saveCollections(cols);COLLECTIONS=cols;
+  closeForm();renderAdminCollections();
+  showToast('Kolleksiya saqlandi ✅');
+}
+
+/* ═══════════════════════════════════════
+   ADMIN — MOVIE FORM
+═══════════════════════════════════════ */
+function openMovForm(id){
+  editingMovId=id;
+  const movs=loadMovies();
+  const cols=loadCollections();
+  const m=id?movs.find(x=>x.id===id):{
+    id:null,col:adminColFilter||cols[0]?.id||'',year:2024,rating:7.0,
+    quality:'1080p',size:'4 GB',emoji:'🎬',thumbnail:'',fileId:'',
+    title:{uz:'',ru:'',en:''},desc:{uz:'',ru:'',en:''}
+  };
+  const colOptions=cols.map(c=>`<option value="${c.id}"${m.col===c.id?' selected':''}>${c.name.uz}</option>`).join('');
+  document.getElementById('form-title').textContent=id?'Filmni tahrirlash':'Yangi film';
+  document.getElementById('form-body').innerHTML=`
+    <div class="f-group">
+      <label class="f-label">Kolleksiya</label>
+      <select class="a-input" id="f-mov-col">${colOptions}</select>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Emoji</label>
+      <input class="a-input" id="f-mov-emoji" value="${m.emoji}" style="font-size:20px">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Thumbnail URL (ixtiyoriy, 2:3 yoki istalgan nisbat)</label>
+      <input class="a-input" id="f-mov-thumb" value="${esc(m.thumbnail)}" placeholder="https://...">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Telegram File ID</label>
+      <input class="a-input" id="f-mov-fid" value="${esc(m.fileId)}" placeholder="BQACAgIAAxkB...">
+    </div>
+    <div class="f-row3">
+      <div class="f-group" style="margin:0">
+        <label class="f-label">Yil</label>
+        <input class="a-input" id="f-mov-year" type="number" value="${m.year}" placeholder="2024">
+      </div>
+      <div class="f-group" style="margin:0">
+        <label class="f-label">Reyting</label>
+        <input class="a-input" id="f-mov-rating" type="number" step="0.1" value="${m.rating}" placeholder="7.5">
+      </div>
+      <div class="f-group" style="margin:0">
+        <label class="f-label">Sifat</label>
+        <select class="a-input" id="f-mov-quality">
+          ${['720p','1080p','4K','8K'].map(q=>`<option${m.quality===q?' selected':''}>${q}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="f-group" style="margin-top:14px">
+      <label class="f-label">Fayl hajmi</label>
+      <input class="a-input" id="f-mov-size" value="${esc(m.size)}" placeholder="4.2 GB">
+    </div>
+    <div class="f-section">Nomi (3 tilda)</div>
+    <div class="f-group">
+      <label class="f-label">🇺🇿 O'zbek</label>
+      <input class="a-input" id="f-mov-tuz" value="${esc(m.title.uz)}" placeholder="Film nomi">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇷🇺 Rus</label>
+      <input class="a-input" id="f-mov-tru" value="${esc(m.title.ru)}" placeholder="Название фильма">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇬🇧 Ingliz</label>
+      <input class="a-input" id="f-mov-ten" value="${esc(m.title.en)}" placeholder="Movie title">
+    </div>
+    <div class="f-section">Tavsif (3 tilda)</div>
+    <div class="f-group">
+      <label class="f-label">🇺🇿 O'zbek</label>
+      <textarea class="a-input" id="f-mov-duz" rows="2" placeholder="Qisqa tavsif...">${esc(m.desc.uz)}</textarea>
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇷🇺 Rus</label>
+      <textarea class="a-input" id="f-mov-dru" rows="2" placeholder="Краткое описание...">${esc(m.desc.ru)}</textarea>
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇬🇧 Ingliz</label>
+      <textarea class="a-input" id="f-mov-den" rows="2" placeholder="Short description...">${esc(m.desc.en)}</textarea>
+    </div>
+    <button class="f-save" onclick="saveMovForm()">💾 Saqlash</button>`;
+  openForm();
+}
+
+function saveMovForm(){
+  const tuzVal=document.getElementById('f-mov-tuz').value.trim();
+  if(!tuzVal)return showToast('O\'zbek nomi kiritilmagan!');
+  const movs=loadMovies();
+  const newId=editingMovId||(movs.length?Math.max(...movs.map(m=>m.id))+1:1);
+  const entry={
+    id:newId,
+    col:document.getElementById('f-mov-col').value,
+    emoji:document.getElementById('f-mov-emoji').value.trim()||'🎬',
+    thumbnail:document.getElementById('f-mov-thumb').value.trim(),
+    fileId:document.getElementById('f-mov-fid').value.trim(),
+    year:parseInt(document.getElementById('f-mov-year').value)||2024,
+    rating:parseFloat(document.getElementById('f-mov-rating').value)||7.0,
+    quality:document.getElementById('f-mov-quality').value,
+    size:document.getElementById('f-mov-size').value.trim(),
+    title:{
+      uz:tuzVal,
+      ru:document.getElementById('f-mov-tru').value.trim(),
+      en:document.getElementById('f-mov-ten').value.trim(),
+    },
+    desc:{
+      uz:document.getElementById('f-mov-duz').value.trim(),
+      ru:document.getElementById('f-mov-dru').value.trim(),
+      en:document.getElementById('f-mov-den').value.trim(),
+    },
+  };
+  const idx=movs.findIndex(m=>m.id===newId);
+  if(idx>=0)movs[idx]=entry;else movs.push(entry);
+  saveMovies(movs);MOVIES=movs;
+  adminColFilter=entry.col;
+  closeForm();renderAdminMovies();
+  showToast('Film saqlandi ✅');
+}
+
+/* ═══════════════════════════════════════
+   FORM SHEET CONTROLS
+═══════════════════════════════════════ */
+function openForm(){document.getElementById('form-ov').classList.add('open')}
+function closeForm(){document.getElementById('form-ov').classList.remove('open')}
+function closeFormOutside(e){if(e.target===document.getElementById('form-ov'))closeForm()}
+
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
+function esc(s){
+  if(s==null)return'';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+</script>
+</body>
+</html>
