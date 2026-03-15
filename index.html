@@ -102,6 +102,8 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   overflow:hidden;
   cursor:pointer;
   position:relative;
+  display:flex;
+  flex-direction:column;
   transition:transform .18s,border-color .18s;
   -webkit-tap-highlight-color:transparent;
   animation:fU .3s ease both;
@@ -112,12 +114,12 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .mov-poster img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
 .mov-poster-emoji{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:62px}
 .q-badge{position:absolute;top:8px;right:8px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(20,20,20,.85);border:1px solid var(--red-b);color:var(--red)}
-.mov-body{padding:12px 12px 14px}
+.mov-body{padding:12px 12px 14px;display:flex;flex-direction:column;flex:1}
 .mov-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:0.3px;line-height:1.25;color:var(--text);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.mov-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.mov-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .mov-year{font-size:12px;color:var(--muted)}
 .mov-rating{font-size:12px;font-weight:500;color:var(--red)}
-.mov-size{font-size:11px;color:var(--muted);margin-bottom:10px}
+.mov-btn-wrap{margin-top:auto}
 .shr-btn{width:100%;padding:9px;background:var(--red-dim);border:1px solid var(--red-b);border-radius:8px;color:var(--red);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
 .shr-btn:active{background:rgba(229,9,20,.25);transform:scale(.97)}
 
@@ -445,7 +447,7 @@ const T = {
     all_col:"Barcha kolleksiyalar",all_mov:"Barcha filmlar",
     count:n=>`${n} ta film`,
     sort_yd:"Yilga ko'ra ↓",sort_r:"Reytingga ko'ra",sort_ya:"Yilga ko'ra ↑",
-    download:"⬇ Yuklab olish",share:"Ulashish",
+    download:"⬇ Yuklab olish",share:"Ulashish",watch:"Tomosha qilish",
     nav_home:"Bosh sahifa",nav_saved:"Saqlangan",nav_search:"Qidirish",nav_settings:"Sozlamalar",
     empty_t:"Topilmadi",empty_s:"Boshqa so'z bilan qidiring",
     toast_share:t=>`"${t}" ulashildi ✅`,
@@ -455,7 +457,7 @@ const T = {
     all_col:"Все коллекции",all_mov:"Все фильмы",
     count:n=>`${n} фильм(ов)`,
     sort_yd:"По году ↓",sort_r:"По рейтингу",sort_ya:"По году ↑",
-    download:"⬇ Скачать",share:"Поделиться",
+    download:"⬇ Скачать",share:"Поделиться",watch:"Смотреть",
     nav_home:"Главная",nav_saved:"Сохранённые",nav_search:"Поиск",nav_settings:"Настройки",
     empty_t:"Ничего не найдено",empty_s:"Попробуйте другой запрос",
     toast_share:t=>`«${t}» отправлено ✅`,
@@ -465,7 +467,7 @@ const T = {
     all_col:"All collections",all_mov:"All movies",
     count:n=>`${n} movie${n!==1?'s':''}`,
     sort_yd:"By year ↓",sort_r:"By rating",sort_ya:"By year ↑",
-    download:"⬇ Download",share:"Share",
+    download:"⬇ Download",share:"Share",watch:"Watch",
     nav_home:"Home",nav_saved:"Saved",nav_search:"Search",nav_settings:"Settings",
     empty_t:"Nothing found",empty_s:"Try a different search",
     toast_share:t=>`"${t}" shared ✅`,
@@ -767,11 +769,12 @@ function renderMovies(){
       <div class="mov-body">
         <div class="mov-title">${esc(m.title[lang])}</div>
         <div class="mov-meta"><span class="mov-year">${m.year}</span><span class="mov-rating">★ ${m.rating}</span></div>
-        
-        <button class="shr-btn" onclick="shareMovie(event,${m.id})">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          ${t.share}
-        </button>
+        <div class="mov-btn-wrap">
+          <button class="shr-btn" onclick="openModal(${m.id})">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            ${t.watch}
+          </button>
+        </div>
       </div>
     </div>`;
   }).join('');
