@@ -943,6 +943,7 @@ function downloadMovie(id){
 
   if(tg){
     tg.openTelegramLink('https://t.me/kinokolleksiyabot?start=' + startParam);
+    tg.close();
   } else {
     showToast(T[lang].download+'...');
   }
