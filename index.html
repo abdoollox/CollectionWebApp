@@ -14,6 +14,12 @@
   --bg:#141414;--s1:#1F1F1F;--s2:#2A2A2A;--s3:#333;
   --border:rgba(255,255,255,.1);--text:#fff;--muted:#B3B3B3;--r:12px;
 }
+html.light{
+  --bg:#F2F2F2;--s1:#FFFFFF;--s2:#EBEBEB;--s3:#DEDEDE;
+  --border:rgba(0,0,0,.1);--text:#111;--muted:#666;
+}
+html{transition:background .25s,color .25s}
+*{transition:background-color .2s,border-color .2s,color .2s}
 html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;min-height:100vh;overflow-x:hidden}
 .screen{display:none;min-height:100vh;flex-direction:column}
 .screen.active{display:flex}
@@ -42,6 +48,8 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .logo{text-transform:uppercase;font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;letter-spacing:1px;color:var(--red);cursor:pointer;user-select:none}
 .lang-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--s2);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--muted);-webkit-tap-highlight-color:transparent}
 .lang-chip:active{border-color:var(--red-b)}
+.theme-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--border);border-radius:50%;cursor:pointer;font-size:16px;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s;flex-shrink:0}
+.theme-btn:active{background:var(--s3)}
 .badge{font-size:12px;color:var(--muted);background:var(--s2);padding:4px 10px;border-radius:20px;border:1px solid var(--border)}
 .srch-wrap{position:relative}
 .srch-ico{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.35;pointer-events:none}
@@ -68,21 +76,44 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .col-arrow{width:36px;height:36px;background:var(--red-dim);border:1px solid var(--red-b);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--red);flex-shrink:0}
 
 /* ── MOVIES ── */
-.mov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:0 12px 100px}
-.mov-card{background:var(--s1);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;cursor:pointer;position:relative;transition:transform .18s,border-color .18s;-webkit-tap-highlight-color:transparent;animation:fU .3s ease both}
+.mov-grid{
+  display:flex;
+  flex-direction:row;
+  gap:14px;
+  padding:8px 18px 100px;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.mov-grid::-webkit-scrollbar{display:none}
+.mov-card{
+  background:var(--s1);
+  border-radius:var(--r);
+  border:1px solid var(--border);
+  overflow:hidden;
+  cursor:pointer;
+  position:relative;
+  transition:transform .18s,border-color .18s;
+  -webkit-tap-highlight-color:transparent;
+  animation:fU .3s ease both;
+  flex-shrink:0;
+  width:188px;
+  scroll-snap-align:center;
+}
 .mov-card:nth-child(1){animation-delay:.03s}.mov-card:nth-child(2){animation-delay:.07s}.mov-card:nth-child(3){animation-delay:.11s}.mov-card:nth-child(4){animation-delay:.15s}.mov-card:nth-child(5){animation-delay:.18s}.mov-card:nth-child(6){animation-delay:.21s}
 .mov-card:active{transform:scale(.97);border-color:var(--red-b)}
 .mov-poster{width:100%;padding-top:150%;position:relative;background:var(--s2);overflow:hidden}
 .mov-poster img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;display:block}
-.mov-poster-emoji{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:52px}
+.mov-poster-emoji{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:62px}
 .q-badge{position:absolute;top:8px;right:8px;font-size:10px;font-weight:600;padding:3px 8px;border-radius:20px;background:rgba(20,20,20,.85);border:1px solid var(--red-b);color:var(--red)}
-.mov-body{padding:10px 10px 12px}
-.mov-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:14px;letter-spacing:0.3px;line-height:1.25;color:var(--text);margin-bottom:5px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.mov-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
-.mov-year{font-size:11px;color:var(--muted)}
-.mov-rating{font-size:11px;font-weight:500;color:var(--red)}
-.mov-size{font-size:10px;color:var(--muted);margin-bottom:9px}
-.shr-btn{width:100%;padding:8px;background:var(--red-dim);border:1px solid var(--red-b);border-radius:8px;color:var(--red);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
+.mov-body{padding:12px 12px 14px}
+.mov-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:15px;letter-spacing:0.3px;line-height:1.25;color:var(--text);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.mov-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.mov-year{font-size:12px;color:var(--muted)}
+.mov-rating{font-size:12px;font-weight:500;color:var(--red)}
+.mov-size{font-size:11px;color:var(--muted);margin-bottom:10px}
+.shr-btn{width:100%;padding:9px;background:var(--red-dim);border:1px solid var(--red-b);border-radius:8px;color:var(--red);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
 .shr-btn:active{background:rgba(229,9,20,.25);transform:scale(.97)}
 
 /* ── BOTTOM NAV ── */
@@ -282,9 +313,12 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="hdr">
     <div class="hdr-row">
       <div class="logo" id="logo-tap" onclick="logoTap()">Kino Kolleksiya</div>
-      <div class="lang-chip" onclick="goToLang()">
-        <span id="cur-flag">🇺🇿</span>
-        <span id="cur-code" style="font-size:11px;font-weight:500">UZ</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="theme-btn" id="theme-btn-col" onclick="toggleTheme()">🌙</div>
+        <div class="lang-chip" onclick="goToLang()">
+          <span id="cur-flag">🇺🇿</span>
+          <span id="cur-code" style="font-size:11px;font-weight:500">UZ</span>
+        </div>
       </div>
     </div>
     <div class="srch-wrap">
@@ -312,7 +346,10 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
         </div>
         <div class="logo" id="mov-title">Harry Potter</div>
       </div>
-      <div class="badge" id="mov-badge">8 ta film</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div class="theme-btn" id="theme-btn-mov" onclick="toggleTheme()">🌙</div>
+        <div class="badge" id="mov-badge">8 ta film</div>
+      </div>
     </div>
     <div class="srch-wrap">
       <svg class="srch-ico" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
@@ -512,6 +549,35 @@ const DEFAULT_MOVIES = [
 const DB_KEY_COL = 'kk_collections_v3';
 const DB_KEY_MOV = 'kk_movies_v3';
 const ADMIN_PASS = 'kino2025'; // ← Parolni shu yerda o'zgartiring
+
+/* ═══════════════════════════════════════
+   THEME
+═══════════════════════════════════════ */
+const DB_KEY_THEME = 'kk_theme';
+let isLight = localStorage.getItem(DB_KEY_THEME) === 'light';
+
+function applyTheme(){
+  if(isLight){
+    document.documentElement.classList.add('light');
+  } else {
+    document.documentElement.classList.remove('light');
+  }
+  const icon = isLight ? '☀️' : '🌙';
+  document.querySelectorAll('.theme-btn').forEach(el => el.textContent = icon);
+  if(tg){
+    tg.setHeaderColor(isLight ? '#F2F2F2' : '#141414');
+    tg.setBackgroundColor(isLight ? '#F2F2F2' : '#141414');
+  }
+}
+
+function toggleTheme(){
+  isLight = !isLight;
+  localStorage.setItem(DB_KEY_THEME, isLight ? 'light' : 'dark');
+  applyTheme();
+}
+
+// Sahifa yuklanganda saqlangan temani qo'llaymiz
+applyTheme();
 
 function loadCollections(){
   try{const d=localStorage.getItem(DB_KEY_COL);return d?JSON.parse(d):JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS))}
