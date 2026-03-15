@@ -122,6 +122,15 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .mov-btn-wrap{margin-top:auto}
 .shr-btn{width:100%;padding:9px;background:var(--red-dim);border:1px solid var(--red-b);border-radius:8px;color:var(--red);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
 .shr-btn:active{background:rgba(229,9,20,.25);transform:scale(.97)}
+.like-btn{
+  flex-shrink:0;width:38px;height:38px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--s2);border:1px solid var(--border);
+  border-radius:8px;color:var(--muted);cursor:pointer;
+  transition:all .2s;-webkit-tap-highlight-color:transparent;
+}
+.like-btn:active{transform:scale(.9)}
+.like-btn.liked{background:rgba(229,9,20,.15);border-color:var(--red-b);color:var(--red)}
 
 /* ── BOTTOM NAV ── */
 .bnav{position:fixed;bottom:0;left:0;right:0;background:var(--hdr-bg);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:100}
@@ -339,14 +348,11 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="sec-lbl" id="col-sec-lbl">Barcha kolleksiyalar</div>
   <div class="col-grid" id="col-grid"></div>
   <div class="bnav">
-    <div class="ni active"><div class="ni-ico">🎬</div><div class="ni-lbl" data-k="nav_home">Bosh sahifa</div></div>
-    <div class="ni"><div class="ni-ico">🔖</div><div class="ni-lbl" data-k="nav_saved">Saqlangan</div></div>
-    <div class="ni"><div class="ni-ico">🔍</div><div class="ni-lbl" data-k="nav_search">Qidirish</div></div>
-    <div class="ni"><div class="ni-ico">⚙️</div><div class="ni-lbl" data-k="nav_settings">Sozlamalar</div></div>
+    <div class="ni active" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl">Bosh sahifa</div></div>
+    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">🎥</div><div class="ni-lbl">Rejissorlar</div></div>
+    <div class="ni" onclick="showNavPage('actors')"><div class="ni-ico">🌟</div><div class="ni-lbl">Aktyorlar</div></div>
+    <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">🔖</div><div class="ni-lbl">Saqlanganlar</div></div>
   </div>
-</div>
-
-<!-- ═══ SCREEN 3: FILMLAR ═══ -->
 <div class="screen" id="screen-movies">
   <div class="hdr">
     <div class="hdr-row">
@@ -375,10 +381,10 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   </div>
   <div class="mov-grid" id="mov-grid"></div>
   <div class="bnav">
-    <div class="ni active"><div class="ni-ico">🎬</div><div class="ni-lbl" data-k="nav_home">Bosh sahifa</div></div>
-    <div class="ni"><div class="ni-ico">🔖</div><div class="ni-lbl" data-k="nav_saved">Saqlangan</div></div>
-    <div class="ni"><div class="ni-ico">🔍</div><div class="ni-lbl" data-k="nav_search">Qidirish</div></div>
-    <div class="ni"><div class="ni-ico">⚙️</div><div class="ni-lbl" data-k="nav_settings">Sozlamalar</div></div>
+    <div class="ni" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl">Bosh sahifa</div></div>
+    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">🎥</div><div class="ni-lbl">Rejissorlar</div></div>
+    <div class="ni" onclick="showNavPage('actors')"><div class="ni-ico">🌟</div><div class="ni-lbl">Aktyorlar</div></div>
+    <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">🔖</div><div class="ni-lbl">Saqlanganlar</div></div>
   </div>
 </div>
 
@@ -768,8 +774,11 @@ function renderMovies(){
       <div class="mov-body">
         <div class="mov-title">${esc(m.title[lang])}</div>
         <div class="mov-meta"><span class="mov-year">${m.year}</span><span class="mov-rating">★ ${m.rating}</span></div>
-        <div class="mov-btn-wrap">
-          <button class="shr-btn" onclick="openModal(${m.id})">
+        <div class="mov-btn-wrap" style="display:flex;gap:8px">
+          <button class="like-btn${isLiked(m.id)?' liked':''}" onclick="toggleLike(event,${m.id})" title="Like">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="${isLiked(m.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+          <button class="shr-btn" style="flex:1" onclick="openModal(${m.id})">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
             ${t.watch}
           </button>
@@ -1195,8 +1204,96 @@ function saveMovForm(){
 }
 
 /* ═══════════════════════════════════════
-   FORM SHEET CONTROLS
+   LIKES
 ═══════════════════════════════════════ */
+const DB_KEY_LIKES = 'kk_likes_v1';
+
+function loadLikes(){
+  try{return JSON.parse(localStorage.getItem(DB_KEY_LIKES)||'[]')}
+  catch{return []}
+}
+
+function saveLikes(arr){localStorage.setItem(DB_KEY_LIKES,JSON.stringify(arr))}
+
+function isLiked(id){return loadLikes().includes(id)}
+
+function toggleLike(event, id){
+  event.stopPropagation();
+  const likes = loadLikes();
+  const idx = likes.indexOf(id);
+  if(idx>=0) likes.splice(idx,1);
+  else likes.push(id);
+  saveLikes(likes);
+  renderMovies();
+}
+
+/* ═══════════════════════════════════════
+   NAV PAGES
+═══════════════════════════════════════ */
+function goHome(){
+  curCol=null;
+  showScreen('screen-collections');
+  renderCollections();
+  // Bosh sahifa navini active qilish
+  document.querySelectorAll('#screen-collections .ni').forEach((el,i)=>{
+    el.classList.toggle('active', i===0);
+  });
+}
+
+function showNavPage(page){
+  const titles = {
+    directors: {uz:'Rejissorlar', ru:'Режиссёры', en:'Directors', ico:'🎥'},
+    actors:    {uz:'Aktyorlar',   ru:'Актёры',    en:'Actors',    ico:'🌟'},
+    saved:     {uz:'Saqlanganlar',ru:'Сохранённые',en:'Saved',     ico:'🔖'},
+  };
+  const info = titles[page];
+
+  // Saqlangan filmlar uchun alohida ko'rsatish
+  if(page==='saved'){
+    const likes = loadLikes();
+    MOVIES = loadMovies();
+    const savedMovies = MOVIES.filter(m=>likes.includes(m.id));
+    curCol = '__saved__';
+    document.getElementById('mov-title').textContent = info[lang]||info.uz;
+    document.getElementById('sort-lbl').textContent = T[lang].sort_yd;
+    document.getElementById('mov-sec-lbl').textContent = T[lang].all_mov;
+    showScreen('screen-movies');
+    const t = T[lang];
+    const grid = document.getElementById('mov-grid');
+    document.getElementById('mov-badge').textContent = t.count(savedMovies.length);
+    if(!savedMovies.length){
+      grid.innerHTML=`<div class="empty"><div class="empty-ico">🔖</div><div class="empty-t">${info[lang]||info.uz}</div><div class="empty-s">${lang==='ru'?'Вы ещё ничего не сохранили':lang==='en'?'Nothing saved yet':'Hali hech narsa saqlanmagan'}</div></div>`;
+      return;
+    }
+    const bg_map = BG;
+    grid.innerHTML = savedMovies.map(m=>{
+      const bg = bg_map[m.col]||'#1A1A1A';
+      const posterContent = `<div class="mov-poster-emoji">${m.emoji}</div>` +
+        (m.thumbnail ? `<img src="${m.thumbnail}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+      return `<div class="mov-card" onclick="openModal(${m.id})">
+        <div class="mov-poster" style="background-color:${bg}">${posterContent}</div>
+        <span class="q-badge">${esc(m.quality)}</span>
+        <div class="mov-body">
+          <div class="mov-title">${esc(m.title[lang])}</div>
+          <div class="mov-meta"><span class="mov-year">${m.year}</span><span class="mov-rating">★ ${m.rating}</span></div>
+          <div class="mov-btn-wrap" style="display:flex;gap:8px">
+            <button class="like-btn liked" onclick="toggleLike(event,${m.id})" title="Like">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+            <button class="shr-btn" style="flex:1" onclick="openModal(${m.id})">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              ${t.watch}
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // Rejissorlar va Aktyorlar — tez orada qo'shiladi
+  showToast(`${info.ico} ${info[lang]||info.uz} — tez orada!`);
+}
 function openForm(){document.getElementById('form-ov').classList.add('open')}
 function closeForm(){document.getElementById('form-ov').classList.remove('open')}
 function closeFormOutside(e){if(e.target===document.getElementById('form-ov'))closeForm()}
