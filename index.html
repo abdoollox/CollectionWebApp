@@ -13,10 +13,12 @@
   --red:#E50914;--red-dark:#B20710;--red-dim:rgba(229,9,20,.15);--red-b:rgba(229,9,20,.4);
   --bg:#141414;--s1:#1F1F1F;--s2:#2A2A2A;--s3:#333;
   --border:rgba(255,255,255,.1);--text:#fff;--muted:#B3B3B3;--r:12px;
+  --hdr-bg:rgba(20,20,20,.97);
 }
 html.light{
   --bg:#F2F2F2;--s1:#FFFFFF;--s2:#EBEBEB;--s3:#DEDEDE;
   --border:rgba(0,0,0,.1);--text:#111;--muted:#666;
+  --hdr-bg:rgba(242,242,242,.97);
 }
 html{transition:background .25s,color .25s}
 *{transition:background-color .2s,border-color .2s,color .2s}
@@ -40,7 +42,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .arr{color:var(--muted);opacity:.35;font-size:20px}
 
 /* ── HEADER ── */
-.hdr{position:sticky;top:0;z-index:100;background:rgba(20,20,20,.97);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 18px 12px}
+.hdr{position:sticky;top:0;z-index:100;background:var(--hdr-bg);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);padding:14px 18px 12px}
 .hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .hdr-left{display:flex;align-items:center;gap:10px}
 .back{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--border);border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s;flex-shrink:0}
@@ -59,7 +61,15 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 
 /* ── COLLECTIONS ── */
 .sec-lbl{padding:14px 18px 8px;font-size:12px;color:var(--muted);letter-spacing:.5px}
-.col-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;padding:4px 14px 100px}
+.col-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:12px;
+  padding:4px 12px 100px;
+}
+@media(min-width:600px){.col-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.col-grid{grid-template-columns:repeat(3,1fr)}}
+@media(min-width:1400px){.col-grid{grid-template-columns:repeat(4,1fr)}}
 .col-card{background:var(--s1);border:1px solid var(--border);border-radius:16px;overflow:hidden;cursor:pointer;transition:transform .18s,border-color .18s;-webkit-tap-highlight-color:transparent;animation:fU .35s ease both}
 .col-card:nth-child(1){animation-delay:.04s}.col-card:nth-child(2){animation-delay:.09s}.col-card:nth-child(3){animation-delay:.14s}.col-card:nth-child(4){animation-delay:.19s}.col-card:nth-child(5){animation-delay:.24s}
 .col-card:active{transform:scale(.98);border-color:var(--red-b)}
@@ -78,10 +88,13 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 /* ── MOVIES ── */
 .mov-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(188px,1fr));
-  gap:14px;
-  padding:8px 14px 100px;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:10px;
+  padding:8px 12px 100px;
 }
+@media(min-width:480px){.mov-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}}
+@media(min-width:768px){.mov-grid{grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:14px}}
+@media(min-width:1024px){.mov-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}}
 .mov-card{
   background:var(--s1);
   border-radius:var(--r);
@@ -109,7 +122,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .shr-btn:active{background:rgba(229,9,20,.25);transform:scale(.97)}
 
 /* ── BOTTOM NAV ── */
-.bnav{position:fixed;bottom:0;left:0;right:0;background:rgba(20,20,20,.98);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:100}
+.bnav{position:fixed;bottom:0;left:0;right:0;background:var(--hdr-bg);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:100}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 0;-webkit-tap-highlight-color:transparent}
 .ni-ico{font-size:20px;line-height:1}
 .ni-lbl{font-size:10px;color:var(--muted);letter-spacing:.3px}
@@ -221,7 +234,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .a-err{font-size:13px;color:var(--red);text-align:center;display:none}
 
 #screen-admin{background:var(--bg)}
-.admin-hdr{background:rgba(20,20,20,.97);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.admin-hdr{background:var(--hdr-bg);border-bottom:1px solid var(--border);padding:14px 18px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
 .admin-hdr-title{font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;letter-spacing:0.5px;color:var(--red)}
 .admin-tabs{display:flex;gap:8px;padding:14px 18px 0}
 .a-tab{padding:8px 18px;border-radius:30px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-size:13px;cursor:pointer;transition:all .2s;-webkit-tap-highlight-color:transparent}
@@ -240,8 +253,11 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .db-actions{display:flex;gap:6px;flex-shrink:0}
 .db-edit{padding:6px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .db-edit:active{background:var(--s3)}
+.db-hide{padding:6px 10px;background:rgba(255,165,0,.1);border:1px solid rgba(255,165,0,.4);border-radius:8px;color:#FFA500;font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.db-hide:active{opacity:.7}
 .db-del{padding:6px 10px;background:rgba(229,9,20,.1);border:1px solid var(--red-b);border-radius:8px;color:var(--red);font-size:12px;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .db-del:active{background:var(--red-dim)}
+.db-card.is-hidden{opacity:.45}
 
 /* add button */
 .add-btn{width:100%;padding:14px;background:var(--red-dim);border:1px dashed var(--red-b);border-radius:14px;color:var(--red);font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px;transition:background .2s;-webkit-tap-highlight-color:transparent}
@@ -460,77 +476,77 @@ const T = {
    DEFAULT DATA
 ═══════════════════════════════════════ */
 const DEFAULT_COLLECTIONS = [
-  {id:'hp',emoji:'🧙',thumbnail:'https://image.tmdb.org/t/p/original/gOduLS90AehfJPoJMizaRkC3Hoz.jpg',
+  {id:'hp',emoji:'🧙',hidden:false,thumbnail:'https://image.tmdb.org/t/p/original/gOduLS90AehfJPoJMizaRkC3Hoz.jpg',
    name:{uz:"Harry Potter",ru:"Гарри Поттер",en:"Harry Potter"},
    sub:{uz:"Sehrgar dunyosi",ru:"Мир волшебников",en:"Wizarding World"},
    years:[2001,2011]},
-  {id:'marvel',emoji:'⚡',thumbnail:'',
+  {id:'marvel',emoji:'⚡',hidden:false,thumbnail:'',
    name:{uz:"Marvel",ru:"Марвел",en:"Marvel"},
    sub:{uz:"Super qahramonlar olami",ru:"Вселенная супергероев",en:"Marvel Cinematic Universe"},
    years:[2008,2023]},
-  {id:'lotr',emoji:'💍',thumbnail:'',
+  {id:'lotr',emoji:'💍',hidden:false,thumbnail:'',
    name:{uz:"Uzuk Egasi",ru:"Властелин Колец",en:"Lord of the Rings"},
    sub:{uz:"O'rta Yer eposasi",ru:"Эпос Средиземья",en:"Middle-earth Saga"},
    years:[2001,2003]},
-  {id:'sw',emoji:'⭐',thumbnail:'',
+  {id:'sw',emoji:'⭐',hidden:false,thumbnail:'',
    name:{uz:"Yulduz Urushlari",ru:"Звёздные Войны",en:"Star Wars"},
    sub:{uz:"Galaktika eposasi",ru:"Эпос галактики",en:"Galaxy Saga"},
    years:[1977,2019]},
 ];
 
 const DEFAULT_MOVIES = [
-  {id:1,col:'hp',year:2001,rating:7.6,quality:'1080p',size:'4.2 GB',emoji:'🧙',thumbnail:'',fileId:'hp_1',
+  {id:1,col:'hp',year:2001,rating:7.6,quality:'1080p',size:'4.2 GB',hidden:false,emoji:'🧙',thumbnail:'',modalThumb:'',fileId:'hp_1',
    title:{uz:"Harry Potter va Faylasuf Toshi",ru:"Гарри Поттер и философский камень",en:"Harry Potter and the Philosopher's Stone"},
    desc:{uz:"Yosh sehrgar Harry Potter Hogvarts maktabiga qabul qilinadi.",ru:"Юный волшебник Гарри Поттер поступает в Хогвартс.",en:"Young wizard Harry Potter is admitted to Hogwarts."}},
-  {id:2,col:'hp',year:2002,rating:7.4,quality:'1080p',size:'4.5 GB',emoji:'🐍',thumbnail:'',fileId:'hp_2',
+  {id:2,col:'hp',year:2002,rating:7.4,quality:'1080p',size:'4.5 GB',hidden:false,emoji:'🐍',thumbnail:'',modalThumb:'',fileId:'hp_2',
    title:{uz:"Harry Potter va Sirlar Xonasi",ru:"Гарри Поттер и тайная комната",en:"Harry Potter and the Chamber of Secrets"},
    desc:{uz:"Hogvartsda sirli hujumlar boshlanadi.",ru:"В Хогвартсе начинаются таинственные нападения.",en:"Mysterious attacks plague Hogwarts."}},
-  {id:3,col:'hp',year:2004,rating:7.9,quality:'4K',size:'15 GB',emoji:'🌙',thumbnail:'',fileId:'hp_3',
+  {id:3,col:'hp',year:2004,rating:7.9,quality:'4K',size:'15 GB',hidden:false,emoji:'🌙',thumbnail:'',modalThumb:'',fileId:'hp_3',
    title:{uz:"Harry Potter va Azkaban Mahbusi",ru:"Гарри Поттер и узник Азкабана",en:"Harry Potter and the Prisoner of Azkaban"},
    desc:{uz:"Xavfli mahbus Azkabandan qochdi.",ru:"Опасный заключённый сбежал из Азкабана.",en:"A dangerous prisoner escapes Azkaban."}},
-  {id:4,col:'hp',year:2005,rating:7.7,quality:'1080p',size:'5.1 GB',emoji:'🏆',thumbnail:'',fileId:'hp_4',
+  {id:4,col:'hp',year:2005,rating:7.7,quality:'1080p',size:'5.1 GB',hidden:false,emoji:'🏆',thumbnail:'',modalThumb:'',fileId:'hp_4',
    title:{uz:"Harry Potter va O't Qadahi",ru:"Гарри Поттер и кубок огня",en:"Harry Potter and the Goblet of Fire"},
    desc:{uz:"Hogvarts uch ta maktab o'rtasidagi musobaqaga mezbonlik qiladi.",ru:"Хогвартс принимает Турнир Трёх Волшебников.",en:"Hogwarts hosts the Triwizard Tournament."}},
-  {id:5,col:'hp',year:2007,rating:7.5,quality:'1080p',size:'4.8 GB',emoji:'🦅',thumbnail:'',fileId:'hp_5',
+  {id:5,col:'hp',year:2007,rating:7.5,quality:'1080p',size:'4.8 GB',hidden:false,emoji:'🦅',thumbnail:'',modalThumb:'',fileId:'hp_5',
    title:{uz:"Harry Potter va Feniks Ordeni",ru:"Гарри Поттер и орден Феникса",en:"Harry Potter and the Order of the Phoenix"},
    desc:{uz:"Voldemort qaytib kelganiga hech kim ishonmaydi.",ru:"Никто не верит в возвращение Волдеморта.",en:"Nobody believes Voldemort has returned."}},
-  {id:6,col:'hp',year:2009,rating:7.6,quality:'4K',size:'14 GB',emoji:'🧪',thumbnail:'',fileId:'hp_6',
+  {id:6,col:'hp',year:2009,rating:7.6,quality:'4K',size:'14 GB',hidden:false,emoji:'🧪',thumbnail:'',modalThumb:'',fileId:'hp_6',
    title:{uz:"Harry Potter va Yarim Qon Shahzoda",ru:"Гарри Поттер и принц-полукровка",en:"Harry Potter and the Half-Blood Prince"},
    desc:{uz:"Harry Dumbledordan maxfiy ta'lim oladi.",ru:"Гарри получает тайные уроки от Дамблдора.",en:"Harry receives secret lessons from Dumbledore."}},
-  {id:7,col:'hp',year:2010,rating:7.7,quality:'4K',size:'16 GB',emoji:'⚔️',thumbnail:'',fileId:'hp_7a',
+  {id:7,col:'hp',year:2010,rating:7.7,quality:'4K',size:'16 GB',hidden:false,emoji:'⚔️',thumbnail:'',modalThumb:'',fileId:'hp_7a',
    title:{uz:"Harry Potter va O'lim Sovg'alari: 1-qism",ru:"Гарри Поттер и Дары Смерти: Часть 1",en:"Harry Potter and the Deathly Hallows: Part 1"},
    desc:{uz:"Harry, Ron va Hermiona maktabni tark etib, gorksinlalarni izlashga otlanadi.",ru:"Гарри, Рон и Гермиона покидают школу и ищут крестражи.",en:"Harry, Ron and Hermione leave Hogwarts to hunt Horcruxes."}},
-  {id:8,col:'hp',year:2011,rating:8.1,quality:'4K',size:'17 GB',emoji:'🏰',thumbnail:'',fileId:'hp_7b',
+  {id:8,col:'hp',year:2011,rating:8.1,quality:'4K',size:'17 GB',hidden:false,emoji:'🏰',thumbnail:'',modalThumb:'',fileId:'hp_7b',
    title:{uz:"Harry Potter va O'lim Sovg'alari: 2-qism",ru:"Гарри Поттер и Дары Смерти: Часть 2",en:"Harry Potter and the Deathly Hallows: Part 2"},
    desc:{uz:"Hogvarts jangida yakuniy to'qnashuv sodir bo'ladi.",ru:"В битве за Хогвартс происходит финальное противостояние.",en:"The final battle at Hogwarts."}},
-  {id:9,col:'marvel',year:2008,rating:7.9,quality:'4K',size:'14 GB',emoji:'🦾',thumbnail:'',fileId:'mcu_im1',
+  {id:9,col:'marvel',year:2008,rating:7.9,quality:'4K',size:'14 GB',hidden:false,emoji:'🦾',thumbnail:'',modalThumb:'',fileId:'mcu_im1',
    title:{uz:"Temir Odam",ru:"Железный человек",en:"Iron Man"},
    desc:{uz:"Tony Stark asirlikda zirhli kostyum yaratadi.",ru:"Тони Старк в плену создаёт бронекостюм.",en:"Tony Stark builds an armored suit in captivity."}},
-  {id:10,col:'marvel',year:2012,rating:8.0,quality:'4K',size:'16 GB',emoji:'⚡',thumbnail:'',fileId:'mcu_av1',
+  {id:10,col:'marvel',year:2012,rating:8.0,quality:'4K',size:'16 GB',hidden:false,emoji:'⚡',thumbnail:'',modalThumb:'',fileId:'mcu_av1',
    title:{uz:"Qasoskorlar",ru:"Мстители",en:"The Avengers"},
    desc:{uz:"Olti super qahramon Lokining bosqiniga qarshi kurashadi.",ru:"Шесть супергероев объединяются против Локи.",en:"Six superheroes unite to stop Loki's invasion."}},
-  {id:11,col:'marvel',year:2018,rating:8.4,quality:'4K',size:'18 GB',emoji:'💎',thumbnail:'',fileId:'mcu_iw',
+  {id:11,col:'marvel',year:2018,rating:8.4,quality:'4K',size:'18 GB',hidden:false,emoji:'💎',thumbnail:'',modalThumb:'',fileId:'mcu_iw',
    title:{uz:"Qasoskorlar: Sonsizlik Urushi",ru:"Мстители: Война бесконечности",en:"Avengers: Infinity War"},
    desc:{uz:"Thanos olti Sonsizlik Toshini to'plash uchun yo'lga chiqadi.",ru:"Танос отправляется собрать все камни Бесконечности.",en:"Thanos sets out to collect all six Infinity Stones."}},
-  {id:12,col:'marvel',year:2019,rating:8.4,quality:'4K',size:'17 GB',emoji:'🕰️',thumbnail:'',fileId:'mcu_eg',
+  {id:12,col:'marvel',year:2019,rating:8.4,quality:'4K',size:'17 GB',hidden:false,emoji:'🕰️',thumbnail:'',modalThumb:'',fileId:'mcu_eg',
    title:{uz:"Qasoskorlar: Oxirat",ru:"Мстители: Финал",en:"Avengers: Endgame"},
    desc:{uz:"Qolgan qahramonlar so'nggi kurashar.",ru:"Оставшиеся герои вступают в финальную битву.",en:"The remaining heroes make one final stand."}},
-  {id:13,col:'lotr',year:2001,rating:8.8,quality:'4K',size:'22 GB',emoji:'💍',thumbnail:'',fileId:'lotr_1',
+  {id:13,col:'lotr',year:2001,rating:8.8,quality:'4K',size:'22 GB',hidden:false,emoji:'💍',thumbnail:'',modalThumb:'',fileId:'lotr_1',
    title:{uz:"Uzuk Egasi: Uzuk Hamdo'stligi",ru:"Властелин колец: Братство кольца",en:"The Lord of the Rings: The Fellowship of the Ring"},
    desc:{uz:"Frodo Baggins Qudrat Uzugini yo'q qilish uchun yo'lga chiqadi.",ru:"Фродо отправляется уничтожить Кольцо Всевластья.",en:"Frodo embarks on a journey to destroy the One Ring."}},
-  {id:14,col:'lotr',year:2002,rating:8.7,quality:'4K',size:'23 GB',emoji:'🏰',thumbnail:'',fileId:'lotr_2',
+  {id:14,col:'lotr',year:2002,rating:8.7,quality:'4K',size:'23 GB',hidden:false,emoji:'🏰',thumbnail:'',modalThumb:'',fileId:'lotr_2',
    title:{uz:"Uzuk Egasi: Ikkita Minora",ru:"Властелин колец: Две крепости",en:"The Lord of the Rings: The Two Towers"},
    desc:{uz:"Hamdo'stlik bo'lingan. Frodo va Sam Mordorga yaqinlashmoqda.",ru:"Братство разделилось. Фродо и Сэм приближаются к Мордору.",en:"The Fellowship is broken. Frodo and Sam draw closer to Mordor."}},
-  {id:15,col:'lotr',year:2003,rating:9.0,quality:'4K',size:'24 GB',emoji:'👑',thumbnail:'',fileId:'lotr_3',
+  {id:15,col:'lotr',year:2003,rating:9.0,quality:'4K',size:'24 GB',hidden:false,emoji:'👑',thumbnail:'',modalThumb:'',fileId:'lotr_3',
    title:{uz:"Uzuk Egasi: Qirolning Qaytishi",ru:"Властелин колец: Возвращение короля",en:"The Lord of the Rings: The Return of the King"},
    desc:{uz:"Yakuniy jang. Frodo Mordorga, Aragon esa taxtga.",ru:"Финальная битва. Фродо идёт к Мордору, Арагорн — к трону.",en:"Final battle. Frodo pushes to Mordor, Aragorn reclaims the throne."}},
-  {id:16,col:'sw',year:1977,rating:8.6,quality:'4K',size:'20 GB',emoji:'⭐',thumbnail:'',fileId:'sw_4',
+  {id:16,col:'sw',year:1977,rating:8.6,quality:'4K',size:'20 GB',hidden:false,emoji:'⭐',thumbnail:'',modalThumb:'',fileId:'sw_4',
    title:{uz:"Yulduz Urushlari: Yangi Umid",ru:"Звёздные войны: Новая надежда",en:"Star Wars: A New Hope"},
    desc:{uz:"Luke Skywalker Imperiyaga qarshi Isyonchilar bilan qo'shiladi.",ru:"Люк Скайуокер присоединяется к повстанцам против Империи.",en:"Luke Skywalker joins rebels in the fight against the Empire."}},
-  {id:17,col:'sw',year:1980,rating:8.7,quality:'4K',size:'19 GB',emoji:'🌌',thumbnail:'',fileId:'sw_5',
+  {id:17,col:'sw',year:1980,rating:8.7,quality:'4K',size:'19 GB',hidden:false,emoji:'🌌',thumbnail:'',modalThumb:'',fileId:'sw_5',
    title:{uz:"Yulduz Urushlari: Imperiya Zarba Beradi",ru:"Звёздные войны: Империя наносит ответный удар",en:"Star Wars: The Empire Strikes Back"},
    desc:{uz:"Imperiya qahramonlarni quvib yuradi. Luke Jedi ustozidan ta'lim oladi.",ru:"Империя преследует героев. Люк обучается у мастера-джедая.",en:"The Empire strikes back. Luke trains with a Jedi Master."}},
-  {id:18,col:'sw',year:1983,rating:8.3,quality:'4K',size:'18 GB',emoji:'🐻',thumbnail:'',fileId:'sw_6',
+  {id:18,col:'sw',year:1983,rating:8.3,quality:'4K',size:'18 GB',hidden:false,emoji:'🐻',thumbnail:'',modalThumb:'',fileId:'sw_6',
    title:{uz:"Yulduz Urushlari: Jedi Qaytadi",ru:"Звёздные войны: Возвращение джедая",en:"Star Wars: Return of the Jedi"},
    desc:{uz:"Luke Darth Veyderga qarshi yakuniy duelga chiqadi.",ru:"Люк вступает в финальную дуэль с Дартом Вейдером.",en:"Luke faces Darth Vader in the final duel."}},
 ];
@@ -538,9 +554,9 @@ const DEFAULT_MOVIES = [
 /* ═══════════════════════════════════════
    DATABASE (localStorage)
 ═══════════════════════════════════════ */
-const DB_KEY_COL = 'kk_collections_v3';
-const DB_KEY_MOV = 'kk_movies_v3';
-const ADMIN_PASS = 'kino2025'; // ← Parolni shu yerda o'zgartiring
+const DB_KEY_COL = 'kk_collections_v4';
+const DB_KEY_MOV = 'kk_movies_v4';
+const ADMIN_PASS = 'kino';
 
 /* ═══════════════════════════════════════
    THEME
@@ -677,7 +693,7 @@ function renderCollections(){
   const t=T[lang];
   const q=colQ.toLowerCase();
   COLLECTIONS=loadCollections();
-  const list=COLLECTIONS.filter(c=>!q||c.name[lang].toLowerCase().includes(q));
+  const list=COLLECTIONS.filter(c=>!c.hidden&&(!q||c.name[lang].toLowerCase().includes(q)));
   const grid=document.getElementById('col-grid');
 
   if(!list.length){
@@ -730,7 +746,7 @@ function renderMovies(){
   const q=movQ.toLowerCase();
   MOVIES=loadMovies();
   const grid=document.getElementById('mov-grid');
-  let list=MOVIES.filter(m=>m.col===curCol&&(!q||m.title[lang].toLowerCase().includes(q)));
+  let list=MOVIES.filter(m=>!m.hidden&&m.col===curCol&&(!q||m.title[lang].toLowerCase().includes(q)));
   const s=SORTS[sortIdx];
   if(s==='year')list.sort((a,b)=>b.year-a.year);
   else if(s==='year_asc')list.sort((a,b)=>a.year-b.year);
@@ -751,7 +767,7 @@ function renderMovies(){
       <div class="mov-body">
         <div class="mov-title">${esc(m.title[lang])}</div>
         <div class="mov-meta"><span class="mov-year">${m.year}</span><span class="mov-rating">★ ${m.rating}</span></div>
-        <div class="mov-size">📦 ${esc(m.size)}</div>
+        
         <button class="shr-btn" onclick="shareMovie(event,${m.id})">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
           ${t.share}
@@ -783,8 +799,10 @@ function openModal(id){
   const bg=BG[m.col]||'#1A1A1A';
 
   // Poster
+  // Modal uchun alohida rasm (modalThumb), bo'lmasa oddiy thumbnail
+  const modalImg = m.modalThumb || m.thumbnail;
   const posterInner = `<div class="modal-poster-emoji">${m.emoji}</div>` +
-    (m.thumbnail ? `<img src="${m.thumbnail}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+    (modalImg ? `<img src="${modalImg}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
 
   document.getElementById('modal-poster').innerHTML=`
     <div class="modal-poster-wrap" style="background:${bg}">
@@ -805,7 +823,7 @@ function openModal(id){
       <div class="modal-stat">⭐ <strong>${m.rating}</strong></div>
       <div class="modal-stat">📅 <strong>${m.year}</strong></div>
       <div class="modal-stat">💿 <strong>${esc(m.quality)}</strong></div>
-      <div class="modal-stat">📦 <strong>${esc(m.size)}</strong></div>
+      
     </div>
     <div class="modal-desc">${esc(m.desc[lang])}</div>
     <div class="modal-acts">
@@ -871,7 +889,7 @@ function renderAdminCollections(){
     const thumb=c.thumbnail
       ?`<div class="db-thumb"><img src="${esc(c.thumbnail)}" onerror="this.parentElement.textContent='${c.emoji}'"></div>`
       :`<div class="db-thumb" style="font-size:22px">${c.emoji}</div>`;
-    return `<div class="db-card" style="animation-delay:${i*0.04}s">
+    return `<div class="db-card${c.hidden?' is-hidden':''}" style="animation-delay:${i*0.04}s">
       <div class="db-card-hdr">
         ${thumb}
         <div class="db-info">
@@ -880,6 +898,7 @@ function renderAdminCollections(){
         </div>
         <div class="db-actions">
           <div class="db-edit" onclick="openColForm('${c.id}')">✏️ Tahrir</div>
+          <div class="db-hide" onclick="toggleHideCol('${c.id}')">${c.hidden?'👁 Ko\'rsat':'🙈 Yashir'}</div>
           <div class="db-del" onclick="deleteCollection('${c.id}')">🗑</div>
         </div>
       </div>
@@ -895,6 +914,26 @@ function deleteCollection(id){
   COLLECTIONS=cols;MOVIES=movs;
   renderAdminCollections();
   showToast('Kolleksiya o\'chirildi');
+}
+
+function toggleHideCol(id){
+  const cols=loadCollections();
+  const idx=cols.findIndex(c=>c.id===id);
+  if(idx<0)return;
+  cols[idx].hidden=!cols[idx].hidden;
+  saveCollections(cols);COLLECTIONS=cols;
+  renderAdminCollections();
+  showToast(cols[idx].hidden?'Kolleksiya yashirildi 🙈':'Kolleksiya ko\'rsatildi 👁');
+}
+
+function toggleHideMov(id){
+  const movs=loadMovies();
+  const idx=movs.findIndex(m=>m.id===id);
+  if(idx<0)return;
+  movs[idx].hidden=!movs[idx].hidden;
+  saveMovies(movs);MOVIES=movs;
+  renderAdminMovies();
+  showToast(movs[idx].hidden?'Film yashirildi 🙈':'Film ko\'rsatildi 👁');
 }
 
 /* ═══════════════════════════════════════
@@ -917,15 +956,16 @@ function renderAdminMovies(){
     const thumb=m.thumbnail
       ?`<div class="db-thumb"><img src="${esc(m.thumbnail)}" onerror="this.parentElement.textContent='${m.emoji}'"></div>`
       :`<div class="db-thumb" style="font-size:22px">${m.emoji}</div>`;
-    return `<div class="db-card" style="animation-delay:${i*0.03}s">
+    return `<div class="db-card${m.hidden?' is-hidden':''}" style="animation-delay:${i*0.03}s">
       <div class="db-card-hdr">
         ${thumb}
         <div class="db-info">
           <div class="db-name">${esc(m.title.uz)}</div>
-          <div class="db-meta">${m.year} · ${esc(m.quality)} · ${esc(m.size)} · ★${m.rating}</div>
+          <div class="db-meta">${m.year} · ${esc(m.quality)} · ★${m.rating}</div>
         </div>
         <div class="db-actions">
           <div class="db-edit" onclick="openMovForm(${m.id})">✏️</div>
+          <div class="db-hide" onclick="toggleHideMov(${m.id})">${m.hidden?'👁':'🙈'}</div>
           <div class="db-del" onclick="deleteMovie(${m.id})">🗑</div>
         </div>
       </div>
@@ -1012,6 +1052,7 @@ function saveColForm(){
       parseInt(document.getElementById('f-col-y1').value)||2000,
       parseInt(document.getElementById('f-col-y2').value)||2024
     ],
+    hidden: editingColId ? (cols.find(c=>c.id===cid)?.hidden||false) : false,
     name:{
       uz:document.getElementById('f-col-nuz').value.trim(),
       ru:document.getElementById('f-col-nru').value.trim(),
@@ -1039,7 +1080,7 @@ function openMovForm(id){
   const cols=loadCollections();
   const m=id?movs.find(x=>x.id===id):{
     id:null,col:adminColFilter||cols[0]?.id||'',year:2024,rating:7.0,
-    quality:'1080p',size:'4 GB',emoji:'🎬',thumbnail:'',fileId:'',
+    quality:'1080p',size:'4 GB',hidden:false,emoji:'🎬',thumbnail:'',modalThumb:'',fileId:'',
     title:{uz:'',ru:'',en:''},desc:{uz:'',ru:'',en:''}
   };
   const colOptions=cols.map(c=>`<option value="${c.id}"${m.col===c.id?' selected':''}>${c.name.uz}</option>`).join('');
@@ -1054,8 +1095,12 @@ function openMovForm(id){
       <input class="a-input" id="f-mov-emoji" value="${m.emoji}" style="font-size:20px">
     </div>
     <div class="f-group">
-      <label class="f-label">Thumbnail URL (ixtiyoriy, 2:3 yoki istalgan nisbat)</label>
+      <label class="f-label">Poster URL (2:3 — film kartochkasi uchun)</label>
       <input class="a-input" id="f-mov-thumb" value="${esc(m.thumbnail)}" placeholder="https://...">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Modal rasm URL (16:9 — batafsil oyna uchun)</label>
+      <input class="a-input" id="f-mov-modal-thumb" value="${esc(m.modalThumb||'')}" placeholder="https://...">
     </div>
     <div class="f-group">
       <label class="f-label">Telegram File ID</label>
@@ -1121,6 +1166,8 @@ function saveMovForm(){
     col:document.getElementById('f-mov-col').value,
     emoji:document.getElementById('f-mov-emoji').value.trim()||'🎬',
     thumbnail:document.getElementById('f-mov-thumb').value.trim(),
+    modalThumb:document.getElementById('f-mov-modal-thumb').value.trim(),
+    hidden: editingMovId ? (movs.find(m=>m.id===editingMovId)?.hidden||false) : false,
     fileId:document.getElementById('f-mov-fid').value.trim(),
     year:parseInt(document.getElementById('f-mov-year').value)||2024,
     rating:parseFloat(document.getElementById('f-mov-rating').value)||7.0,
