@@ -452,6 +452,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="admin-tabs">
     <div class="a-tab active" id="tab-col" onclick="switchAdminTab('collections')">Kolleksiyalar</div>
     <div class="a-tab" id="tab-mov" onclick="switchAdminTab('movies')">Filmlar</div>
+    <div class="a-tab" id="tab-sync" onclick="switchAdminTab('sync')">🔗 Sinxron</div>
   </div>
   <div class="admin-content" id="admin-content"></div>
 </div>
@@ -602,46 +603,35 @@ const DEFAULT_MOVIES = [
 /* ═══════════════════════════════════════
    DATABASE (JSONBin — barcha qurilmalarda ishlaydi)
 ═══════════════════════════════════════ */
-const DB_KEY_COL  = 'kk_collections_v5';
-const DB_KEY_MOV  = 'kk_movies_v5';
-const ADMIN_PASS  = 'kino';
-const JBIN_KEY    = '$2a$10$8ZjJPT/TsTAqxT0JCv94huAaOAOuYV.yYIgVm3iTR941gB2M1Fg0i';
-const JBIN_URL    = 'https://api.jsonbin.io/v3/b';
-const JBIN_ID_COL = 'kk_jbin_col';
-const JBIN_ID_MOV = 'kk_jbin_mov';
+const DB_KEY_COL = 'kk_collections_v5';
+const DB_KEY_MOV = 'kk_movies_v5';
+const ADMIN_PASS = 'kino';
+const JBIN_KEY   = '$2a$10$8ZjJPT/TsTAqxT0JCv94huAaOAOuYV.yYIgVm3iTR941gB2M1Fg0i';
+const JBIN_URL   = 'https://api.jsonbin.io/v3/b';
+const JBIN_COL   = '69b7d3b9b7ec241ddc71faf1';
+const JBIN_MOV   = '69b7d3f3b7ec241ddc71fbf9';
 
-async function cloudGet(lsKey, binIdKey, fallback){
-  const binId = localStorage.getItem(binIdKey);
-  if(binId){
-    try{
-      const r = await fetch(`${JBIN_URL}/${binId}/latest`,{headers:{'X-Master-Key':JBIN_KEY}});
-      const j = await r.json();
-      if(j.record){ localStorage.setItem(lsKey,JSON.stringify(j.record)); return j.record; }
-    }catch(e){ console.warn('Cloud o\'qish xatosi:',e); }
-  }
+async function cloudGet(lsKey, binId, fallback){
+  try{
+    const r = await fetch(`${JBIN_URL}/${binId}/latest`,{headers:{'X-Master-Key':JBIN_KEY}});
+    const j = await r.json();
+    const rec = j.record?.data ?? j.record;
+    if(Array.isArray(rec)){
+      localStorage.setItem(lsKey, JSON.stringify(rec));
+      return rec;
+    }
+  }catch(e){ console.warn('Cloud o\'qish xatosi:',e); }
   try{ const d=localStorage.getItem(lsKey); return d?JSON.parse(d):JSON.parse(JSON.stringify(fallback)); }
   catch{ return JSON.parse(JSON.stringify(fallback)); }
 }
 
-async function cloudSet(lsKey, binIdKey, data){
-  localStorage.setItem(lsKey, JSON.stringify(data));
-  const binId = localStorage.getItem(binIdKey);
+async function cloudSet(binId, data){
   try{
-    if(binId){
-      await fetch(`${JBIN_URL}/${binId}`,{
-        method:'PUT',
-        headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY},
-        body:JSON.stringify(data)
-      });
-    } else {
-      const r = await fetch(JBIN_URL,{
-        method:'POST',
-        headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Private':'true'},
-        body:JSON.stringify(data)
-      });
-      const j = await r.json();
-      if(j.metadata?.id) localStorage.setItem(binIdKey, j.metadata.id);
-    }
+    await fetch(`${JBIN_URL}/${binId}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY},
+      body:JSON.stringify({data: data})
+    });
   }catch(e){ console.warn('Cloud yozish xatosi:',e); }
 }
 
@@ -654,17 +644,17 @@ function loadMovies(){
   catch{return JSON.parse(JSON.stringify(DEFAULT_MOVIES))}
 }
 function saveCollections(data){
-  localStorage.setItem(DB_KEY_COL,JSON.stringify(data));
-  cloudSet(DB_KEY_COL, JBIN_ID_COL, data);
+  localStorage.setItem(DB_KEY_COL, JSON.stringify(data));
+  cloudSet(JBIN_COL, data);
 }
 function saveMovies(data){
-  localStorage.setItem(DB_KEY_MOV,JSON.stringify(data));
-  cloudSet(DB_KEY_MOV, JBIN_ID_MOV, data);
+  localStorage.setItem(DB_KEY_MOV, JSON.stringify(data));
+  cloudSet(JBIN_MOV, data);
 }
 
 async function syncFromCloud(){
-  const cols = await cloudGet(DB_KEY_COL, JBIN_ID_COL, DEFAULT_COLLECTIONS);
-  const movs = await cloudGet(DB_KEY_MOV, JBIN_ID_MOV, DEFAULT_MOVIES);
+  const cols = await cloudGet(DB_KEY_COL, JBIN_COL, DEFAULT_COLLECTIONS);
+  const movs = await cloudGet(DB_KEY_MOV, JBIN_MOV, DEFAULT_MOVIES);
   localStorage.setItem(DB_KEY_COL, JSON.stringify(cols));
   localStorage.setItem(DB_KEY_MOV, JSON.stringify(movs));
   COLLECTIONS = cols; MOVIES = movs;
@@ -1018,8 +1008,10 @@ function switchAdminTab(tab){
   adminTab=tab;
   document.getElementById('tab-col').classList.toggle('active',tab==='collections');
   document.getElementById('tab-mov').classList.toggle('active',tab==='movies');
+  document.getElementById('tab-sync').classList.toggle('active',tab==='sync');
   if(tab==='collections')renderAdminCollections();
-  else renderAdminMovies();
+  else if(tab==='movies')renderAdminMovies();
+  else if(tab==='sync')renderAdminSync();
 }
 
 /* ═══════════════════════════════════════
@@ -1608,6 +1600,18 @@ function showNavPage(page){
   // Rejissorlar va Aktyorlar — tez orada qo'shiladi
   showToast(`${info.ico} ${info[lang]||info.uz} — tez orada!`);
 }
+function renderAdminSync(){
+  const ct = document.getElementById('admin-content');
+  ct.innerHTML = `
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:8px">
+      <div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:6px">✅ Cloud sinxronizatsiya yoqilgan</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">
+        Admin paneldan qo'shgan kolleksiya va filmlaringiz barcha qurilmalarda avtomatik ko'rinadi.
+      </div>
+    </div>
+  `;
+}
+
 function openForm(){document.getElementById('form-ov').classList.add('open')}
 function closeForm(){document.getElementById('form-ov').classList.remove('open')}
 function closeFormOutside(e){if(e.target===document.getElementById('form-ov'))closeForm()}
