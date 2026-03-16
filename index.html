@@ -984,33 +984,28 @@ function closeModalOutside(e){if(e.target===document.getElementById('modal'))clo
    ACTIONS
 ═══════════════════════════════════════ */
 function downloadMovie(id){
-  const m=loadMovies().find(x=>x.id===id);
+  const m = loadMovies().find(x => x.id === id);
   closeModal();
 
-  // fileId → bot kalit (masalan "hp_1" → "hp1")
-  const FILE_TO_KEY = {
-    'hp_1':'hp1','hp_2':'hp2','hp_3':'hp3','hp_4':'hp4',
-    'hp_5':'hp5','hp_6':'hp6','hp_7a':'hp7','hp_7b':'hp8',
-    'mcu_im1':'mcu1','mcu_av1':'mcu2','mcu_iw':'mcu3','mcu_eg':'mcu4',
-    'lotr_1':'lotr1','lotr_2':'lotr2','lotr_3':'lotr3',
-    'sw_4':'sw1','sw_5':'sw2','sw_6':'sw3',
-  };
-
-  const fid = (m.fileId && typeof m.fileId === 'object') ? (m.fileId[lang] || m.fileId.uz || '') : (m.fileId || '');
-  const movieKey = FILE_TO_KEY[fid];
-  if(!movieKey){ showToast('Film topilmadi ❌'); return; }
-
-  // Til (uz/ru/en)
+  // fileId ni til bo'yicha olish
   const curLang = lang || 'uz';
+  let fid = '';
+  if(m.fileId && typeof m.fileId === 'object'){
+    fid = m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '';
+  } else {
+    fid = m.fileId || '';
+  }
 
-  // Botga /start hp1_uz komandasini yuborish
-  const startParam = movieKey + '_' + curLang;
+  if(!fid){ showToast('Bu fil hali qo\'shilmagan ⏳'); return; }
+
+  // Botga /start fid_lang yuborish (masalan: hp_1_uz)
+  const startParam = fid + '_' + curLang;
 
   if(tg){
     tg.openTelegramLink('https://t.me/kinokolleksiyabot?start=' + startParam);
     tg.close();
   } else {
-    showToast(T[lang].download+'...');
+    showToast(T[lang].download + '...');
   }
 }
 
