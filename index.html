@@ -533,25 +533,31 @@ let COLLECTIONS = [];
 let MOVIES = [];
 
 /* ═══════════════════════════════════════
-   CLOUD DAN O'QISH VA YOZISH
+   CLOUD DAN O'QISH VA YOZISH (Bulletproof)
 ═══════════════════════════════════════ */
 async function fetchCloudData() {
   try {
     const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}/latest`, {
       headers: { 'X-Access-Key': DB_READ_KEY }
     });
-    if (!res.ok) throw new Error('Network error');
-    const data = await res.json();
     
+    // Agar JSONBin xato bersa, uni yashirmaymiz, yuzingga aytamiz
+    if (!res.ok) {
+      const errData = await res.json();
+      alert("⚠️ O'qishda xatolik: Bin yopiq yoki Read kalit xato! Sababi: " + (errData.message || res.status));
+      throw new Error('Network error');
+    }
+    
+    const data = await res.json();
     COLLECTIONS = data.record.collections || [];
     MOVIES = data.record.movies || [];
 
-    // Oflayn holat uchun brauzerda zaxira nusxa saqlaymiz
+    // Oflayn holat uchun brauzerda zaxira nusxa
     localStorage.setItem('kk_col_backup', JSON.stringify(COLLECTIONS));
     localStorage.setItem('kk_mov_backup', JSON.stringify(MOVIES));
   } catch (err) {
     console.error("Cloud xatosi:", err);
-    // Internet ishlamasa, zaxiradan olamiz
+    // Internet yo'q bo'lsa yoki xato qilsa eskisini ko'rsatadi
     COLLECTIONS = JSON.parse(localStorage.getItem('kk_col_backup') || '[]');
     MOVIES = JSON.parse(localStorage.getItem('kk_mov_backup') || '[]');
   }
@@ -565,11 +571,19 @@ async function syncToCloud() {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
-        'X-Master-Key': ADMIN_TOKEN // Ruxsat faqat admin kirgandagina mavjud bo'ladi
+        'X-Master-Key': ADMIN_TOKEN,
+        'X-Bin-Versioning': 'false' // DIQQAT: Limit to'lmasligi uchun asosiy himoya!
       },
       body: JSON.stringify({ collections: COLLECTIONS, movies: MOVIES })
     });
-    if (!res.ok) throw new Error();
+    
+    // Agar saqlash xato bo'lsa darhol alert beradi
+    if (!res.ok) {
+      const errData = await res.json();
+      alert("⚠️ Saqlashda xato: " + (errData.message || res.status));
+      throw new Error();
+    }
+    
     showToast("Barcha qurilmalarda sinxronlandi ✅");
   } catch (e) {
     showToast("Saqlashda xatolik yuz berdi ❌");
