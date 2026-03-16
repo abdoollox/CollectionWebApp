@@ -984,26 +984,32 @@ function closeModalOutside(e){if(e.target===document.getElementById('modal'))clo
    ACTIONS
 ═══════════════════════════════════════ */
 function downloadMovie(id){
-  const m = loadMovies().find(x => x.id === id);
+  const m = loadMovies().find(x => x.id === id || x.id === +id);
   closeModal();
 
-  // fileId ni til bo'yicha olish
+  if(!m){ showToast('Film topilmadi ❌'); return; }
+
+  // fileId ni til bo'yicha olish (message_id DB kanalda)
   const curLang = lang || 'uz';
-  let fid = '';
+  let fileId = '';
   if(m.fileId && typeof m.fileId === 'object'){
-    fid = m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '';
+    fileId = m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '';
   } else {
-    fid = m.fileId || '';
+    fileId = String(m.fileId || '');
   }
 
-  if(!fid){ showToast('Bu fil hali qo\'shilmagan ⏳'); return; }
+  if(!fileId){
+    showToast("Bu film hali qo'shilmagan ⏳");
+    return;
+  }
 
-  // Botga /start fid_lang yuborish (masalan: hp_1_uz)
-  const startParam = fid + '_' + curLang;
-
+  // Botga signal yuborish: action, movieId, fileId (message_id)
   if(tg){
-    tg.openTelegramLink('https://t.me/kinokolleksiyabot?start=' + startParam);
-    tg.close();
+    tg.sendData(JSON.stringify({
+      action: 'download',
+      movieId: m.id,
+      fileId: fileId
+    }));
   } else {
     showToast(T[lang].download + '...');
   }
