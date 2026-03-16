@@ -600,11 +600,75 @@ const DEFAULT_MOVIES = [
 ];
 
 /* ═══════════════════════════════════════
-   DATABASE (localStorage)
+   DATABASE (JSONBin — barcha qurilmalarda ishlaydi)
 ═══════════════════════════════════════ */
-const DB_KEY_COL = 'kk_collections_v5';
-const DB_KEY_MOV = 'kk_movies_v5';
-const ADMIN_PASS = 'kino';
+const DB_KEY_COL  = 'kk_collections_v5';
+const DB_KEY_MOV  = 'kk_movies_v5';
+const ADMIN_PASS  = 'kino';
+const JBIN_KEY    = '$2a$10$8ZjJPT/TsTAqxT0JCv94huAaOAOuYV.yYIgVm3iTR941gB2M1Fg0i';
+const JBIN_URL    = 'https://api.jsonbin.io/v3/b';
+const JBIN_ID_COL = 'kk_jbin_col';
+const JBIN_ID_MOV = 'kk_jbin_mov';
+
+async function cloudGet(lsKey, binIdKey, fallback){
+  const binId = localStorage.getItem(binIdKey);
+  if(binId){
+    try{
+      const r = await fetch(`${JBIN_URL}/${binId}/latest`,{headers:{'X-Master-Key':JBIN_KEY}});
+      const j = await r.json();
+      if(j.record){ localStorage.setItem(lsKey,JSON.stringify(j.record)); return j.record; }
+    }catch(e){ console.warn('Cloud o\'qish xatosi:',e); }
+  }
+  try{ const d=localStorage.getItem(lsKey); return d?JSON.parse(d):JSON.parse(JSON.stringify(fallback)); }
+  catch{ return JSON.parse(JSON.stringify(fallback)); }
+}
+
+async function cloudSet(lsKey, binIdKey, data){
+  localStorage.setItem(lsKey, JSON.stringify(data));
+  const binId = localStorage.getItem(binIdKey);
+  try{
+    if(binId){
+      await fetch(`${JBIN_URL}/${binId}`,{
+        method:'PUT',
+        headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY},
+        body:JSON.stringify(data)
+      });
+    } else {
+      const r = await fetch(JBIN_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Master-Key':JBIN_KEY,'X-Bin-Private':'true'},
+        body:JSON.stringify(data)
+      });
+      const j = await r.json();
+      if(j.metadata?.id) localStorage.setItem(binIdKey, j.metadata.id);
+    }
+  }catch(e){ console.warn('Cloud yozish xatosi:',e); }
+}
+
+function loadCollections(){
+  try{const d=localStorage.getItem(DB_KEY_COL);return d?JSON.parse(d):JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS))}
+  catch{return JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS))}
+}
+function loadMovies(){
+  try{const d=localStorage.getItem(DB_KEY_MOV);return d?JSON.parse(d):JSON.parse(JSON.stringify(DEFAULT_MOVIES))}
+  catch{return JSON.parse(JSON.stringify(DEFAULT_MOVIES))}
+}
+function saveCollections(data){
+  localStorage.setItem(DB_KEY_COL,JSON.stringify(data));
+  cloudSet(DB_KEY_COL, JBIN_ID_COL, data);
+}
+function saveMovies(data){
+  localStorage.setItem(DB_KEY_MOV,JSON.stringify(data));
+  cloudSet(DB_KEY_MOV, JBIN_ID_MOV, data);
+}
+
+async function syncFromCloud(){
+  const cols = await cloudGet(DB_KEY_COL, JBIN_ID_COL, DEFAULT_COLLECTIONS);
+  const movs = await cloudGet(DB_KEY_MOV, JBIN_ID_MOV, DEFAULT_MOVIES);
+  localStorage.setItem(DB_KEY_COL, JSON.stringify(cols));
+  localStorage.setItem(DB_KEY_MOV, JSON.stringify(movs));
+  COLLECTIONS = cols; MOVIES = movs;
+}
 
 /* ═══════════════════════════════════════
    THEME
@@ -613,11 +677,8 @@ const DB_KEY_THEME = 'kk_theme';
 let isLight = localStorage.getItem(DB_KEY_THEME) === 'light';
 
 function applyTheme(){
-  if(isLight){
-    document.documentElement.classList.add('light');
-  } else {
-    document.documentElement.classList.remove('light');
-  }
+  if(isLight){ document.documentElement.classList.add('light'); }
+  else { document.documentElement.classList.remove('light'); }
   const icon = isLight ? '☀️' : '🌙';
   document.querySelectorAll('.theme-btn').forEach(el => el.textContent = icon);
   if(tg){
@@ -632,21 +693,7 @@ function toggleTheme(){
   applyTheme();
 }
 
-// Sahifa yuklanganda saqlangan temani qo'llaymiz
 applyTheme();
-
-function loadCollections(){
-  try{const d=localStorage.getItem(DB_KEY_COL);return d?JSON.parse(d):JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS))}
-  catch{return JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS))}
-}
-
-function loadMovies(){
-  try{const d=localStorage.getItem(DB_KEY_MOV);return d?JSON.parse(d):JSON.parse(JSON.stringify(DEFAULT_MOVIES))}
-  catch{return JSON.parse(JSON.stringify(DEFAULT_MOVIES))}
-}
-
-function saveCollections(data){localStorage.setItem(DB_KEY_COL,JSON.stringify(data))}
-function saveMovies(data){localStorage.setItem(DB_KEY_MOV,JSON.stringify(data))}
 
 let COLLECTIONS = loadCollections();
 let MOVIES = loadMovies();
@@ -1576,7 +1623,10 @@ function esc(s){
 /* ═══════════════════════════════════════
    INIT — sahifa yuklanganda
 ═══════════════════════════════════════ */
-(function init(){
+(async function init(){
+  // Avval cloud dan yangi ma'lumotlarni yuklab olamiz
+  await syncFromCloud();
+
   const saved = localStorage.getItem(DB_KEY_LANG);
   if(saved && ['uz','ru','en'].includes(saved)){
     lang = saved;
