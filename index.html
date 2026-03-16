@@ -480,13 +480,13 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 
 <script>
 /* ═══════════════════════════════════════
-   TELEGRAM WEB APP
+   TELEGRAM
 ═══════════════════════════════════════ */
 const tg = window.Telegram?.WebApp;
 if(tg){tg.ready();tg.expand();tg.setHeaderColor('#141414');tg.setBackgroundColor('#141414')}
 
 /* ═══════════════════════════════════════
-   I18N (TIL SOZLAMALARI)
+   I18N
 ═══════════════════════════════════════ */
 const T = {
   uz:{
@@ -494,7 +494,7 @@ const T = {
     all_col:"Barcha kolleksiyalar",all_mov:"Barcha filmlar",
     count:n=>`${n} ta film`,
     sort_yd:"Yilga ko'ra ↓",sort_r:"Reytingga ko'ra",sort_ya:"Yilga ko'ra ↑",
-    download:"⬇ Yuklab olish",share:"Ulashish",
+    download:"⬇ Yuklab olish",share:"Ulashish",watch:"Tomosha qilish",
     nav_home:"Bosh sahifa",nav_saved:"Saqlangan",nav_search:"Qidirish",nav_settings:"Sozlamalar",
     empty_t:"Topilmadi",empty_s:"Boshqa so'z bilan qidiring",
     toast_share:t=>`"${t}" ulashildi ✅`,
@@ -504,7 +504,7 @@ const T = {
     all_col:"Все коллекции",all_mov:"Все фильмы",
     count:n=>`${n} фильм(ов)`,
     sort_yd:"По году ↓",sort_r:"По рейтингу",sort_ya:"По году ↑",
-    download:"⬇ Скачать",share:"Поделиться",
+    download:"⬇ Скачать",share:"Поделиться",watch:"Смотреть",
     nav_home:"Главная",nav_saved:"Сохранённые",nav_search:"Поиск",nav_settings:"Настройки",
     empty_t:"Ничего не найдено",empty_s:"Попробуйте другой запрос",
     toast_share:t=>`«${t}» отправлено ✅`,
@@ -514,7 +514,7 @@ const T = {
     all_col:"All collections",all_mov:"All movies",
     count:n=>`${n} movie${n!==1?'s':''}`,
     sort_yd:"By year ↓",sort_r:"By rating",sort_ya:"By year ↑",
-    download:"⬇ Download",share:"Share",
+    download:"⬇ Download",share:"Share",watch:"Watch",
     nav_home:"Home",nav_saved:"Saved",nav_search:"Search",nav_settings:"Settings",
     empty_t:"Nothing found",empty_s:"Try a different search",
     toast_share:t=>`"${t}" shared ✅`,
@@ -522,76 +522,186 @@ const T = {
 };
 
 /* ═══════════════════════════════════════
-   CLOUD BAZA SOZLAMALARI (JSONBIN)
+   DEFAULT DATA
 ═══════════════════════════════════════ */
-// DIQQAT: O'zingning Bin ID va Access Key (Read-only) kalitingni kirit!
-const DB_BIN_ID = '69b7de99b7ec241ddc722d74'; 
-const DB_READ_KEY = '69b7d54caa77b81da9ebd7d5'; 
-let ADMIN_TOKEN = null; // Bunga teginma. Admin panelga kirganda Master Key shu yerda vaqtincha saqlanadi.
+const DEFAULT_COLLECTIONS = [
+  {id:'hp',emoji:'🧙',hidden:false,thumbnail:'https://image.tmdb.org/t/p/original/gOduLS90AehfJPoJMizaRkC3Hoz.jpg',
+   name:{uz:"Harry Potter",ru:"Гарри Поттер",en:"Harry Potter"},
+   sub:{uz:"Sehrgar dunyosi",ru:"Мир волшебников",en:"Wizarding World"},
+   years:[2001,2011]},
+  {id:'marvel',emoji:'⚡',hidden:false,thumbnail:'',
+   name:{uz:"Marvel",ru:"Марвел",en:"Marvel"},
+   sub:{uz:"Super qahramonlar olami",ru:"Вселенная супергероев",en:"Marvel Cinematic Universe"},
+   years:[2008,2023]},
+  {id:'lotr',emoji:'💍',hidden:false,thumbnail:'',
+   name:{uz:"Uzuk Egasi",ru:"Властелин Колец",en:"Lord of the Rings"},
+   sub:{uz:"O'rta Yer eposasi",ru:"Эпос Средиземья",en:"Middle-earth Saga"},
+   years:[2001,2003]},
+  {id:'sw',emoji:'⭐',hidden:false,thumbnail:'',
+   name:{uz:"Yulduz Urushlari",ru:"Звёздные Войны",en:"Star Wars"},
+   sub:{uz:"Galaktika eposasi",ru:"Эпос галактики",en:"Galaxy Saga"},
+   years:[1977,2019]},
+];
+
+const DEFAULT_MOVIES = [
+  {id:1,col:'hp',year:2001,rating:7.6,quality:'1080p',size:'4.2 GB',hidden:false,emoji:'🧙',thumbnail:'',trailer:'',modalThumb:'',fileId:'hp_1',
+   title:{uz:"Harry Potter va Faylasuf Toshi",ru:"Гарри Поттер и философский камень",en:"Harry Potter and the Philosopher's Stone"},
+   desc:{uz:"Yosh sehrgar Harry Potter Hogvarts maktabiga qabul qilinadi.",ru:"Юный волшебник Гарри Поттер поступает в Хогвартс.",en:"Young wizard Harry Potter is admitted to Hogwarts."}},
+  {id:2,col:'hp',year:2002,rating:7.4,quality:'1080p',size:'4.5 GB',hidden:false,emoji:'🐍',thumbnail:'',trailer:'',modalThumb:'',fileId:'hp_2',
+   title:{uz:"Harry Potter va Sirlar Xonasi",ru:"Гарри Поттер и тайная комната",en:"Harry Potter and the Chamber of Secrets"},
+   desc:{uz:"Hogvartsda sirli hujumlar boshlanadi.",ru:"В Хогвартсе начинаются таинственные нападения.",en:"Mysterious attacks plague Hogwarts."}},
+  {id:3,col:'hp',year:2004,rating:7.9,quality:'4K',size:'15 GB',hidden:false,emoji:'🌙',thumbnail:'',trailer:'',modalThumb:'',fileId:'hp_3',
+   title:{uz:"Harry Potter va Azkaban Mahbusi",ru:"Гарри Поттер и узник Азкабана",en:"Harry Potter and the Prisoner of Azkaban"},
+   desc:{uz:"Xavfli mahbus Azkabandan qochdi.",ru:"Опасный заключённый сбежал из Азкабана.",en:"A dangerous prisoner escapes Azkaban."}},
+  {id:4,col:'hp',year:2005,rating:7.7,quality:'1080p',size:'5.1 GB',hidden:false,emoji:'🏆',thumbnail:'',trailer:'',modalThumb:'',fileId:'hp_4',
+   title:{uz:"Harry Potter va O't Qadahi",ru:"Гарри Поттер и кубок огня",en:"Harry Potter and the Goblet of Fire"},
+   desc:{uz:"Hogvarts uch ta maktab o'rtasidagi musobaqaga mezbonlik qiladi.",ru:"Хогвартс принимает Турнир Трёх Волшебников.",en:"Hogwarts hosts the Triwizard Tournament."}},
+  {id:5,col:'hp',year:2007,rating:7.5,quality:'1080p',size:'4.8 GB',hidden:false,emoji:'🦅',thumbnail:'',trailer:'',modalThumb:'',fileId:'hp_5',
+   title:{uz:"Harry Potter va Feniks Ordeni",ru:"Гарри Поттер и орден Феникса",en:"Harry Potter and the Order of the Phoenix"},
+   desc:{uz:"Voldemort qaytib kelganiga hech kim ishonmaydi.",ru:"Никто не верит в возвращение Волдеморта.",en:"Nobody believes Voldemort has returned."}},
+  {id:6,col:'hp',year:2009,rating:7.6,quality:'4K',size:'14 GB',hidden:false,emoji:'🧪',thumbnail:'',trailer:'',modalThumb:'',fileId:'hp_6',
+   title:{uz:"Harry Potter va Yarim Qon Shahzoda",ru:"Гарри Поттер и принц-полукровка",en:"Harry Potter and the Half-Blood Prince"},
+   desc:{uz:"Harry Dumbledordan maxfiy ta'lim oladi.",ru:"Гарри получает тайные уроки от Дамблдора.",en:"Harry receives secret lessons from Dumbledore."}},
+  {id:7,col:'hp',year:2010,rating:7.7,quality:'4K',size:'16 GB',hidden:false,emoji:'⚔️',thumbnail:'',trailer:'',modalThumb:'',fileId:'hp_7a',
+   title:{uz:"Harry Potter va O'lim Sovg'alari: 1-qism",ru:"Гарри Поттер и Дары Смерти: Часть 1",en:"Harry Potter and the Deathly Hallows: Part 1"},
+   desc:{uz:"Harry, Ron va Hermiona maktabni tark etib, gorksinlalarni izlashga otlanadi.",ru:"Гарри, Рон и Гермиона покидают школу и ищут крестражи.",en:"Harry, Ron and Hermione leave Hogwarts to hunt Horcruxes."}},
+  {id:8,col:'hp',year:2011,rating:8.1,quality:'4K',size:'17 GB',hidden:false,emoji:'🏰',thumbnail:'',trailer:'',modalThumb:'',fileId:'hp_7b',
+   title:{uz:"Harry Potter va O'lim Sovg'alari: 2-qism",ru:"Гарри Поттер и Дары Смерти: Часть 2",en:"Harry Potter and the Deathly Hallows: Part 2"},
+   desc:{uz:"Hogvarts jangida yakuniy to'qnashuv sodir bo'ladi.",ru:"В битве за Хогвартс происходит финальное противостояние.",en:"The final battle at Hogwarts."}},
+  {id:9,col:'marvel',year:2008,rating:7.9,quality:'4K',size:'14 GB',hidden:false,emoji:'🦾',thumbnail:'',trailer:'',modalThumb:'',fileId:'mcu_im1',
+   title:{uz:"Temir Odam",ru:"Железный человек",en:"Iron Man"},
+   desc:{uz:"Tony Stark asirlikda zirhli kostyum yaratadi.",ru:"Тони Старк в плену создаёт бронекостюм.",en:"Tony Stark builds an armored suit in captivity."}},
+  {id:10,col:'marvel',year:2012,rating:8.0,quality:'4K',size:'16 GB',hidden:false,emoji:'⚡',thumbnail:'',trailer:'',modalThumb:'',fileId:'mcu_av1',
+   title:{uz:"Qasoskorlar",ru:"Мстители",en:"The Avengers"},
+   desc:{uz:"Olti super qahramon Lokining bosqiniga qarshi kurashadi.",ru:"Шесть супергероев объединяются против Локи.",en:"Six superheroes unite to stop Loki's invasion."}},
+  {id:11,col:'marvel',year:2018,rating:8.4,quality:'4K',size:'18 GB',hidden:false,emoji:'💎',thumbnail:'',trailer:'',modalThumb:'',fileId:'mcu_iw',
+   title:{uz:"Qasoskorlar: Sonsizlik Urushi",ru:"Мстители: Война бесконечности",en:"Avengers: Infinity War"},
+   desc:{uz:"Thanos olti Sonsizlik Toshini to'plash uchun yo'lga chiqadi.",ru:"Танос отправляется собрать все камни Бесконечности.",en:"Thanos sets out to collect all six Infinity Stones."}},
+  {id:12,col:'marvel',year:2019,rating:8.4,quality:'4K',size:'17 GB',hidden:false,emoji:'🕰️',thumbnail:'',trailer:'',modalThumb:'',fileId:'mcu_eg',
+   title:{uz:"Qasoskorlar: Oxirat",ru:"Мстители: Финал",en:"Avengers: Endgame"},
+   desc:{uz:"Qolgan qahramonlar so'nggi kurashar.",ru:"Оставшиеся герои вступают в финальную битву.",en:"The remaining heroes make one final stand."}},
+  {id:13,col:'lotr',year:2001,rating:8.8,quality:'4K',size:'22 GB',hidden:false,emoji:'💍',thumbnail:'',trailer:'',modalThumb:'',fileId:'lotr_1',
+   title:{uz:"Uzuk Egasi: Uzuk Hamdo'stligi",ru:"Властелин колец: Братство кольца",en:"The Lord of the Rings: The Fellowship of the Ring"},
+   desc:{uz:"Frodo Baggins Qudrat Uzugini yo'q qilish uchun yo'lga chiqadi.",ru:"Фродо отправляется уничтожить Кольцо Всевластья.",en:"Frodo embarks on a journey to destroy the One Ring."}},
+  {id:14,col:'lotr',year:2002,rating:8.7,quality:'4K',size:'23 GB',hidden:false,emoji:'🏰',thumbnail:'',trailer:'',modalThumb:'',fileId:'lotr_2',
+   title:{uz:"Uzuk Egasi: Ikkita Minora",ru:"Властелин колец: Две крепости",en:"The Lord of the Rings: The Two Towers"},
+   desc:{uz:"Hamdo'stlik bo'lingan. Frodo va Sam Mordorga yaqinlashmoqda.",ru:"Братство разделилось. Фродо и Сэм приближаются к Мордору.",en:"The Fellowship is broken. Frodo and Sam draw closer to Mordor."}},
+  {id:15,col:'lotr',year:2003,rating:9.0,quality:'4K',size:'24 GB',hidden:false,emoji:'👑',thumbnail:'',trailer:'',modalThumb:'',fileId:'lotr_3',
+   title:{uz:"Uzuk Egasi: Qirolning Qaytishi",ru:"Властелин колец: Возвращение короля",en:"The Lord of the Rings: The Return of the King"},
+   desc:{uz:"Yakuniy jang. Frodo Mordorga, Aragon esa taxtga.",ru:"Финальная битва. Фродо идёт к Мордору, Арагорн — к трону.",en:"Final battle. Frodo pushes to Mordor, Aragorn reclaims the throne."}},
+  {id:16,col:'sw',year:1977,rating:8.6,quality:'4K',size:'20 GB',hidden:false,emoji:'⭐',thumbnail:'',trailer:'',modalThumb:'',fileId:'sw_4',
+   title:{uz:"Yulduz Urushlari: Yangi Umid",ru:"Звёздные войны: Новая надежда",en:"Star Wars: A New Hope"},
+   desc:{uz:"Luke Skywalker Imperiyaga qarshi Isyonchilar bilan qo'shiladi.",ru:"Люк Скайуокер присоединяется к повстанцам против Империи.",en:"Luke Skywalker joins rebels in the fight against the Empire."}},
+  {id:17,col:'sw',year:1980,rating:8.7,quality:'4K',size:'19 GB',hidden:false,emoji:'🌌',thumbnail:'',trailer:'',modalThumb:'',fileId:'sw_5',
+   title:{uz:"Yulduz Urushlari: Imperiya Zarba Beradi",ru:"Звёздные войны: Империя наносит ответный удар",en:"Star Wars: The Empire Strikes Back"},
+   desc:{uz:"Imperiya qahramonlarni quvib yuradi. Luke Jedi ustozidan ta'lim oladi.",ru:"Империя преследует героев. Люк обучается у мастера-джедая.",en:"The Empire strikes back. Luke trains with a Jedi Master."}},
+  {id:18,col:'sw',year:1983,rating:8.3,quality:'4K',size:'18 GB',hidden:false,emoji:'🐻',thumbnail:'',trailer:'',modalThumb:'',fileId:'sw_6',
+   title:{uz:"Yulduz Urushlari: Jedi Qaytadi",ru:"Звёздные войны: Возвращение джедая",en:"Star Wars: Return of the Jedi"},
+   desc:{uz:"Luke Darth Veyderga qarshi yakuniy duelga chiqadi.",ru:"Люк вступает в финальную дуэль с Дартом Вейдером.",en:"Luke faces Darth Vader in the final duel."}},
+];
+
+/* ═══════════════════════════════════════
+   CLOUD BAZA (JSONBIN)
+═══════════════════════════════════════ */
+const DB_KEY_COL = 'kk_col_backup';
+const DB_KEY_MOV = 'kk_mov_backup';
+const ADMIN_PASS = 'kino';
+
+const DB_BIN_ID  = '69b7de99b7ec241ddc722d74';
+const DB_READ_KEY = '69b7d54caa77b81da9ebd7d5';
+let ADMIN_TOKEN = null;
 
 let COLLECTIONS = [];
 let MOVIES = [];
 
-/* ═══════════════════════════════════════
-   CLOUD DAN O'QISH VA YOZISH (Bulletproof)
-═══════════════════════════════════════ */
-async function fetchCloudData() {
-  try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}/latest`, {
-      headers: { 'X-Access-Key': DB_READ_KEY }
-    });
-    
-    // Agar JSONBin xato bersa, uni yashirmaymiz, yuzingga aytamiz
-    if (!res.ok) {
-      const errData = await res.json();
-      alert("⚠️ O'qishda xatolik: Bin yopiq yoki Read kalit xato! Sababi: " + (errData.message || res.status));
-      throw new Error('Network error');
-    }
-    
+async function fetchCloudData(){
+  try{
+    // Bin public — kalit shart emas
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}/latest`);
+    if(!res.ok) throw new Error('Read error: ' + res.status);
     const data = await res.json();
     COLLECTIONS = data.record.collections || [];
-    MOVIES = data.record.movies || [];
-
-    // Oflayn holat uchun brauzerda zaxira nusxa
-    localStorage.setItem('kk_col_backup', JSON.stringify(COLLECTIONS));
-    localStorage.setItem('kk_mov_backup', JSON.stringify(MOVIES));
-  } catch (err) {
-    console.error("Cloud xatosi:", err);
-    // Internet yo'q bo'lsa yoki xato qilsa eskisini ko'rsatadi
-    COLLECTIONS = JSON.parse(localStorage.getItem('kk_col_backup') || '[]');
-    MOVIES = JSON.parse(localStorage.getItem('kk_mov_backup') || '[]');
+    MOVIES      = data.record.movies      || [];
+    localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
+    localStorage.setItem(DB_KEY_MOV, JSON.stringify(MOVIES));
+  }catch(err){
+    console.warn('Cloud o\'qish xatosi:', err);
+    COLLECTIONS = JSON.parse(localStorage.getItem(DB_KEY_COL) || '[]');
+    MOVIES      = JSON.parse(localStorage.getItem(DB_KEY_MOV) || '[]');
+    if(!COLLECTIONS.length) COLLECTIONS = JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS));
+    if(!MOVIES.length)      MOVIES      = JSON.parse(JSON.stringify(DEFAULT_MOVIES));
   }
-  renderCollections();
 }
 
-async function syncToCloud() {
-  showToast("Bulutga saqlanmoqda... ⏳");
-  try {
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
+async function syncToCloud(){
+  if(!ADMIN_TOKEN){ showToast('Admin kirish kerak!'); return; }
+  showToast('Saqlanmoqda... ⏳');
+  try{
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}`,{
+      method:'PUT',
+      headers:{
+        'Content-Type':'application/json',
         'X-Master-Key': ADMIN_TOKEN,
-        'X-Bin-Versioning': 'false' // DIQQAT: Limit to'lmasligi uchun asosiy himoya!
+        'X-Bin-Versioning':'false'
       },
-      body: JSON.stringify({ collections: COLLECTIONS, movies: MOVIES })
+      body: JSON.stringify({collections: COLLECTIONS, movies: MOVIES})
     });
-    
-    // Agar saqlash xato bo'lsa darhol alert beradi
-    if (!res.ok) {
-      const errData = await res.json();
-      alert("⚠️ Saqlashda xato: " + (errData.message || res.status));
-      throw new Error();
-    }
-    
-    showToast("Barcha qurilmalarda sinxronlandi ✅");
-  } catch (e) {
-    showToast("Saqlashda xatolik yuz berdi ❌");
+    if(!res.ok) throw new Error('Write error: ' + res.status);
+    localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
+    localStorage.setItem(DB_KEY_MOV, JSON.stringify(MOVIES));
+    showToast('Saqlandi ✅');
+  }catch(e){
+    showToast('Saqlashda xato ❌');
+    console.warn('Cloud yozish xatosi:', e);
   }
+}
+
+function loadCollections(){ return COLLECTIONS; }
+function loadMovies(){ return MOVIES; }
+
+function saveCollections(data){
+  COLLECTIONS = data;
+  syncToCloud();
+}
+function saveMovies(data){
+  MOVIES = data;
+  syncToCloud();
+}
+
+async function syncFromCloud(){
+  await fetchCloudData();
 }
 
 /* ═══════════════════════════════════════
-   STATE (HOLAT)
+   THEME
+═══════════════════════════════════════ */
+const DB_KEY_THEME = 'kk_theme';
+let isLight = localStorage.getItem(DB_KEY_THEME) === 'light';
+
+function applyTheme(){
+  if(isLight){ document.documentElement.classList.add('light'); }
+  else { document.documentElement.classList.remove('light'); }
+  const icon = isLight ? '☀️' : '🌙';
+  document.querySelectorAll('.theme-btn').forEach(el => el.textContent = icon);
+  if(tg){
+    tg.setHeaderColor(isLight ? '#F2F2F2' : '#141414');
+    tg.setBackgroundColor(isLight ? '#F2F2F2' : '#141414');
+  }
+}
+
+function toggleTheme(){
+  isLight = !isLight;
+  localStorage.setItem(DB_KEY_THEME, isLight ? 'light' : 'dark');
+  applyTheme();
+}
+
+applyTheme();
+
+// COLLECTIONS yuqorida e'lon qilindi
+// MOVIES yuqorida e'lon qilindi
+
+/* ═══════════════════════════════════════
+   STATE
 ═══════════════════════════════════════ */
 let lang='uz', curCol=null, sortIdx=0, colQ='', movQ='';
 let logoTapCount=0, logoTapTimer=null;
@@ -601,6 +711,7 @@ const FLAGS={uz:'🇺🇿',ru:'🇷🇺',en:'🇬🇧'};
 const CODES={uz:'UZ',ru:'RU',en:'EN'};
 const SORTS=['year','rating','year_asc'];
 const BG={hp:'#1A0000',marvel:'#1C0000',lotr:'#071205',sw:'#050B14'};
+const DB_KEY_LANG='kk_lang_v1';
 
 /* ═══════════════════════════════════════
    NAVIGATION
@@ -613,11 +724,13 @@ function showScreen(id){
 
 function selectLang(l){
   lang=l;
+  localStorage.setItem(DB_KEY_LANG, l);
   document.getElementById('cur-flag').textContent=FLAGS[l];
   document.getElementById('cur-code').textContent=CODES[l];
   applyLang();
   showScreen('screen-collections');
   renderCollections();
+  handleDeepLink();
 }
 
 function goToLang(){showScreen('screen-lang')}
@@ -634,13 +747,14 @@ function applyLang(){
 }
 
 function goBack(){
-  curCol=null;movQ='';
+  curCol=null; movQ='';
   document.getElementById('mov-srch').value='';
   showScreen('screen-collections');
+  renderCollections();
 }
 
 /* ═══════════════════════════════════════
-   ADMIN AUTH (PAROL = MASTER KEY)
+   LOGO TAP → ADMIN
 ═══════════════════════════════════════ */
 function logoTap(){
   logoTapCount++;
@@ -654,49 +768,46 @@ function logoTap(){
   }
 }
 
-async function adminLogin() {
+/* ═══════════════════════════════════════
+   ADMIN AUTH
+═══════════════════════════════════════ */
+async function adminLogin(){
   const inputKey = document.getElementById('a-pass').value.trim();
   const btn = document.querySelector('.a-btn');
   const err = document.getElementById('a-err');
-
   if(!inputKey) return;
-
-  btn.textContent = "Tekshirilmoqda...";
+  btn.textContent = 'Tekshirilmoqda...';
   err.style.display = 'none';
-
-  try {
-    // Parol sifatida kiritilgan Master Key ni tekshiramiz
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}/latest`, {
-      headers: { 'X-Master-Key': inputKey }
+  try{
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}/latest`,{
+      headers:{'X-Master-Key': inputKey}
     });
-
-    if (res.ok) {
-      ADMIN_TOKEN = inputKey; // Ruxsat berildi! Kod uni vaqtincha eslab qoladi.
+    if(res.ok){
+      ADMIN_TOKEN = inputKey;
       document.getElementById('a-pass').value = '';
       showScreen('screen-admin');
       switchAdminTab('collections');
-    } else {
-      throw new Error();
-    }
-  } catch(e) {
+    } else { throw new Error(); }
+  }catch(e){
     err.textContent = "Maxfiy kalit noto'g'ri!";
     err.style.display = 'block';
   }
-  btn.textContent = "Kirish";
+  btn.textContent = 'Kirish';
 }
 
 function adminLogout(){
-  ADMIN_TOKEN = null; // Chiqqanda kodni o'chiramiz (xavfsizlik uchun)
+  ADMIN_TOKEN = null;
   showScreen('screen-collections');
 }
 
 /* ═══════════════════════════════════════
-   RENDER UI
+   RENDER COLLECTIONS
 ═══════════════════════════════════════ */
 function renderCollections(){
   const t=T[lang];
   const q=colQ.toLowerCase();
-  const list=COLLECTIONS.filter(c=>!q||c.name[lang].toLowerCase().includes(q));
+  COLLECTIONS=loadCollections();
+  const list=COLLECTIONS.filter(c=>!c.hidden&&(!q||c.name[lang].toLowerCase().includes(q)));
   const grid=document.getElementById('col-grid');
 
   if(!list.length){
@@ -708,19 +819,26 @@ function renderCollections(){
     const cnt=MOVIES.filter(m=>m.col===c.id).length;
     const bg = BG[c.id]||'#1A1A1A';
     const bannerContent = `<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:56px">${c.emoji}</div>` +
-      (c.thumbnail ? `<img src="${c.thumbnail}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+      (c.thumbnail ? `<img src="${c.thumbnail}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
     return `<div class="col-card" onclick="openCollection('${c.id}')">
       <div class="col-banner" style="background-color:${bg}">
         ${bannerContent}
         <div class="col-banner-overlay">
           <div class="col-banner-title">${esc(c.name[lang])}</div>
-          <div class="col-banner-emoji">${c.emoji}</div>
         </div>
       </div>
       <div class="col-body">
-        <div class="col-meta">
+        <div class="col-meta" style="flex:1;min-width:0">
           <div class="col-count">${esc(c.sub[lang])} · <strong>${t.count(cnt)}</strong></div>
           <div class="col-years">${c.years[0]} – ${c.years[1]}</div>
+          ${(()=>{
+            const watchedCount = loadWatched().filter(id => MOVIES.find(m=>m.col===c.id&&m.id===id)).length;
+            const totalViews = getCollectionViews(c.id);
+            if(!cnt) return '';
+            const pct = Math.round(watchedCount/cnt*100);
+            return `<div class="col-progress"><div class="col-progress-fill" style="width:${pct}%"></div></div>
+                    <div class="col-progress-lbl">👁 ${watchedCount}/${cnt} · ${totalViews} ta qaralgan</div>`;
+          })()}
         </div>
         <div class="col-arrow">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
@@ -730,6 +848,9 @@ function renderCollections(){
   }).join('');
 }
 
+/* ═══════════════════════════════════════
+   RENDER MOVIES
+═══════════════════════════════════════ */
 function openCollection(id){
   curCol=id; sortIdx=0; movQ='';
   document.getElementById('mov-srch').value='';
@@ -744,8 +865,9 @@ function openCollection(id){
 function renderMovies(){
   const t=T[lang];
   const q=movQ.toLowerCase();
+  MOVIES=loadMovies();
   const grid=document.getElementById('mov-grid');
-  let list=MOVIES.filter(m=>m.col===curCol&&(!q||m.title[lang].toLowerCase().includes(q)));
+  let list=MOVIES.filter(m=>!m.hidden&&m.col===curCol&&(!q||m.title[lang].toLowerCase().includes(q)));
   const s=SORTS[sortIdx];
   if(s==='year')list.sort((a,b)=>b.year-a.year);
   else if(s==='year_asc')list.sort((a,b)=>a.year-b.year);
@@ -759,18 +881,22 @@ function renderMovies(){
   grid.innerHTML=list.map(m=>{
     const bg=BG[m.col]||'#1A1A1A';
     const posterContent = `<div class="mov-poster-emoji">${m.emoji}</div>` +
-      (m.thumbnail ? `<img src="${m.thumbnail}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+      (m.thumbnail ? `<img src="${m.thumbnail}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
     return `<div class="mov-card" onclick="openModal(${m.id})">
       <div class="mov-poster" style="background-color:${bg}">${posterContent}</div>
       <span class="q-badge">${esc(m.quality)}</span>
       <div class="mov-body">
         <div class="mov-title">${esc(m.title[lang])}</div>
-        <div class="mov-meta"><span class="mov-year">${m.year}</span><span class="mov-rating">★ ${m.rating}</span></div>
-        <div class="mov-size">📦 ${esc(m.size)}</div>
-        <button class="shr-btn" onclick="shareMovie(event,${m.id})">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
-          ${t.share}
-        </button>
+        <div class="mov-meta"><span class="mov-year">${m.year}</span><span class="mov-rating">★ ${m.rating}<span class="views-badge">· 👁 ${getViews(m.id)}</span></span></div>
+        <div class="mov-btn-wrap" style="display:flex;gap:8px">
+          <button class="like-btn${isLiked(m.id)?' liked':''}" onclick="toggleLike(event,${m.id})" title="Like">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="${isLiked(m.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+          <button class="shr-btn" style="flex:1" onclick="openModal(${m.id})">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            ${t.watch}
+          </button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -783,21 +909,29 @@ function toggleSort(){
   renderMovies();
 }
 
-document.getElementById('col-srch').addEventListener('input',e=>{colQ=e.target.value;renderCollections()});
+document.getElementById('col-srch').addEventListener('input',e=>{
+  colQ=e.target.value;
+  globalSearch(e.target.value);
+  if(!e.target.value) renderCollections();
+});
 document.getElementById('mov-srch').addEventListener('input',e=>{movQ=e.target.value;renderMovies()});
 
 /* ═══════════════════════════════════════
    MODAL
 ═══════════════════════════════════════ */
 function openModal(id){
+  MOVIES=loadMovies();
   const m=MOVIES.find(x=>x.id===id);
   if(!m)return;
   const t=T[lang];
   const col=COLLECTIONS.find(c=>c.id===m.col);
   const bg=BG[m.col]||'#1A1A1A';
 
+  // Poster
+  // Modal uchun alohida rasm (modalThumb), bo'lmasa oddiy thumbnail
+  const modalImg = m.modalThumb || m.thumbnail;
   const posterInner = `<div class="modal-poster-emoji">${m.emoji}</div>` +
-    (m.thumbnail ? `<img src="${m.thumbnail}" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+    (modalImg ? `<img src="${modalImg}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
 
   document.getElementById('modal-poster').innerHTML=`
     <div class="modal-poster-wrap" style="background:${bg}">
@@ -805,6 +939,7 @@ function openModal(id){
       <div class="modal-poster-gradient"></div>
     </div>`;
 
+  // Body
   document.getElementById('modal-body').innerHTML=`
     <div class="modal-top">
       <div>
@@ -817,13 +952,23 @@ function openModal(id){
       <div class="modal-stat">⭐ <strong>${m.rating}</strong></div>
       <div class="modal-stat">📅 <strong>${m.year}</strong></div>
       <div class="modal-stat">💿 <strong>${esc(m.quality)}</strong></div>
-      <div class="modal-stat">📦 <strong>${esc(m.size)}</strong></div>
+      <div class="modal-stat">👁 <strong>${getViews(m.id)}</strong></div>
     </div>
     <div class="modal-desc">${esc(m.desc[lang])}</div>
     <div class="modal-acts">
       <button class="btn-p" onclick="downloadMovie(${m.id})">${t.download}</button>
-      <button class="btn-s" onclick="shareMovieModal(${m.id})">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+      ${m.trailer ? `<a class="btn-trailer" href="${esc(m.trailer)}" target="_blank" onclick="event.stopPropagation()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        Trailer
+      </a>` : ''}
+      <button class="btn-s" onclick="toggleWatchedModal(${m.id})" title="${lang==='ru'?'Я смотрел':lang==='en'?'Watched':'Ko\'rganman'}" style="${isWatched(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}">
+        ${isWatched(m.id)
+          ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>`
+          : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
+        }
+      </button>
+      <button class="btn-s" onclick="toggleLikeModal(${m.id})" style="${isLiked(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="${isLiked(m.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
       </button>
     </div>`;
 
@@ -834,18 +979,41 @@ function closeModal(){document.getElementById('modal').classList.remove('open')}
 function closeModalOutside(e){if(e.target===document.getElementById('modal'))closeModal()}
 
 /* ═══════════════════════════════════════
-   ACTIONS (DOWNLOAD & SHARE)
+   ACTIONS
 ═══════════════════════════════════════ */
 function downloadMovie(id){
-  const m=MOVIES.find(x=>x.id===id);
+  const m=loadMovies().find(x=>x.id===id);
   closeModal();
-  if(tg)tg.sendData(JSON.stringify({action:'download',movieId:id,fileId:m.fileId}));
-  else showToast(T[lang].download+'...');
+
+  // fileId → bot kalit (masalan "hp_1" → "hp1")
+  const FILE_TO_KEY = {
+    'hp_1':'hp1','hp_2':'hp2','hp_3':'hp3','hp_4':'hp4',
+    'hp_5':'hp5','hp_6':'hp6','hp_7a':'hp7','hp_7b':'hp8',
+    'mcu_im1':'mcu1','mcu_av1':'mcu2','mcu_iw':'mcu3','mcu_eg':'mcu4',
+    'lotr_1':'lotr1','lotr_2':'lotr2','lotr_3':'lotr3',
+    'sw_4':'sw1','sw_5':'sw2','sw_6':'sw3',
+  };
+
+  const movieKey = FILE_TO_KEY[m.fileId];
+  if(!movieKey){ showToast('Film topilmadi ❌'); return; }
+
+  // Til (uz/ru/en)
+  const curLang = lang || 'uz';
+
+  // Botga /start hp1_uz komandasini yuborish
+  const startParam = movieKey + '_' + curLang;
+
+  if(tg){
+    tg.openTelegramLink('https://t.me/kinokolleksiyabot?start=' + startParam);
+    tg.close();
+  } else {
+    showToast(T[lang].download+'...');
+  }
 }
 
 function shareMovie(event,id){
   event.stopPropagation();
-  const m=MOVIES.find(x=>x.id===id);
+  const m=loadMovies().find(x=>x.id===id);
   if(tg?.switchInlineQuery)tg.switchInlineQuery(`film_${id}`,['users','groups']);
   else showToast(T[lang].toast_share(m.title[lang]));
 }
@@ -859,27 +1027,33 @@ function showToast(msg){
 }
 
 /* ═══════════════════════════════════════
-   ADMIN TABS & RENDER LISTS
+   ADMIN — TABS
 ═══════════════════════════════════════ */
 function switchAdminTab(tab){
   adminTab=tab;
   document.getElementById('tab-col').classList.toggle('active',tab==='collections');
   document.getElementById('tab-mov').classList.toggle('active',tab==='movies');
+  document.getElementById('tab-sync').classList.toggle('active',tab==='sync');
   if(tab==='collections')renderAdminCollections();
-  else renderAdminMovies();
+  else if(tab==='movies')renderAdminMovies();
+  else if(tab==='sync')renderAdminSync();
 }
 
+/* ═══════════════════════════════════════
+   ADMIN — COLLECTIONS LIST
+═══════════════════════════════════════ */
 function renderAdminCollections(){
+  COLLECTIONS=loadCollections();
   const ct=document.getElementById('admin-content');
   ct.innerHTML=`<button class="add-btn" onclick="openColForm(null)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Yangi kolleksiya qo'shish
   </button>`+COLLECTIONS.map((c,i)=>{
-    const cnt=MOVIES.filter(m=>m.col===c.id).length;
+    const cnt=loadMovies().filter(m=>m.col===c.id).length;
     const thumb=c.thumbnail
       ?`<div class="db-thumb"><img src="${esc(c.thumbnail)}" onerror="this.parentElement.textContent='${c.emoji}'"></div>`
       :`<div class="db-thumb" style="font-size:22px">${c.emoji}</div>`;
-    return `<div class="db-card" style="animation-delay:${i*0.04}s">
+    return `<div class="db-card${c.hidden?' is-hidden':''}" style="animation-delay:${i*0.04}s">
       <div class="db-card-hdr">
         ${thumb}
         <div class="db-info">
@@ -888,6 +1062,7 @@ function renderAdminCollections(){
         </div>
         <div class="db-actions">
           <div class="db-edit" onclick="openColForm('${c.id}')">✏️ Tahrir</div>
+          <div class="db-hide" onclick="toggleHideCol('${c.id}')">${c.hidden?'👁 Ko\'rsat':'🙈 Yashir'}</div>
           <div class="db-del" onclick="deleteCollection('${c.id}')">🗑</div>
         </div>
       </div>
@@ -895,7 +1070,41 @@ function renderAdminCollections(){
   }).join('');
 }
 
+function deleteCollection(id){
+  if(!confirm('Bu kolleksiyani o\'chirishni tasdiqlaysizmi?'))return;
+  let cols=loadCollections().filter(c=>c.id!==id);
+  let movs=loadMovies().filter(m=>m.col!==id);
+  saveCollections(cols);saveMovies(movs);
+  COLLECTIONS=cols;MOVIES=movs;
+  renderAdminCollections();
+  showToast('Kolleksiya o\'chirildi');
+}
+
+function toggleHideCol(id){
+  const cols=loadCollections();
+  const idx=cols.findIndex(c=>c.id===id);
+  if(idx<0)return;
+  cols[idx].hidden=!cols[idx].hidden;
+  saveCollections(cols);COLLECTIONS=cols;
+  renderAdminCollections();
+  showToast(cols[idx].hidden?'Kolleksiya yashirildi 🙈':'Kolleksiya ko\'rsatildi 👁');
+}
+
+function toggleHideMov(id){
+  const movs=loadMovies();
+  const idx=movs.findIndex(m=>m.id===id);
+  if(idx<0)return;
+  movs[idx].hidden=!movs[idx].hidden;
+  saveMovies(movs);MOVIES=movs;
+  renderAdminMovies();
+  showToast(movs[idx].hidden?'Film yashirildi 🙈':'Film ko\'rsatildi 👁');
+}
+
+/* ═══════════════════════════════════════
+   ADMIN — MOVIES LIST
+═══════════════════════════════════════ */
 function renderAdminMovies(){
+  COLLECTIONS=loadCollections();MOVIES=loadMovies();
   const ct=document.getElementById('admin-content');
   if(!adminColFilter&&COLLECTIONS.length)adminColFilter=COLLECTIONS[0].id;
 
@@ -911,15 +1120,16 @@ function renderAdminMovies(){
     const thumb=m.thumbnail
       ?`<div class="db-thumb"><img src="${esc(m.thumbnail)}" onerror="this.parentElement.textContent='${m.emoji}'"></div>`
       :`<div class="db-thumb" style="font-size:22px">${m.emoji}</div>`;
-    return `<div class="db-card" style="animation-delay:${i*0.03}s">
+    return `<div class="db-card${m.hidden?' is-hidden':''}" style="animation-delay:${i*0.03}s">
       <div class="db-card-hdr">
         ${thumb}
         <div class="db-info">
           <div class="db-name">${esc(m.title.uz)}</div>
-          <div class="db-meta">${m.year} · ${esc(m.quality)} · ${esc(m.size)} · ★${m.rating}</div>
+          <div class="db-meta">${m.year} · ${esc(m.quality)} · ★${m.rating}</div>
         </div>
         <div class="db-actions">
           <div class="db-edit" onclick="openMovForm(${m.id})">✏️</div>
+          <div class="db-hide" onclick="toggleHideMov(${m.id})">${m.hidden?'👁':'🙈'}</div>
           <div class="db-del" onclick="deleteMovie(${m.id})">🗑</div>
         </div>
       </div>
@@ -929,27 +1139,20 @@ function renderAdminMovies(){
 
 function setAdminColFilter(id){adminColFilter=id;renderAdminMovies()}
 
-/* ═══════════════════════════════════════
-   ADMIN — C.R.U.D ACTIONS + CLOUD SYNC
-═══════════════════════════════════════ */
-function deleteCollection(id){
-  if(!confirm('Bu kolleksiyani o\'chirishni tasdiqlaysizmi?'))return;
-  COLLECTIONS = COLLECTIONS.filter(c=>c.id!==id);
-  MOVIES = MOVIES.filter(m=>m.col!==id);
-  renderAdminCollections();
-  syncToCloud();
-}
-
 function deleteMovie(id){
   if(!confirm('Bu filmni o\'chirishni tasdiqlaysizmi?'))return;
-  MOVIES = MOVIES.filter(m=>m.id!==id);
-  renderAdminMovies();
-  syncToCloud();
+  const movs=loadMovies().filter(m=>m.id!==id);
+  saveMovies(movs);MOVIES=movs;
+  renderAdminMovies();showToast('Film o\'chirildi');
 }
 
+/* ═══════════════════════════════════════
+   ADMIN — COLLECTION FORM
+═══════════════════════════════════════ */
 function openColForm(id){
   editingColId=id;
-  const c=id?COLLECTIONS.find(x=>x.id===id):{id:'',emoji:'🎬',thumbnail:'',name:{uz:'',ru:'',en:''},sub:{uz:'',ru:'',en:''},years:[2000,2024]};
+  const cols=loadCollections();
+  const c=id?cols.find(x=>x.id===id):{id:'',emoji:'🎬',thumbnail:'',name:{uz:'',ru:'',en:''},sub:{uz:'',ru:'',en:''},years:[2000,2024]};
   document.getElementById('form-title').textContent=id?'Kolleksiyani tahrirlash':'Yangi kolleksiya';
   document.getElementById('form-body').innerHTML=`
     <div class="f-group">
@@ -972,13 +1175,31 @@ function openColForm(id){
       </div>
     </div>
     <div class="f-section">Nomi (3 tilda)</div>
-    <div class="f-group"><label class="f-label">🇺🇿 O'zbek</label><input class="a-input" id="f-col-nuz" value="${esc(c.name.uz)}"></div>
-    <div class="f-group"><label class="f-label">🇷🇺 Rus</label><input class="a-input" id="f-col-nru" value="${esc(c.name.ru)}"></div>
-    <div class="f-group"><label class="f-label">🇬🇧 Ingliz</label><input class="a-input" id="f-col-nen" value="${esc(c.name.en)}"></div>
+    <div class="f-group">
+      <label class="f-label">🇺🇿 O'zbek</label>
+      <input class="a-input" id="f-col-nuz" value="${esc(c.name.uz)}" placeholder="Harry Potter">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇷🇺 Rus</label>
+      <input class="a-input" id="f-col-nru" value="${esc(c.name.ru)}" placeholder="Гарри Поттер">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇬🇧 Ingliz</label>
+      <input class="a-input" id="f-col-nen" value="${esc(c.name.en)}" placeholder="Harry Potter">
+    </div>
     <div class="f-section">Tavsif (3 tilda)</div>
-    <div class="f-group"><label class="f-label">🇺🇿 O'zbek</label><input class="a-input" id="f-col-suz" value="${esc(c.sub.uz)}"></div>
-    <div class="f-group"><label class="f-label">🇷🇺 Rus</label><input class="a-input" id="f-col-sru" value="${esc(c.sub.ru)}"></div>
-    <div class="f-group"><label class="f-label">🇬🇧 Ingliz</label><input class="a-input" id="f-col-sen" value="${esc(c.sub.en)}"></div>
+    <div class="f-group">
+      <label class="f-label">🇺🇿 O'zbek</label>
+      <input class="a-input" id="f-col-suz" value="${esc(c.sub.uz)}" placeholder="Sehrgar dunyosi">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇷🇺 Rus</label>
+      <input class="a-input" id="f-col-sru" value="${esc(c.sub.ru)}" placeholder="Мир волшебников">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇬🇧 Ingliz</label>
+      <input class="a-input" id="f-col-sen" value="${esc(c.sub.en)}" placeholder="Wizarding World">
+    </div>
     <button class="f-save" onclick="saveColForm()">💾 Saqlash</button>`;
   openForm();
 }
@@ -986,49 +1207,119 @@ function openColForm(id){
 function saveColForm(){
   const cid=document.getElementById('f-col-id').value.trim().replace(/\s/g,'_');
   if(!cid)return showToast('ID kiritilmagan!');
+  const cols=loadCollections();
   const entry={
     id:cid,
     emoji:document.getElementById('f-col-emoji').value.trim()||'🎬',
     thumbnail:document.getElementById('f-col-thumb').value.trim(),
-    years:[parseInt(document.getElementById('f-col-y1').value)||2000, parseInt(document.getElementById('f-col-y2').value)||2024],
-    name:{ uz:document.getElementById('f-col-nuz').value.trim(), ru:document.getElementById('f-col-nru').value.trim(), en:document.getElementById('f-col-nen').value.trim()},
-    sub:{ uz:document.getElementById('f-col-suz').value.trim(), ru:document.getElementById('f-col-sru').value.trim(), en:document.getElementById('f-col-sen').value.trim()},
+    years:[
+      parseInt(document.getElementById('f-col-y1').value)||2000,
+      parseInt(document.getElementById('f-col-y2').value)||2024
+    ],
+    hidden: editingColId ? (cols.find(c=>c.id===cid)?.hidden||false) : false,
+    name:{
+      uz:document.getElementById('f-col-nuz').value.trim(),
+      ru:document.getElementById('f-col-nru').value.trim(),
+      en:document.getElementById('f-col-nen').value.trim(),
+    },
+    sub:{
+      uz:document.getElementById('f-col-suz').value.trim(),
+      ru:document.getElementById('f-col-sru').value.trim(),
+      en:document.getElementById('f-col-sen').value.trim(),
+    },
   };
-  const idx=COLLECTIONS.findIndex(c=>c.id===cid);
-  if(idx>=0)COLLECTIONS[idx]=entry; else COLLECTIONS.push(entry);
-  closeForm(); 
-  renderAdminCollections();
-  syncToCloud();
+  const idx=cols.findIndex(c=>c.id===cid);
+  if(idx>=0)cols[idx]=entry;else cols.push(entry);
+  saveCollections(cols);COLLECTIONS=cols;
+  closeForm();renderAdminCollections();
+  showToast('Kolleksiya saqlandi ✅');
 }
 
+/* ═══════════════════════════════════════
+   ADMIN — MOVIE FORM
+═══════════════════════════════════════ */
 function openMovForm(id){
   editingMovId=id;
-  const m=id?MOVIES.find(x=>x.id===id):{
-    id:null,col:adminColFilter||COLLECTIONS[0]?.id||'',year:2024,rating:7.0,
-    quality:'1080p',size:'4 GB',emoji:'🎬',thumbnail:'',fileId:'',
+  const movs=loadMovies();
+  const cols=loadCollections();
+  const m=id?movs.find(x=>x.id===id):{
+    id:null,col:adminColFilter||cols[0]?.id||'',year:2024,rating:7.0,
+    quality:'1080p',size:'4 GB',hidden:false,emoji:'🎬',thumbnail:'',trailer:'',modalThumb:'',fileId:'',
     title:{uz:'',ru:'',en:''},desc:{uz:'',ru:'',en:''}
   };
-  const colOptions=COLLECTIONS.map(c=>`<option value="${c.id}"${m.col===c.id?' selected':''}>${c.name.uz}</option>`).join('');
+  const colOptions=cols.map(c=>`<option value="${c.id}"${m.col===c.id?' selected':''}>${c.name.uz}</option>`).join('');
   document.getElementById('form-title').textContent=id?'Filmni tahrirlash':'Yangi film';
   document.getElementById('form-body').innerHTML=`
-    <div class="f-group"><label class="f-label">Kolleksiya</label><select class="a-input" id="f-mov-col">${colOptions}</select></div>
-    <div class="f-group"><label class="f-label">Emoji</label><input class="a-input" id="f-mov-emoji" value="${m.emoji}" style="font-size:20px"></div>
-    <div class="f-group"><label class="f-label">Thumbnail URL (ixtiyoriy, 2:3 rasm)</label><input class="a-input" id="f-mov-thumb" value="${esc(m.thumbnail)}"></div>
-    <div class="f-group"><label class="f-label">Telegram File ID</label><input class="a-input" id="f-mov-fid" value="${esc(m.fileId)}"></div>
-    <div class="f-row3">
-      <div class="f-group" style="margin:0"><label class="f-label">Yil</label><input class="a-input" id="f-mov-year" type="number" value="${m.year}"></div>
-      <div class="f-group" style="margin:0"><label class="f-label">Reyting</label><input class="a-input" id="f-mov-rating" type="number" step="0.1" value="${m.rating}"></div>
-      <div class="f-group" style="margin:0"><label class="f-label">Sifat</label><select class="a-input" id="f-mov-quality">${['720p','1080p','4K','8K'].map(q=>`<option${m.quality===q?' selected':''}>${q}</option>`).join('')}</select></div>
+    <div class="f-group">
+      <label class="f-label">Kolleksiya</label>
+      <select class="a-input" id="f-mov-col">${colOptions}</select>
     </div>
-    <div class="f-group" style="margin-top:14px"><label class="f-label">Fayl hajmi</label><input class="a-input" id="f-mov-size" value="${esc(m.size)}"></div>
+    <div class="f-group">
+      <label class="f-label">Emoji</label>
+      <input class="a-input" id="f-mov-emoji" value="${m.emoji}" style="font-size:20px">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Trailer URL (YouTube yoki boshqa link)</label>
+      <input class="a-input" id="f-mov-trailer" value="${esc(m.trailer||'')}" placeholder="https://youtube.com/watch?v=...">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Poster URL (2:3 — film kartochkasi uchun)</label>
+      <input class="a-input" id="f-mov-thumb" value="${esc(m.thumbnail)}" placeholder="https://...">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Modal rasm URL (16:9 — batafsil oyna uchun)</label>
+      <input class="a-input" id="f-mov-modal-thumb" value="${esc(m.modalThumb||'')}" placeholder="https://...">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Telegram File ID</label>
+      <input class="a-input" id="f-mov-fid" value="${esc(m.fileId)}" placeholder="BQACAgIAAxkB...">
+    </div>
+    <div class="f-row3">
+      <div class="f-group" style="margin:0">
+        <label class="f-label">Yil</label>
+        <input class="a-input" id="f-mov-year" type="number" value="${m.year}" placeholder="2024">
+      </div>
+      <div class="f-group" style="margin:0">
+        <label class="f-label">Reyting</label>
+        <input class="a-input" id="f-mov-rating" type="number" step="0.1" value="${m.rating}" placeholder="7.5">
+      </div>
+      <div class="f-group" style="margin:0">
+        <label class="f-label">Sifat</label>
+        <select class="a-input" id="f-mov-quality">
+          ${['720p','1080p','4K','8K'].map(q=>`<option${m.quality===q?' selected':''}>${q}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="f-group" style="margin-top:14px">
+      <label class="f-label">Fayl hajmi</label>
+      <input class="a-input" id="f-mov-size" value="${esc(m.size)}" placeholder="4.2 GB">
+    </div>
     <div class="f-section">Nomi (3 tilda)</div>
-    <div class="f-group"><label class="f-label">🇺🇿 O'zbek</label><input class="a-input" id="f-mov-tuz" value="${esc(m.title.uz)}"></div>
-    <div class="f-group"><label class="f-label">🇷🇺 Rus</label><input class="a-input" id="f-mov-tru" value="${esc(m.title.ru)}"></div>
-    <div class="f-group"><label class="f-label">🇬🇧 Ingliz</label><input class="a-input" id="f-mov-ten" value="${esc(m.title.en)}"></div>
+    <div class="f-group">
+      <label class="f-label">🇺🇿 O'zbek</label>
+      <input class="a-input" id="f-mov-tuz" value="${esc(m.title.uz)}" placeholder="Film nomi">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇷🇺 Rus</label>
+      <input class="a-input" id="f-mov-tru" value="${esc(m.title.ru)}" placeholder="Название фильма">
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇬🇧 Ingliz</label>
+      <input class="a-input" id="f-mov-ten" value="${esc(m.title.en)}" placeholder="Movie title">
+    </div>
     <div class="f-section">Tavsif (3 tilda)</div>
-    <div class="f-group"><label class="f-label">🇺🇿 O'zbek</label><textarea class="a-input" id="f-mov-duz" rows="2">${esc(m.desc.uz)}</textarea></div>
-    <div class="f-group"><label class="f-label">🇷🇺 Rus</label><textarea class="a-input" id="f-mov-dru" rows="2">${esc(m.desc.ru)}</textarea></div>
-    <div class="f-group"><label class="f-label">🇬🇧 Ingliz</label><textarea class="a-input" id="f-mov-den" rows="2">${esc(m.desc.en)}</textarea></div>
+    <div class="f-group">
+      <label class="f-label">🇺🇿 O'zbek</label>
+      <textarea class="a-input" id="f-mov-duz" rows="2" placeholder="Qisqa tavsif...">${esc(m.desc.uz)}</textarea>
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇷🇺 Rus</label>
+      <textarea class="a-input" id="f-mov-dru" rows="2" placeholder="Краткое описание...">${esc(m.desc.ru)}</textarea>
+    </div>
+    <div class="f-group">
+      <label class="f-label">🇬🇧 Ingliz</label>
+      <textarea class="a-input" id="f-mov-den" rows="2" placeholder="Short description...">${esc(m.desc.en)}</textarea>
+    </div>
     <button class="f-save" onclick="saveMovForm()">💾 Saqlash</button>`;
   openForm();
 }
@@ -1036,35 +1327,346 @@ function openMovForm(id){
 function saveMovForm(){
   const tuzVal=document.getElementById('f-mov-tuz').value.trim();
   if(!tuzVal)return showToast('O\'zbek nomi kiritilmagan!');
-  const newId=editingMovId||(MOVIES.length?Math.max(...MOVIES.map(m=>m.id))+1:1);
+  const movs=loadMovies();
+  const newId=editingMovId||(movs.length?Math.max(...movs.map(m=>m.id))+1:1);
   const entry={
-    id:newId, col:document.getElementById('f-mov-col').value, emoji:document.getElementById('f-mov-emoji').value.trim()||'🎬',
-    thumbnail:document.getElementById('f-mov-thumb').value.trim(), fileId:document.getElementById('f-mov-fid').value.trim(),
-    year:parseInt(document.getElementById('f-mov-year').value)||2024, rating:parseFloat(document.getElementById('f-mov-rating').value)||7.0,
-    quality:document.getElementById('f-mov-quality').value, size:document.getElementById('f-mov-size').value.trim(),
-    title:{ uz:tuzVal, ru:document.getElementById('f-mov-tru').value.trim(), en:document.getElementById('f-mov-ten').value.trim() },
-    desc:{ uz:document.getElementById('f-mov-duz').value.trim(), ru:document.getElementById('f-mov-dru').value.trim(), en:document.getElementById('f-mov-den').value.trim() },
+    id:newId,
+    col:document.getElementById('f-mov-col').value,
+    emoji:document.getElementById('f-mov-emoji').value.trim()||'🎬',
+    trailer:document.getElementById('f-mov-trailer').value.trim(),
+    thumbnail:document.getElementById('f-mov-thumb').value.trim(),
+    modalThumb:document.getElementById('f-mov-modal-thumb').value.trim(),
+    hidden: editingMovId ? (movs.find(m=>m.id===editingMovId)?.hidden||false) : false,
+    fileId:document.getElementById('f-mov-fid').value.trim(),
+    year:parseInt(document.getElementById('f-mov-year').value)||2024,
+    rating:parseFloat(document.getElementById('f-mov-rating').value)||7.0,
+    quality:document.getElementById('f-mov-quality').value,
+    size:document.getElementById('f-mov-size').value.trim(),
+    title:{
+      uz:tuzVal,
+      ru:document.getElementById('f-mov-tru').value.trim(),
+      en:document.getElementById('f-mov-ten').value.trim(),
+    },
+    desc:{
+      uz:document.getElementById('f-mov-duz').value.trim(),
+      ru:document.getElementById('f-mov-dru').value.trim(),
+      en:document.getElementById('f-mov-den').value.trim(),
+    },
   };
-  const idx=MOVIES.findIndex(m=>m.id===newId);
-  if(idx>=0)MOVIES[idx]=entry; else MOVIES.push(entry);
+  const idx=movs.findIndex(m=>m.id===newId);
+  if(idx>=0)movs[idx]=entry;else movs.push(entry);
+  saveMovies(movs);MOVIES=movs;
   adminColFilter=entry.col;
-  closeForm(); renderAdminMovies();
-  syncToCloud();
+  closeForm();renderAdminMovies();
+  showToast('Film saqlandi ✅');
+}
+
+/* ═══════════════════════════════════════
+   VIEWS (Ko'rishlar soni) + WATCHED
+═══════════════════════════════════════ */
+const DB_KEY_VIEWS   = 'kk_views_v1';
+const DB_KEY_WATCHED = 'kk_watched_v1';
+
+function loadViews(){
+  try{return JSON.parse(localStorage.getItem(DB_KEY_VIEWS)||'{}')}
+  catch{return {}}
+}
+
+function getViews(id){
+  return loadViews()[id]||0;
+}
+
+function incrementViews(id){
+  // Ko'rishlar: har safar modal ochilganda +1
+  const v = loadViews();
+  v[id] = (v[id]||0)+1;
+  localStorage.setItem(DB_KEY_VIEWS, JSON.stringify(v));
+
+  // Watched: faqat bir marta belgilanadi
+  const w = loadWatched();
+  if(!w.includes(id)){
+    w.push(id);
+    saveWatched(w);
+  }
+}
+
+function loadWatched(){
+  try{return JSON.parse(localStorage.getItem(DB_KEY_WATCHED)||'[]')}
+  catch{return []}
+}
+
+function saveWatched(arr){
+  localStorage.setItem(DB_KEY_WATCHED, JSON.stringify(arr));
+}
+
+function isWatched(id){
+  return loadWatched().includes(id);
+}
+
+function getCollectionViews(colId){
+  // Kolleksiyaga tegishli barcha filmlar ko'rishlar sonining yig'indisi
+  const v = loadViews();
+  return MOVIES
+    .filter(m=>m.col===colId)
+    .reduce((sum,m)=>(sum + (v[m.id]||0)), 0);
+}
+
+/* ═══════════════════════════════════════
+   GLOBAL QIDIRUV
+═══════════════════════════════════════ */
+function globalSearch(q){
+  const grid = document.getElementById('col-grid');
+  const sec = document.getElementById('col-sec-lbl');
+  const results = document.getElementById('global-results');
+  q = q.trim().toLowerCase();
+
+  if(!q){
+    grid.style.display='';
+    sec.style.display='';
+    results.style.display='none';
+    results.innerHTML='';
+    return;
+  }
+
+  grid.style.display='none';
+  sec.style.display='none';
+  results.style.display='block';
+
+  COLLECTIONS = loadCollections();
+  MOVIES = loadMovies();
+  const t = T[lang];
+
+  const matchCols = COLLECTIONS.filter(c=>
+    !c.hidden && (c.name[lang]?.toLowerCase().includes(q) || c.sub[lang]?.toLowerCase().includes(q))
+  );
+  const matchMovs = MOVIES.filter(m=>
+    !m.hidden && m.title[lang]?.toLowerCase().includes(q)
+  );
+
+  let html = '';
+
+  if(matchCols.length){
+    html += `<div class="gs-section">Kolleksiyalar</div>`;
+    html += matchCols.map(c=>{
+      const cnt = MOVIES.filter(m=>m.col===c.id).length;
+      const bg = BG[c.id]||'#1A1A1A';
+      const imgEl = c.thumbnail ? `<img src="${c.thumbnail}" alt="" onerror="this.style.display='none'">` : '';
+      return `<div class="gs-mov-card" onclick="openCollection('${c.id}')">
+        <div class="gs-poster" style="height:44px;width:44px;border-radius:8px;background:${bg}">${imgEl}<span style="position:relative;z-index:1">${c.emoji}</span></div>
+        <div class="gs-info">
+          <div class="gs-title">${esc(c.name[lang])}</div>
+          <div class="gs-meta">${t.count(cnt)} · ${c.years[0]}–${c.years[1]}</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>`;
+    }).join('');
+  }
+
+  if(matchMovs.length){
+    html += `<div class="gs-section">Filmlar</div>`;
+    html += matchMovs.map(m=>{
+      const bg = BG[m.col]||'#1A1A1A';
+      const col = COLLECTIONS.find(c=>c.id===m.col);
+      const imgEl = m.thumbnail ? `<img src="${m.thumbnail}" alt="" onerror="this.style.display='none'">` : '';
+      return `<div class="gs-mov-card" onclick="openModal(${m.id})">
+        <div class="gs-poster" style="background:${bg}">${imgEl}<span style="position:relative;z-index:1">${m.emoji}</span></div>
+        <div class="gs-info">
+          <div class="gs-title">${esc(m.title[lang])}</div>
+          <div class="gs-meta">${col?esc(col.name[lang]):''}  ·  ${m.year}  ·  ★${m.rating}</div>
+        </div>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>`;
+    }).join('');
+  }
+
+  if(!matchCols.length && !matchMovs.length){
+    html = `<div class="empty" style="grid-column:1/-1"><div class="empty-ico">🔍</div><div class="empty-t">${t.empty_t}</div><div class="empty-s">${t.empty_s}</div></div>`;
+  }
+
+  results.innerHTML = html;
+}
+
+/* ═══════════════════════════════════════
+   DEEP LINK
+═══════════════════════════════════════ */
+function handleDeepLink(){
+  const params = new URLSearchParams(window.location.search);
+  // Telegram WebApp dan ham parametr olish
+  const tgData = tg?.initDataUnsafe?.start_param || params.get('start') || params.get('film');
+  if(!tgData) return false;
+
+  const filmId = parseInt(tgData.replace('film_',''));
+  if(!filmId) return false;
+
+  MOVIES = loadMovies();
+  const m = MOVIES.find(x=>x.id===filmId);
+  if(!m) return false;
+
+  COLLECTIONS = loadCollections();
+  // Avval kolleksiyaga o'tamiz
+  selectLang(lang); // default til bilan
+  openCollection(m.col);
+  // Keyin modalni ochamiz
+  setTimeout(()=>openModal(filmId), 300);
+  return true;
+}
+
+/* ═══════════════════════════════════════
+   LIKE MODAL
+═══════════════════════════════════════ */
+function toggleLikeModal(id){
+  const likes = loadLikes();
+  const idx = likes.indexOf(id);
+  if(idx>=0) likes.splice(idx,1);
+  else likes.push(id);
+  saveLikes(likes);
+  openModal(id);
+}
+
+function toggleWatchedModal(id){
+  const w = loadWatched();
+  const idx = w.indexOf(id);
+  if(idx>=0){
+    // Ko'rilgan belgisini olib tashlash
+    w.splice(idx,1);
+  } else {
+    // Ko'rilgan deb belgilash + views +1
+    w.push(id);
+    incrementViews(id);
+  }
+  saveWatched(w);
+  openModal(id);
+}
+const DB_KEY_LIKES = 'kk_likes_v1';
+
+function loadLikes(){
+  try{return JSON.parse(localStorage.getItem(DB_KEY_LIKES)||'[]')}
+  catch{return []}
+}
+
+function saveLikes(arr){localStorage.setItem(DB_KEY_LIKES,JSON.stringify(arr))}
+
+function isLiked(id){return loadLikes().includes(id)}
+
+function toggleLike(event, id){
+  event.stopPropagation();
+  const likes = loadLikes();
+  const idx = likes.indexOf(id);
+  if(idx>=0) likes.splice(idx,1);
+  else likes.push(id);
+  saveLikes(likes);
+  renderMovies();
+}
+
+/* ═══════════════════════════════════════
+   NAV PAGES
+═══════════════════════════════════════ */
+function goHome(){
+  curCol=null;
+  showScreen('screen-collections');
+  renderCollections();
+  // Bosh sahifa navini active qilish
+  document.querySelectorAll('#screen-collections .ni').forEach((el,i)=>{
+    el.classList.toggle('active', i===0);
+  });
+}
+
+function showNavPage(page){
+  const titles = {
+    directors: {uz:'Rejissorlar', ru:'Режиссёры', en:'Directors', ico:'🎥'},
+    actors:    {uz:'Aktyorlar',   ru:'Актёры',    en:'Actors',    ico:'🌟'},
+    saved:     {uz:'Saqlanganlar',ru:'Сохранённые',en:'Saved',     ico:'🔖'},
+  };
+  const info = titles[page];
+
+  // Saqlangan filmlar uchun alohida ko'rsatish
+  if(page==='saved'){
+    const likes = loadLikes();
+    MOVIES = loadMovies();
+    const savedMovies = MOVIES.filter(m=>likes.includes(m.id));
+    curCol = '__saved__';
+    document.getElementById('mov-title').textContent = info[lang]||info.uz;
+    document.getElementById('sort-lbl').textContent = T[lang].sort_yd;
+    document.getElementById('mov-sec-lbl').textContent = T[lang].all_mov;
+    showScreen('screen-movies');
+    const t = T[lang];
+    const grid = document.getElementById('mov-grid');
+    document.getElementById('mov-badge').textContent = t.count(savedMovies.length);
+    if(!savedMovies.length){
+      grid.innerHTML=`<div class="empty"><div class="empty-ico">🔖</div><div class="empty-t">${info[lang]||info.uz}</div><div class="empty-s">${lang==='ru'?'Вы ещё ничего не сохранили':lang==='en'?'Nothing saved yet':'Hali hech narsa saqlanmagan'}</div></div>`;
+      return;
+    }
+    const bg_map = BG;
+    grid.innerHTML = savedMovies.map(m=>{
+      const bg = bg_map[m.col]||'#1A1A1A';
+      const posterContent = `<div class="mov-poster-emoji">${m.emoji}</div>` +
+        (m.thumbnail ? `<img src="${m.thumbnail}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+      return `<div class="mov-card" onclick="openModal(${m.id})">
+        <div class="mov-poster" style="background-color:${bg}">${posterContent}</div>
+        <span class="q-badge">${esc(m.quality)}</span>
+        <div class="mov-body">
+          <div class="mov-title">${esc(m.title[lang])}</div>
+          <div class="mov-meta"><span class="mov-year">${m.year}</span><span class="mov-rating">★ ${m.rating}</span></div>
+          <div class="mov-btn-wrap" style="display:flex;gap:8px">
+            <button class="like-btn liked" onclick="toggleLike(event,${m.id})" title="Like">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </button>
+            <button class="shr-btn" style="flex:1" onclick="openModal(${m.id})">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              ${t.watch}
+            </button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    return;
+  }
+
+  // Rejissorlar va Aktyorlar — tez orada qo'shiladi
+  showToast(`${info.ico} ${info[lang]||info.uz} — tez orada!`);
+}
+function renderAdminSync(){
+  const ct = document.getElementById('admin-content');
+  ct.innerHTML = `
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:8px">
+      <div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:6px">✅ Cloud sinxronizatsiya yoqilgan</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6">
+        Admin paneldan qo'shgan kolleksiya va filmlaringiz barcha qurilmalarda avtomatik ko'rinadi.
+      </div>
+    </div>
+  `;
 }
 
 function openForm(){document.getElementById('form-ov').classList.add('open')}
 function closeForm(){document.getElementById('form-ov').classList.remove('open')}
 function closeFormOutside(e){if(e.target===document.getElementById('form-ov'))closeForm()}
 
+/* ═══════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════ */
 function esc(s){
   if(s==null)return'';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 }
 
 /* ═══════════════════════════════════════
-   APP ISHGA TUSHIRILISHI (INIT)
+   INIT — sahifa yuklanganda
 ═══════════════════════════════════════ */
-fetchCloudData();
+(async function init(){
+  // Cloud dan ma'lumotlarni yuklab olamiz
+  await fetchCloudData();
+
+  const saved = localStorage.getItem(DB_KEY_LANG);
+  if(saved && ['uz','ru','en'].includes(saved)){
+    lang = saved;
+    document.getElementById('cur-flag').textContent = FLAGS[saved];
+    document.getElementById('cur-code').textContent = CODES[saved];
+    applyLang();
+    showScreen('screen-collections');
+    renderCollections();
+    handleDeepLink();
+  }
+})();
 </script>
 </body>
 </html>
