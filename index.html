@@ -986,10 +986,8 @@ function closeModalOutside(e){if(e.target===document.getElementById('modal'))clo
 function downloadMovie(id){
   const m = loadMovies().find(x => x.id === id || x.id === +id);
   closeModal();
-
   if(!m){ showToast('Film topilmadi ❌'); return; }
 
-  // fileId ni til bo'yicha olish (message_id DB kanalda)
   const curLang = lang || 'uz';
   let fileId = '';
   if(m.fileId && typeof m.fileId === 'object'){
@@ -998,18 +996,12 @@ function downloadMovie(id){
     fileId = String(m.fileId || '');
   }
 
-  if(!fileId){
-    showToast("Bu film hali qo'shilmagan ⏳");
-    return;
-  }
+  if(!fileId){ showToast("Bu film hali qo'shilmagan ⏳"); return; }
 
-  // Botga signal yuborish: action, movieId, fileId (message_id)
+  // fileId (message_id raqami) ni bot ga yuborish
   if(tg){
-    tg.sendData(JSON.stringify({
-      action: 'download',
-      movieId: m.id,
-      fileId: fileId
-    }));
+    tg.openTelegramLink('https://t.me/kinokolleksiyabot?start=dl_' + fileId);
+    tg.close();
   } else {
     showToast(T[lang].download + '...');
   }
