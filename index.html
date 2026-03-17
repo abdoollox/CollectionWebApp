@@ -171,6 +171,26 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .gs-info{flex:1;min-width:0}
 .gs-title{font-family:'Oswald',sans-serif;font-size:15px;font-weight:600;letter-spacing:.3px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .gs-meta{font-size:11px;color:var(--muted);margin-top:3px}
+/* ── STATS PAGE ── */
+.stats-screen{padding:0 0 90px}
+.stats-hdr{padding:16px 18px 8px;display:flex;align-items:center;justify-content:space-between}
+.stats-hdr-title{font-family:'Oswald',sans-serif;font-size:22px;font-weight:700;color:var(--text)}
+.period-bar{display:flex;gap:6px;padding:8px 18px 12px;overflow-x:auto;scrollbar-width:none}
+.period-chip{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent;flex-shrink:0}
+.period-chip.active{background:var(--red-dim);border-color:var(--red-b);color:var(--red)}
+.stats-section{margin:0 14px 20px}
+.stats-section-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:var(--muted);letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;padding:0 4px}
+.stats-card{display:flex;align-items:center;gap:12px;background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:10px 12px;margin-bottom:8px;cursor:pointer;transition:border-color .2s;-webkit-tap-highlight-color:transparent}
+.stats-card:active{border-color:var(--red-b)}
+.stats-rank{font-family:'Oswald',sans-serif;font-size:20px;font-weight:700;color:var(--muted);width:28px;text-align:center;flex-shrink:0}
+.stats-rank.gold{color:#FFD700}.stats-rank.silver{color:#C0C0C0}.stats-rank.bronze{color:#CD7F32}
+.stats-poster{width:40px;height:60px;border-radius:6px;background:var(--s2);overflow:hidden;position:relative;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px}
+.stats-poster img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+.stats-info{flex:1;min-width:0}
+.stats-title{font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stats-col{font-size:11px;color:var(--muted);margin-top:2px}
+.stats-count{font-family:'Oswald',sans-serif;font-size:18px;font-weight:700;color:var(--red);flex-shrink:0}
+.stats-empty{text-align:center;padding:32px 16px;color:var(--muted);font-size:14px}
 .bnav{position:fixed;bottom:0;left:0;right:0;background:var(--hdr-bg);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:flex;padding:10px 0 max(10px,env(safe-area-inset-bottom));z-index:100}
 .ni{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;padding:4px 0;-webkit-tap-highlight-color:transparent}
 .ni-ico{font-size:20px;line-height:1}
@@ -390,7 +410,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="col-grid" id="col-grid"></div>
   <div class="bnav">
     <div class="ni active" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl">Bosh sahifa</div></div>
-    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">🎥</div><div class="ni-lbl">Rejissorlar</div></div>
+    <div class="ni" onclick="showNavPage('stats')"><div class="ni-ico">📊</div><div class="ni-lbl">Statistika</div></div>
     <div class="ni" onclick="showNavPage('actors')"><div class="ni-ico">🌟</div><div class="ni-lbl">Aktyorlar</div></div>
     <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">❤️</div><div class="ni-lbl">Saqlanganlar</div></div>
   </div>
@@ -417,7 +437,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
     </div>
   </div>
   <div style="padding:8px 14px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-    <span style="font-size:12px;color:var(--muted);flex-shrink:0" id="mov-sec-lbl">Barcha filmlar</span>
+    <span style="font-size:12px;color:var(--muted);flex-shrink:0" id="mov-sec-lbl"></span>
     <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
       <button class="sort-chip active" id="sort-chrono" onclick="setSort('chrono')">🎬 Xronologiya ↑</button>
       <button class="sort-chip" id="sort-year" onclick="setSort('year')">📅 Yil</button>
@@ -427,7 +447,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="mov-grid" id="mov-grid"></div>
   <div class="bnav">
     <div class="ni" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl">Bosh sahifa</div></div>
-    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">🎥</div><div class="ni-lbl">Rejissorlar</div></div>
+    <div class="ni" onclick="showNavPage('stats')"><div class="ni-ico">📊</div><div class="ni-lbl">Statistika</div></div>
     <div class="ni" onclick="showNavPage('actors')"><div class="ni-ico">🌟</div><div class="ni-lbl">Aktyorlar</div></div>
     <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">❤️</div><div class="ni-lbl">Saqlanganlar</div></div>
   </div>
@@ -627,6 +647,11 @@ async function fetchCloudData(){
     const data = await res.json();
     COLLECTIONS = data.record.collections || [];
     MOVIES      = data.record.movies      || [];
+    // Global stats ni yuklab olamiz
+    if(data.record.stats){
+      const remoteStats = data.record.stats;
+      mergeRemoteStats(remoteStats);
+    }
     localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
     localStorage.setItem(DB_KEY_MOV, JSON.stringify(MOVIES));
   }catch(err){
@@ -649,7 +674,7 @@ async function syncToCloud(){
         'X-Master-Key': ADMIN_TOKEN,
         'X-Bin-Versioning':'false'
       },
-      body: JSON.stringify({collections: COLLECTIONS, movies: MOVIES})
+      body: JSON.stringify({collections: COLLECTIONS, movies: MOVIES, stats: loadGlobalStats()})
     });
     if(!res.ok) throw new Error('Write error: ' + res.status);
     localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
@@ -757,6 +782,12 @@ function applyLang(){
 function goBack(){
   curCol=null; movQ='';
   document.getElementById('mov-srch').value='';
+  // Stats va sort chiplarni reset
+  const statsC = document.getElementById('stats-container');
+  if(statsC) statsC.style.display='none';
+  const movGrid = document.getElementById('mov-grid');
+  if(movGrid) movGrid.style.display='';
+  document.querySelectorAll('.sort-chip').forEach(el=>el.style.display='');
   showScreen('screen-collections');
   renderCollections();
 }
@@ -865,7 +896,12 @@ function openCollection(id){
   document.getElementById('mov-srch').value='';
   const col=COLLECTIONS.find(c=>c.id===id);
   document.getElementById('mov-title').textContent=col.name[lang];
-  document.getElementById('mov-sec-lbl').textContent=T[lang].all_mov;
+  const _msl=document.getElementById('mov-sec-lbl');if(_msl)_msl.textContent='';
+  // Stats container ni yashir, mov-grid ni ko'rsat
+  const _sc=document.getElementById('stats-container');
+  if(_sc) _sc.style.display='none';
+  document.getElementById('mov-grid').style.display='';
+  document.querySelectorAll('.sort-chip').forEach(el=>el.style.display='');
   showScreen('screen-movies');
   // Chip larni default (chrono) ga qaytaramiz
   document.querySelectorAll('.sort-chip').forEach(el=>el.classList.remove('active'));
@@ -1033,6 +1069,7 @@ function downloadMovie(id){
   }
 
   if(!fileId){ showToast("Bu film hali qo'shilmagan ⏳"); return; }
+  incrementGlobalStat('d', m.id);
 
   // Faqat fileId yuboramiz — nom DB kanaldagi captiondan olinadi
   if(tg){
@@ -1401,6 +1438,239 @@ function saveMovForm(){
   showToast('Film saqlandi ✅');
 }
 
+
+/* ═══════════════════════════════════════
+   GLOBAL STATISTIKA
+   Tuzilma: {
+     d: {movieId: totalCount, ...},   // downloads
+     w: {movieId: totalCount, ...},   // watched
+     l: {movieId: totalCount, ...},   // likes
+     log: {
+       "YYYY-MM-DD": {
+         d: {movieId: count},
+         w: {movieId: count},
+         l: {movieId: count}
+       }
+     }
+   }
+═══════════════════════════════════════ */
+const DB_KEY_GSTATS = 'kk_global_stats_v1';
+
+function loadGlobalStats(){
+  try{return JSON.parse(localStorage.getItem(DB_KEY_GSTATS)||'{}')}
+  catch{return {}}
+}
+
+function saveGlobalStats(s){
+  localStorage.setItem(DB_KEY_GSTATS, JSON.stringify(s));
+}
+
+function todayStr(){
+  return new Date().toISOString().slice(0,10); // "YYYY-MM-DD"
+}
+
+function incrementGlobalStat(type, movieId){
+  // type: 'd'=download, 'w'=watched, 'l'=like
+  const s = loadGlobalStats();
+  const id = String(movieId);
+  const today = todayStr();
+
+  // Total
+  if(!s[type]) s[type] = {};
+  s[type][id] = (s[type][id]||0) + 1;
+
+  // Daily log
+  if(!s.log) s.log = {};
+  if(!s.log[today]) s.log[today] = {};
+  if(!s.log[today][type]) s.log[today][type] = {};
+  s.log[today][type][id] = (s.log[today][type][id]||0) + 1;
+
+  // 365 kundan eski loglarni tozalaymiz
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 365);
+  Object.keys(s.log).forEach(d => {
+    if(new Date(d) < cutoff) delete s.log[d];
+  });
+
+  saveGlobalStats(s);
+  scheduleSyncStats();
+}
+
+// Stats ni cloud ga yuborish (debounced — 10 soniyada bir marta)
+let _statsSyncTimer = null;
+function scheduleSyncStats(){
+  if(_statsSyncTimer) clearTimeout(_statsSyncTimer);
+  _statsSyncTimer = setTimeout(syncStatsToCloud, 10000);
+}
+
+async function syncStatsToCloud(){
+  // Master key yo'q bo'lsa — faqat local saqlaydi
+  if(!ADMIN_TOKEN){
+    // Public write uchun — bin public bo'lgani uchun PUT ham ishlaydimi?
+    // Ishlamasa — faqat local, admin keyingisi sync qiladi
+    return;
+  }
+  try{
+    const current = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}/latest`).then(r=>r.json());
+    const merged = {
+      collections: current.record?.collections || COLLECTIONS,
+      movies:      current.record?.movies      || MOVIES,
+      stats:       loadGlobalStats()
+    };
+    await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json','X-Master-Key': ADMIN_TOKEN,'X-Bin-Versioning':'false'},
+      body: JSON.stringify(merged)
+    });
+  }catch(e){ console.warn('Stats sync xatosi:', e); }
+}
+
+function mergeRemoteStats(remote){
+  // Remote stats bilan local ni birlashtirish (kattasini oladi)
+  const local = loadGlobalStats();
+  ['d','w','l'].forEach(type => {
+    if(!remote[type]) return;
+    if(!local[type]) local[type] = {};
+    Object.entries(remote[type]).forEach(([id, cnt]) => {
+      local[type][id] = Math.max(local[type][id]||0, cnt);
+    });
+  });
+  // Log ham birlashtirish
+  if(remote.log){
+    if(!local.log) local.log = {};
+    Object.entries(remote.log).forEach(([date, dayData]) => {
+      if(!local.log[date]) local.log[date] = {};
+      ['d','w','l'].forEach(type => {
+        if(!dayData[type]) return;
+        if(!local.log[date][type]) local.log[date][type] = {};
+        Object.entries(dayData[type]).forEach(([id, cnt]) => {
+          local.log[date][type][id] = Math.max(local.log[date][type][id]||0, cnt);
+        });
+      });
+    });
+  }
+  saveGlobalStats(local);
+}
+
+// Davr bo'yicha stats hisoblash
+function getStatsByPeriod(type, days){
+  const s = loadGlobalStats();
+  if(!s.log) return {};
+
+  // days: 1=kunlik, 7=haftalik, 30=oylik, 365=yillik, 0=barcha vaqt
+  if(days === 0) return s[type] || {};
+
+  const result = {};
+  const now = new Date();
+  for(let i=0; i<days; i++){
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().slice(0,10);
+    const dayData = s.log[key]?.[type];
+    if(!dayData) continue;
+    Object.entries(dayData).forEach(([id, cnt]) => {
+      result[id] = (result[id]||0) + cnt;
+    });
+  }
+  return result;
+}
+
+// Top N filmlarni qaytaradi
+function getTopMovies(type, days, n=5){
+  const counts = getStatsByPeriod(type, days);
+  return Object.entries(counts)
+    .sort((a,b) => b[1]-a[1])
+    .slice(0, n)
+    .map(([id, cnt]) => ({
+      movie: MOVIES.find(m => m.id === +id),
+      count: cnt
+    }))
+    .filter(x => x.movie && !x.movie.hidden);
+}
+
+/* ═══════════════════════════════════════
+   STATS PAGE RENDER
+═══════════════════════════════════════ */
+let statsPeriod = 7; // default haftalik
+
+function renderStatsPage(){
+  const periodDays = statsPeriod;
+  const sections = [
+    {type:'d', icon:'⬇️', label:'Top Yuklamalar'},
+    {type:'w', icon:'👁',  label:"Top Ko'rishlar"},
+    {type:'l', icon:'❤️',  label:'Top Likelar'},
+  ];
+
+  const periods = [
+    {label:'Kunlik',  days:1},
+    {label:'Haftalik',days:7},
+    {label:'Oylik',   days:30},
+    {label:'Yillik',  days:365},
+  ];
+
+  const grid = document.getElementById('stats-grid');
+  if(!grid) return;
+
+  // Period chips
+  const bar = document.getElementById('stats-period-bar');
+  if(bar){
+    bar.innerHTML = periods.map(p =>
+      `<button class="period-chip${periodDays===p.days?' active':''}" onclick="setStatsPeriod(${p.days})">${p.label}</button>`
+    ).join('');
+  }
+
+  // Sections
+  let html = '';
+  sections.forEach(sec => {
+    const top = getTopMovies(sec.type, periodDays, 5);
+    html += `<div class="stats-section">
+      <div class="stats-section-title">${sec.icon} ${sec.label}</div>`;
+
+    if(!top.length){
+      html += `<div class="stats-empty">Hali ma'lumot yo'q</div>`;
+    } else {
+      top.forEach(({movie: m, count}, i) => {
+        const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
+        const col = COLLECTIONS.find(c=>c.id===(Array.isArray(m.cols)?m.cols[0]:m.col));
+        const colName = col ? esc(col.name[lang]) : '';
+        const bg = BG[Array.isArray(m.cols)?m.cols[0]:m.col] || '#1A1A1A';
+        const thumb = (m.thumbnail && m.thumbnail[lang]) || (m.thumbnail && m.thumbnail.uz) || '';
+        html += `<div class="stats-card" onclick="openStatsMovie(${m.id})">
+          <div class="stats-rank ${rankClass}">${i+1}</div>
+          <div class="stats-poster" style="background:${bg}">
+            <span>${m.emoji}</span>
+            ${thumb ? `<img src="${thumb}" alt="" onerror="this.style.display='none'">` : ''}
+          </div>
+          <div class="stats-info">
+            <div class="stats-title">${esc(m.title[lang])}</div>
+            <div class="stats-col">${colName} · ${m.year}</div>
+          </div>
+          <div class="stats-count">${count}</div>
+        </div>`;
+      });
+    }
+    html += '</div>';
+  });
+
+  grid.innerHTML = html;
+}
+
+function setStatsPeriod(days){
+  statsPeriod = days;
+  renderStatsPage();
+}
+
+function openStatsMovie(id){
+  // Stats sahifasidan film modalini ochish
+  MOVIES = loadMovies();
+  const m = MOVIES.find(x=>x.id===id);
+  if(!m) return;
+  // Kolleksiyaga o'tamiz keyin modalni ochamiz
+  const colId = Array.isArray(m.cols) ? m.cols[0] : m.col;
+  openCollection(colId);
+  setTimeout(() => openModal(id), 300);
+}
+
 /* ═══════════════════════════════════════
    VIEWS (Ko'rishlar soni) + WATCHED
 ═══════════════════════════════════════ */
@@ -1557,8 +1827,8 @@ function handleDeepLink(){
 function toggleLikeModal(id){
   const likes = loadLikes();
   const idx = likes.indexOf(id);
-  if(idx>=0) likes.splice(idx,1);
-  else likes.push(id);
+  if(idx>=0){ likes.splice(idx,1); }
+  else{ likes.push(id); incrementGlobalStat('l', id); }
   saveLikes(likes);
   openModal(id);
 }
@@ -1573,6 +1843,7 @@ function toggleWatchedModal(id){
     // Ko'rilgan deb belgilash + views +1
     w.push(id);
     incrementViews(id);
+    incrementGlobalStat('w', id);
   }
   saveWatched(w);
   openModal(id);
@@ -1592,8 +1863,8 @@ function toggleLike(event, id){
   event.stopPropagation();
   const likes = loadLikes();
   const idx = likes.indexOf(id);
-  if(idx>=0) likes.splice(idx,1);
-  else likes.push(id);
+  if(idx>=0){ likes.splice(idx,1); }
+  else{ likes.push(id); incrementGlobalStat('l', id); }
   saveLikes(likes);
   renderMovies();
 }
@@ -1613,7 +1884,7 @@ function goHome(){
 
 function showNavPage(page){
   const titles = {
-    directors: {uz:'Rejissorlar', ru:'Режиссёры', en:'Directors', ico:'🎥'},
+    stats:     {uz:'Statistika',  ru:'Статистика', en:'Statistics', ico:'📊'},
     actors:    {uz:'Aktyorlar',   ru:'Актёры',    en:'Actors',    ico:'🌟'},
     saved:     {uz:'Saqlanganlar',ru:'Сохранённые',en:'Saved',     ico:'🔖'},
   };
@@ -1627,7 +1898,7 @@ function showNavPage(page){
     curCol = '__saved__';
     document.getElementById('mov-title').textContent = info[lang]||info.uz;
     // sort-lbl removed
-    document.getElementById('mov-sec-lbl').textContent = T[lang].all_mov;
+    const _msl2=document.getElementById('mov-sec-lbl');if(_msl2)_msl2.textContent='';
     showScreen('screen-movies');
     const t = T[lang];
     const grid = document.getElementById('mov-grid');
@@ -1662,7 +1933,37 @@ function showNavPage(page){
     return;
   }
 
-  // Rejissorlar va Aktyorlar — tez orada qo'shiladi
+  // Stats sahifasi
+  if(page === 'stats'){
+    showScreen('screen-movies');
+    curCol = '__stats__';
+    document.getElementById('mov-title').textContent = info[lang]||info.uz;
+    document.getElementById('mov-sec-lbl').textContent = '';
+    document.getElementById('mov-badge').textContent = '';
+    // Sort chips yashiramiz
+    document.querySelectorAll('.sort-chip').forEach(el=>el.style.display='none');
+    // Stats gridni ko'rsatamiz, mov-grid ni yashiramiz
+    document.getElementById('mov-grid').style.display = 'none';
+    let statsContainer = document.getElementById('stats-container');
+    if(!statsContainer){
+      statsContainer = document.createElement('div');
+      statsContainer.id = 'stats-container';
+      statsContainer.className = 'stats-screen';
+      statsContainer.innerHTML = `
+        <div id="stats-period-bar" class="period-bar"></div>
+        <div id="stats-grid"></div>
+      `;
+      document.getElementById('mov-grid').parentNode.insertBefore(
+        statsContainer,
+        document.getElementById('mov-grid').nextSibling
+      );
+    }
+    statsContainer.style.display = 'block';
+    renderStatsPage();
+    return;
+  }
+
+  // Aktyorlar — tez orada qo'shiladi
   showToast(`${info.ico} ${info[lang]||info.uz} — tez orada!`);
 }
 function renderAdminSync(){
