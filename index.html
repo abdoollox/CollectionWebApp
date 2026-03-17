@@ -122,6 +122,9 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .mov-btn-wrap{margin-top:auto}
 .shr-btn{width:100%;padding:8px 6px;background:var(--red-dim);border:1px solid var(--red-b);border-radius:8px;color:var(--red);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;overflow:hidden}
 .shr-btn:active{background:rgba(229,9,20,.25);transform:scale(.97)}
+.sort-chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.sort-chip.active{background:var(--red-dim);border-color:var(--red-b);color:var(--red)}
+.sort-chip:active{transform:scale(.96)}
 .like-btn{
   flex-shrink:0;width:38px;height:38px;
   display:flex;align-items:center;justify-content:center;
@@ -412,12 +415,13 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
       <input class="srch" id="mov-srch" type="text" placeholder="Film qidirish...">
     </div>
   </div>
-  <div style="padding:10px 18px 4px;display:flex;align-items:center;justify-content:space-between">
-    <span style="font-size:12px;color:var(--muted)" id="mov-sec-lbl">Barcha filmlar</span>
-    <button style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--red);background:none;border:none;cursor:pointer;padding:4px 8px;border-radius:6px" onclick="toggleSort()">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
-      <span id="sort-lbl">Yilga ko'ra ↓</span>
-    </button>
+  <div style="padding:8px 14px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+    <span style="font-size:12px;color:var(--muted);flex-shrink:0" id="mov-sec-lbl">Barcha filmlar</span>
+    <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
+      <button class="sort-chip active" id="sort-chrono" onclick="setSort('chrono')">🎬 Xronologiya</button>
+      <button class="sort-chip" id="sort-year" onclick="setSort('year_asc')">📅 Yil</button>
+      <button class="sort-chip" id="sort-rating" onclick="setSort('rating')">⭐ Reyting</button>
+    </div>
   </div>
   <div class="mov-grid" id="mov-grid"></div>
   <div class="bnav">
@@ -544,58 +548,58 @@ const DEFAULT_COLLECTIONS = [
 ];
 
 const DEFAULT_MOVIES = [
-  {id:1,col:'hp',year:2001,rating:7.6,quality:'1080p',size:{uz:'4.2 GB',ru:'',en:''},hidden:false,emoji:'🧙',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_1',ru:'',en:''},
+  {id:1,cols:['hp'],chronoOrder:1,year:2001,rating:7.6,quality:'1080p',size:{uz:'4.2 GB',ru:'',en:''},hidden:false,emoji:'🧙',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_1',ru:'',en:''},
    title:{uz:"Harry Potter va Faylasuf Toshi",ru:"Гарри Поттер и философский камень",en:"Harry Potter and the Philosopher's Stone"},
    desc:{uz:"Yosh sehrgar Harry Potter Hogvarts maktabiga qabul qilinadi.",ru:"Юный волшебник Гарри Поттер поступает в Хогвартс.",en:"Young wizard Harry Potter is admitted to Hogwarts."}},
-  {id:2,col:'hp',year:2002,rating:7.4,quality:'1080p',size:{uz:'4.5 GB',ru:'',en:''},hidden:false,emoji:'🐍',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_2',ru:'',en:''},
+  {id:2,cols:['hp'],chronoOrder:1,year:2002,rating:7.4,quality:'1080p',size:{uz:'4.5 GB',ru:'',en:''},hidden:false,emoji:'🐍',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_2',ru:'',en:''},
    title:{uz:"Harry Potter va Sirlar Xonasi",ru:"Гарри Поттер и тайная комната",en:"Harry Potter and the Chamber of Secrets"},
    desc:{uz:"Hogvartsda sirli hujumlar boshlanadi.",ru:"В Хогвартсе начинаются таинственные нападения.",en:"Mysterious attacks plague Hogwarts."}},
-  {id:3,col:'hp',year:2004,rating:7.9,quality:'4K',size:{uz:'15 GB',ru:'',en:''},hidden:false,emoji:'🌙',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_3',ru:'',en:''},
+  {id:3,cols:['hp'],chronoOrder:1,year:2004,rating:7.9,quality:'4K',size:{uz:'15 GB',ru:'',en:''},hidden:false,emoji:'🌙',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_3',ru:'',en:''},
    title:{uz:"Harry Potter va Azkaban Mahbusi",ru:"Гарри Поттер и узник Азкабана",en:"Harry Potter and the Prisoner of Azkaban"},
    desc:{uz:"Xavfli mahbus Azkabandan qochdi.",ru:"Опасный заключённый сбежал из Азкабана.",en:"A dangerous prisoner escapes Azkaban."}},
-  {id:4,col:'hp',year:2005,rating:7.7,quality:'1080p',size:{uz:'5.1 GB',ru:'',en:''},hidden:false,emoji:'🏆',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_4',ru:'',en:''},
+  {id:4,cols:['hp'],chronoOrder:1,year:2005,rating:7.7,quality:'1080p',size:{uz:'5.1 GB',ru:'',en:''},hidden:false,emoji:'🏆',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_4',ru:'',en:''},
    title:{uz:"Harry Potter va O't Qadahi",ru:"Гарри Поттер и кубок огня",en:"Harry Potter and the Goblet of Fire"},
    desc:{uz:"Hogvarts uch ta maktab o'rtasidagi musobaqaga mezbonlik qiladi.",ru:"Хогвартс принимает Турнир Трёх Волшебников.",en:"Hogwarts hosts the Triwizard Tournament."}},
-  {id:5,col:'hp',year:2007,rating:7.5,quality:'1080p',size:{uz:'4.8 GB',ru:'',en:''},hidden:false,emoji:'🦅',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_5',ru:'',en:''},
+  {id:5,cols:['hp'],chronoOrder:1,year:2007,rating:7.5,quality:'1080p',size:{uz:'4.8 GB',ru:'',en:''},hidden:false,emoji:'🦅',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_5',ru:'',en:''},
    title:{uz:"Harry Potter va Feniks Ordeni",ru:"Гарри Поттер и орден Феникса",en:"Harry Potter and the Order of the Phoenix"},
    desc:{uz:"Voldemort qaytib kelganiga hech kim ishonmaydi.",ru:"Никто не верит в возвращение Волдеморта.",en:"Nobody believes Voldemort has returned."}},
-  {id:6,col:'hp',year:2009,rating:7.6,quality:'4K',size:{uz:'14 GB',ru:'',en:''},hidden:false,emoji:'🧪',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_6',ru:'',en:''},
+  {id:6,cols:['hp'],chronoOrder:1,year:2009,rating:7.6,quality:'4K',size:{uz:'14 GB',ru:'',en:''},hidden:false,emoji:'🧪',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_6',ru:'',en:''},
    title:{uz:"Harry Potter va Yarim Qon Shahzoda",ru:"Гарри Поттер и принц-полукровка",en:"Harry Potter and the Half-Blood Prince"},
    desc:{uz:"Harry Dumbledordan maxfiy ta'lim oladi.",ru:"Гарри получает тайные уроки от Дамблдора.",en:"Harry receives secret lessons from Dumbledore."}},
-  {id:7,col:'hp',year:2010,rating:7.7,quality:'4K',size:{uz:'16 GB',ru:'',en:''},hidden:false,emoji:'⚔️',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_7a',ru:'',en:''},
+  {id:7,cols:['hp'],chronoOrder:1,year:2010,rating:7.7,quality:'4K',size:{uz:'16 GB',ru:'',en:''},hidden:false,emoji:'⚔️',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_7a',ru:'',en:''},
    title:{uz:"Harry Potter va O'lim Sovg'alari: 1-qism",ru:"Гарри Поттер и Дары Смерти: Часть 1",en:"Harry Potter and the Deathly Hallows: Part 1"},
    desc:{uz:"Harry, Ron va Hermiona maktabni tark etib, gorksinlalarni izlashga otlanadi.",ru:"Гарри, Рон и Гермиона покидают школу и ищут крестражи.",en:"Harry, Ron and Hermione leave Hogwarts to hunt Horcruxes."}},
-  {id:8,col:'hp',year:2011,rating:8.1,quality:'4K',size:{uz:'17 GB',ru:'',en:''},hidden:false,emoji:'🏰',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_7b',ru:'',en:''},
+  {id:8,cols:['hp'],chronoOrder:1,year:2011,rating:8.1,quality:'4K',size:{uz:'17 GB',ru:'',en:''},hidden:false,emoji:'🏰',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_7b',ru:'',en:''},
    title:{uz:"Harry Potter va O'lim Sovg'alari: 2-qism",ru:"Гарри Поттер и Дары Смерти: Часть 2",en:"Harry Potter and the Deathly Hallows: Part 2"},
    desc:{uz:"Hogvarts jangida yakuniy to'qnashuv sodir bo'ladi.",ru:"В битве за Хогвартс происходит финальное противостояние.",en:"The final battle at Hogwarts."}},
-  {id:9,col:'marvel',year:2008,rating:7.9,quality:'4K',size:{uz:'14 GB',ru:'',en:''},hidden:false,emoji:'🦾',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_im1',ru:'',en:''},
+  {id:9,cols:['marvel'],chronoOrder:1,year:2008,rating:7.9,quality:'4K',size:{uz:'14 GB',ru:'',en:''},hidden:false,emoji:'🦾',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_im1',ru:'',en:''},
    title:{uz:"Temir Odam",ru:"Железный человек",en:"Iron Man"},
    desc:{uz:"Tony Stark asirlikda zirhli kostyum yaratadi.",ru:"Тони Старк в плену создаёт бронекостюм.",en:"Tony Stark builds an armored suit in captivity."}},
-  {id:10,col:'marvel',year:2012,rating:8.0,quality:'4K',size:{uz:'16 GB',ru:'',en:''},hidden:false,emoji:'⚡',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_av1',ru:'',en:''},
+  {id:10,cols:['marvel'],chronoOrder:1,year:2012,rating:8.0,quality:'4K',size:{uz:'16 GB',ru:'',en:''},hidden:false,emoji:'⚡',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_av1',ru:'',en:''},
    title:{uz:"Qasoskorlar",ru:"Мстители",en:"The Avengers"},
    desc:{uz:"Olti super qahramon Lokining bosqiniga qarshi kurashadi.",ru:"Шесть супергероев объединяются против Локи.",en:"Six superheroes unite to stop Loki's invasion."}},
-  {id:11,col:'marvel',year:2018,rating:8.4,quality:'4K',size:{uz:'18 GB',ru:'',en:''},hidden:false,emoji:'💎',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_iw',ru:'',en:''},
+  {id:11,cols:['marvel'],chronoOrder:1,year:2018,rating:8.4,quality:'4K',size:{uz:'18 GB',ru:'',en:''},hidden:false,emoji:'💎',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_iw',ru:'',en:''},
    title:{uz:"Qasoskorlar: Sonsizlik Urushi",ru:"Мстители: Война бесконечности",en:"Avengers: Infinity War"},
    desc:{uz:"Thanos olti Sonsizlik Toshini to'plash uchun yo'lga chiqadi.",ru:"Танос отправляется собрать все камни Бесконечности.",en:"Thanos sets out to collect all six Infinity Stones."}},
-  {id:12,col:'marvel',year:2019,rating:8.4,quality:'4K',size:{uz:'17 GB',ru:'',en:''},hidden:false,emoji:'🕰️',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_eg',ru:'',en:''},
+  {id:12,cols:['marvel'],chronoOrder:1,year:2019,rating:8.4,quality:'4K',size:{uz:'17 GB',ru:'',en:''},hidden:false,emoji:'🕰️',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_eg',ru:'',en:''},
    title:{uz:"Qasoskorlar: Oxirat",ru:"Мстители: Финал",en:"Avengers: Endgame"},
    desc:{uz:"Qolgan qahramonlar so'nggi kurashar.",ru:"Оставшиеся герои вступают в финальную битву.",en:"The remaining heroes make one final stand."}},
-  {id:13,col:'lotr',year:2001,rating:8.8,quality:'4K',size:{uz:'22 GB',ru:'',en:''},hidden:false,emoji:'💍',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_1',ru:'',en:''},
+  {id:13,cols:['lotr'],chronoOrder:1,year:2001,rating:8.8,quality:'4K',size:{uz:'22 GB',ru:'',en:''},hidden:false,emoji:'💍',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_1',ru:'',en:''},
    title:{uz:"Uzuk Egasi: Uzuk Hamdo'stligi",ru:"Властелин колец: Братство кольца",en:"The Lord of the Rings: The Fellowship of the Ring"},
    desc:{uz:"Frodo Baggins Qudrat Uzugini yo'q qilish uchun yo'lga chiqadi.",ru:"Фродо отправляется уничтожить Кольцо Всевластья.",en:"Frodo embarks on a journey to destroy the One Ring."}},
-  {id:14,col:'lotr',year:2002,rating:8.7,quality:'4K',size:{uz:'23 GB',ru:'',en:''},hidden:false,emoji:'🏰',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_2',ru:'',en:''},
+  {id:14,cols:['lotr'],chronoOrder:1,year:2002,rating:8.7,quality:'4K',size:{uz:'23 GB',ru:'',en:''},hidden:false,emoji:'🏰',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_2',ru:'',en:''},
    title:{uz:"Uzuk Egasi: Ikkita Minora",ru:"Властелин колец: Две крепости",en:"The Lord of the Rings: The Two Towers"},
    desc:{uz:"Hamdo'stlik bo'lingan. Frodo va Sam Mordorga yaqinlashmoqda.",ru:"Братство разделилось. Фродо и Сэм приближаются к Мордору.",en:"The Fellowship is broken. Frodo and Sam draw closer to Mordor."}},
-  {id:15,col:'lotr',year:2003,rating:9.0,quality:'4K',size:{uz:'24 GB',ru:'',en:''},hidden:false,emoji:'👑',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_3',ru:'',en:''},
+  {id:15,cols:['lotr'],chronoOrder:1,year:2003,rating:9.0,quality:'4K',size:{uz:'24 GB',ru:'',en:''},hidden:false,emoji:'👑',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_3',ru:'',en:''},
    title:{uz:"Uzuk Egasi: Qirolning Qaytishi",ru:"Властелин колец: Возвращение короля",en:"The Lord of the Rings: The Return of the King"},
    desc:{uz:"Yakuniy jang. Frodo Mordorga, Aragon esa taxtga.",ru:"Финальная битва. Фродо идёт к Мордору, Арагорн — к трону.",en:"Final battle. Frodo pushes to Mordor, Aragorn reclaims the throne."}},
-  {id:16,col:'sw',year:1977,rating:8.6,quality:'4K',size:{uz:'20 GB',ru:'',en:''},hidden:false,emoji:'⭐',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_4',ru:'',en:''},
+  {id:16,cols:['sw'],chronoOrder:1,year:1977,rating:8.6,quality:'4K',size:{uz:'20 GB',ru:'',en:''},hidden:false,emoji:'⭐',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_4',ru:'',en:''},
    title:{uz:"Yulduz Urushlari: Yangi Umid",ru:"Звёздные войны: Новая надежда",en:"Star Wars: A New Hope"},
    desc:{uz:"Luke Skywalker Imperiyaga qarshi Isyonchilar bilan qo'shiladi.",ru:"Люк Скайуокер присоединяется к повстанцам против Империи.",en:"Luke Skywalker joins rebels in the fight against the Empire."}},
-  {id:17,col:'sw',year:1980,rating:8.7,quality:'4K',size:{uz:'19 GB',ru:'',en:''},hidden:false,emoji:'🌌',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_5',ru:'',en:''},
+  {id:17,cols:['sw'],chronoOrder:1,year:1980,rating:8.7,quality:'4K',size:{uz:'19 GB',ru:'',en:''},hidden:false,emoji:'🌌',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_5',ru:'',en:''},
    title:{uz:"Yulduz Urushlari: Imperiya Zarba Beradi",ru:"Звёздные войны: Империя наносит ответный удар",en:"Star Wars: The Empire Strikes Back"},
    desc:{uz:"Imperiya qahramonlarni quvib yuradi. Luke Jedi ustozidan ta'lim oladi.",ru:"Империя преследует героев. Люк обучается у мастера-джедая.",en:"The Empire strikes back. Luke trains with a Jedi Master."}},
-  {id:18,col:'sw',year:1983,rating:8.3,quality:'4K',size:{uz:'18 GB',ru:'',en:''},hidden:false,emoji:'🐻',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_6',ru:'',en:''},
+  {id:18,cols:['sw'],chronoOrder:1,year:1983,rating:8.3,quality:'4K',size:{uz:'18 GB',ru:'',en:''},hidden:false,emoji:'🐻',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_6',ru:'',en:''},
    title:{uz:"Yulduz Urushlari: Jedi Qaytadi",ru:"Звёздные войны: Возвращение джедая",en:"Star Wars: Return of the Jedi"},
    desc:{uz:"Luke Darth Veyderga qarshi yakuniy duelga chiqadi.",ru:"Люк вступает в финальную дуэль с Дартом Вейдером.",en:"Luke faces Darth Vader in the final duel."}},
 ];
@@ -709,7 +713,7 @@ let adminTab='collections', adminColFilter=null;
 let editingColId=null, editingMovId=null;
 const FLAGS={uz:'🇺🇿',ru:'🇷🇺',en:'🇬🇧'};
 const CODES={uz:'UZ',ru:'RU',en:'EN'};
-const SORTS=['year_asc','year','rating'];
+const SORTS=['chrono','year_asc','year','rating'];
 const BG={hp:'#1A0000',marvel:'#1C0000',lotr:'#071205',sw:'#050B14'};
 const DB_KEY_LANG='kk_lang_v1';
 
@@ -868,10 +872,11 @@ function renderMovies(){
   const q=movQ.toLowerCase();
   MOVIES=loadMovies();
   const grid=document.getElementById('mov-grid');
-  let list=MOVIES.filter(m=>!m.hidden&&m.col===curCol&&(!q||m.title[lang].toLowerCase().includes(q)));
+  let list=MOVIES.filter(m=>!m.hidden&&(Array.isArray(m.cols)?m.cols.includes(curCol):m.col===curCol)&&(!q||m.title[lang].toLowerCase().includes(q)));
   const s=SORTS[sortIdx];
-  if(s==='year')list.sort((a,b)=>b.year-a.year);
+  if(s==='chrono')list.sort((a,b)=>(a.chronoOrder||999)-(b.chronoOrder||999));
   else if(s==='year_asc')list.sort((a,b)=>a.year-b.year);
+  else if(s==='year')list.sort((a,b)=>b.year-a.year);
   else list.sort((a,b)=>b.rating-a.rating);
   document.getElementById('mov-badge').textContent=t.count(list.length);
 
@@ -904,10 +909,14 @@ function renderMovies(){
   }).join('');
 }
 
-function toggleSort(){
-  sortIdx=(sortIdx+1)%3;
-  const t=T[lang];
-  document.getElementById('sort-lbl').textContent=[t.sort_ya,t.sort_yd,t.sort_r][sortIdx];
+function setSort(s){
+  sortIdx = SORTS.indexOf(s);
+  if(sortIdx < 0) sortIdx = 0;
+  // Chip larni yangilaymiz
+  document.querySelectorAll('.sort-chip').forEach(el => el.classList.remove('active'));
+  const map = {'chrono':'sort-chrono','year_asc':'sort-year','year':'sort-year','rating':'sort-rating'};
+  const activeEl = document.getElementById(map[s]);
+  if(activeEl) activeEl.classList.add('active');
   renderMovies();
 }
 
@@ -926,7 +935,7 @@ function openModal(id){
   const m=MOVIES.find(x=>x.id===id);
   if(!m)return;
   const t=T[lang];
-  const col=COLLECTIONS.find(c=>c.id===m.col);
+  const col=COLLECTIONS.find(c=>c.id===(Array.isArray(m.cols)?m.cols[0]:m.col));
   const bg=BG[m.col]||'#1A1A1A';
 
   // Poster
@@ -1106,7 +1115,7 @@ function renderAdminMovies(){
   if(!adminColFilter&&COLLECTIONS.length)adminColFilter=COLLECTIONS[0].id;
 
   const filterBtns=COLLECTIONS.map(c=>`<div class="a-cf-btn${adminColFilter===c.id?' active':''}" onclick="setAdminColFilter('${c.id}')">${esc(c.name.uz)}</div>`).join('');
-  const movs=MOVIES.filter(m=>m.col===adminColFilter);
+  const movs=MOVIES.filter(m=>Array.isArray(m.cols)?m.cols.includes(adminColFilter):(m.col===adminColFilter));
 
   ct.innerHTML=`<button class="add-btn" onclick="openMovForm(null)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1156,6 +1165,10 @@ function openColForm(id){
     <div class="f-group">
       <label class="f-label">Kolleksiya ID (lotin, bo'sh joysiz, masalan: hp)</label>
       <input class="a-input" id="f-col-id" value="${esc(c.id)}" placeholder="hp" ${id?'readonly style="opacity:.5"':''}>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Xronologiya tartibi (har kolleksiya uchun)</label>
+      <input class="a-input" id="f-mov-chrono" type="number" value="${m.chronoOrder||1}" placeholder="1" min="1">
     </div>
     <div class="f-group">
       <label class="f-label">Emoji</label>
@@ -1245,16 +1258,21 @@ function openMovForm(id){
   const movs=loadMovies();
   const cols=loadCollections();
   const m=id?movs.find(x=>x.id===id):{
-    id:null,col:adminColFilter||cols[0]?.id||'',year:2024,rating:7.0,
+    id:null,cols:[adminColFilter||cols[0]?.id||''],chronoOrder:1,year:2024,rating:7.0,
     quality:'1080p',size:{uz:'4 GB',ru:'',en:''},hidden:false,emoji:'🎬',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'',ru:'',en:''},
     title:{uz:'',ru:'',en:''},desc:{uz:'',ru:'',en:''}
   };
-  const colOptions=cols.map(c=>`<option value="${c.id}"${m.col===c.id?' selected':''}>${c.name.uz}</option>`).join('');
+  const mCols = Array.isArray(m.cols) ? m.cols : (m.col ? [m.col] : []);
+  const colOptions=cols.map(c=>`<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border-radius:8px;cursor:pointer;margin-bottom:6px"><input type="checkbox" value="${c.id}" class="col-check" ${mCols.includes(c.id)?'checked':''}> <span style="font-size:14px">${c.emoji} ${c.name.uz}</span></label>`).join('');
   document.getElementById('form-title').textContent=id?'Filmni tahrirlash':'Yangi film';
   document.getElementById('form-body').innerHTML=`
     <div class="f-group">
       <label class="f-label">Kolleksiya</label>
-      <select class="a-input" id="f-mov-col">${colOptions}</select>
+      <div id="f-mov-col">${colOptions}</div>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Xronologiya tartibi (har kolleksiya uchun)</label>
+      <input class="a-input" id="f-mov-chrono" type="number" value="${m.chronoOrder||1}" placeholder="1" min="1">
     </div>
     <div class="f-group">
       <label class="f-label">Emoji</label>
@@ -1324,7 +1342,9 @@ function saveMovForm(){
   const newId=editingMovId||(movs.length?Math.max(...movs.map(m=>m.id))+1:1);
   const entry={
     id:newId,
-    col:document.getElementById('f-mov-col').value,
+    cols:[...document.querySelectorAll('#f-mov-col .col-check:checked')].map(el=>el.value),
+    col:[...document.querySelectorAll('#f-mov-col .col-check:checked')].map(el=>el.value)[0]||'',
+    chronoOrder:parseInt(document.getElementById('f-mov-chrono').value)||1,
     emoji:document.getElementById('f-mov-emoji').value.trim()||'🎬',
     trailer:document.getElementById('f-mov-trailer').value.trim(),
     thumbnail:{uz:document.getElementById('f-mov-thumb-uz').value.trim(),ru:document.getElementById('f-mov-thumb-ru').value.trim(),en:document.getElementById('f-mov-thumb-en').value.trim()},
@@ -1400,7 +1420,7 @@ function getCollectionViews(colId){
   // Kolleksiyaga tegishli barcha filmlar ko'rishlar sonining yig'indisi
   const v = loadViews();
   return MOVIES
-    .filter(m=>m.col===colId)
+    .filter(m=>Array.isArray(m.cols)?m.cols.includes(colId):(m.col===colId))
     .reduce((sum,m)=>(sum + (v[m.id]||0)), 0);
 }
 
@@ -1459,7 +1479,7 @@ function globalSearch(q){
     html += `<div class="gs-section">Filmlar</div>`;
     html += matchMovs.map(m=>{
       const bg = BG[m.col]||'#1A1A1A';
-      const col = COLLECTIONS.find(c=>c.id===m.col);
+      const col = COLLECTIONS.find(c=>(Array.isArray(m.cols)?m.cols[0]:m.col)===c.id);
       const imgEl = m.thumbnail ? `<img src="${m.thumbnail}" alt="" onerror="this.style.display='none'">` : '';
       return `<div class="gs-mov-card" onclick="openModal(${m.id})">
         <div class="gs-poster" style="background:${bg}">${imgEl}<span style="position:relative;z-index:1">${m.emoji}</span></div>
