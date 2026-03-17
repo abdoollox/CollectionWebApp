@@ -741,10 +741,12 @@ function goToLang(){showScreen('screen-lang')}
 
 function applyLang(){
   const t=T[lang];
-  document.getElementById('col-srch').placeholder=t.search_col;
-  document.getElementById('mov-srch').placeholder=t.search_mov;
-  document.getElementById('col-sec-lbl').textContent=t.all_col;
-  document.getElementById('sort-lbl').textContent=t.sort_yd;
+  const colSrch=document.getElementById('col-srch');
+  const movSrch=document.getElementById('mov-srch');
+  const colSecLbl=document.getElementById('col-sec-lbl');
+  if(colSrch) colSrch.placeholder=t.search_col;
+  if(movSrch) movSrch.placeholder=t.search_mov;
+  if(colSecLbl) colSecLbl.textContent=t.all_col;
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k=el.dataset.k;if(t[k])el.textContent=t[k];
   });
@@ -861,9 +863,12 @@ function openCollection(id){
   document.getElementById('mov-srch').value='';
   const col=COLLECTIONS.find(c=>c.id===id);
   document.getElementById('mov-title').textContent=col.name[lang];
-  document.getElementById('sort-lbl').textContent=T[lang].sort_ya;
   document.getElementById('mov-sec-lbl').textContent=T[lang].all_mov;
   showScreen('screen-movies');
+  // Chip larni default (chrono) ga qaytaramiz
+  document.querySelectorAll('.sort-chip').forEach(el=>el.classList.remove('active'));
+  const def=document.getElementById('sort-chrono');
+  if(def) def.classList.add('active');
   renderMovies();
 }
 
@@ -912,7 +917,7 @@ function renderMovies(){
 function setSort(s){
   sortIdx = SORTS.indexOf(s);
   if(sortIdx < 0) sortIdx = 0;
-  // Chip larni yangilaymiz
+  // Chip larni yangilaymiz (agar DOM da mavjud bo'lsa)
   document.querySelectorAll('.sort-chip').forEach(el => el.classList.remove('active'));
   const map = {'chrono':'sort-chrono','year_asc':'sort-year','year':'sort-year','rating':'sort-rating'};
   const activeEl = document.getElementById(map[s]);
@@ -1599,7 +1604,7 @@ function showNavPage(page){
     const savedMovies = MOVIES.filter(m=>likes.includes(m.id));
     curCol = '__saved__';
     document.getElementById('mov-title').textContent = info[lang]||info.uz;
-    document.getElementById('sort-lbl').textContent = T[lang].sort_yd;
+    // sort-lbl removed
     document.getElementById('mov-sec-lbl').textContent = T[lang].all_mov;
     showScreen('screen-movies');
     const t = T[lang];
@@ -1672,8 +1677,8 @@ function esc(s){
   const saved = localStorage.getItem(DB_KEY_LANG);
   if(saved && ['uz','ru','en'].includes(saved)){
     lang = saved;
-    document.getElementById('cur-flag').textContent = FLAGS[saved];
-    document.getElementById('cur-code').textContent = CODES[saved];
+    const _cf=document.getElementById('cur-flag');const _cc=document.getElementById('cur-code');
+    if(_cf)_cf.textContent=FLAGS[saved];if(_cc)_cc.textContent=CODES[saved];
     applyLang();
     showScreen('screen-collections');
     renderCollections();
