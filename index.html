@@ -418,8 +418,8 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div style="padding:8px 14px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px">
     <span style="font-size:12px;color:var(--muted);flex-shrink:0" id="mov-sec-lbl">Barcha filmlar</span>
     <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
-      <button class="sort-chip active" id="sort-chrono" onclick="setSort('chrono')">🎬 Xronologiya</button>
-      <button class="sort-chip" id="sort-year" onclick="setSort('year_asc')">📅 Yil</button>
+      <button class="sort-chip active" id="sort-chrono" onclick="setSort('chrono')">🎬 Xronologiya ↑</button>
+      <button class="sort-chip" id="sort-year" onclick="setSort('year')">📅 Yil</button>
       <button class="sort-chip" id="sort-rating" onclick="setSort('rating')">⭐ Reyting</button>
     </div>
   </div>
@@ -707,13 +707,14 @@ applyTheme();
 /* ═══════════════════════════════════════
    STATE
 ═══════════════════════════════════════ */
-let lang='uz', curCol=null, sortIdx=0, colQ='', movQ='';
+let lang='uz', curCol=null, sortIdx=0, sortDir=1, colQ='', movQ='';
+// sortDir: 1=asc, -1=desc
 let logoTapCount=0, logoTapTimer=null;
 let adminTab='collections', adminColFilter=null;
 let editingColId=null, editingMovId=null;
 const FLAGS={uz:'🇺🇿',ru:'🇷🇺',en:'🇬🇧'};
 const CODES={uz:'UZ',ru:'RU',en:'EN'};
-const SORTS=['chrono','year_asc','year','rating'];
+const SORTS=['chrono','year','rating'];
 const BG={hp:'#1A0000',marvel:'#1C0000',lotr:'#071205',sw:'#050B14'};
 const DB_KEY_LANG='kk_lang_v1';
 
@@ -859,7 +860,7 @@ function renderCollections(){
    RENDER MOVIES
 ═══════════════════════════════════════ */
 function openCollection(id){
-  curCol=id; sortIdx=0; movQ='';
+  curCol=id; sortIdx=0; sortDir=1; movQ='';
   document.getElementById('mov-srch').value='';
   const col=COLLECTIONS.find(c=>c.id===id);
   document.getElementById('mov-title').textContent=col.name[lang];
@@ -879,10 +880,9 @@ function renderMovies(){
   const grid=document.getElementById('mov-grid');
   let list=MOVIES.filter(m=>!m.hidden&&(Array.isArray(m.cols)?m.cols.includes(curCol):m.col===curCol)&&(!q||m.title[lang].toLowerCase().includes(q)));
   const s=SORTS[sortIdx];
-  if(s==='chrono')list.sort((a,b)=>(a.chronoOrder||999)-(b.chronoOrder||999));
-  else if(s==='year_asc')list.sort((a,b)=>a.year-b.year);
-  else if(s==='year')list.sort((a,b)=>b.year-a.year);
-  else list.sort((a,b)=>b.rating-a.rating);
+  if(s==='chrono') list.sort((a,b)=>sortDir*((a.chronoOrder||999)-(b.chronoOrder||999)));
+  else if(s==='year') list.sort((a,b)=>sortDir*(a.year-b.year));
+  else list.sort((a,b)=>sortDir*(a.rating-b.rating));
   document.getElementById('mov-badge').textContent=t.count(list.length);
 
   if(!list.length){
@@ -915,13 +915,32 @@ function renderMovies(){
 }
 
 function setSort(s){
-  sortIdx = SORTS.indexOf(s);
-  if(sortIdx < 0) sortIdx = 0;
-  // Chip larni yangilaymiz (agar DOM da mavjud bo'lsa)
-  document.querySelectorAll('.sort-chip').forEach(el => el.classList.remove('active'));
-  const map = {'chrono':'sort-chrono','year_asc':'sort-year','year':'sort-year','rating':'sort-rating'};
-  const activeEl = document.getElementById(map[s]);
-  if(activeEl) activeEl.classList.add('active');
+  const newIdx = SORTS.indexOf(s);
+  if(newIdx < 0) return;
+  if(sortIdx === newIdx){
+    // Xuddi shu tugma — yo'nalishni almashtir
+    sortDir *= -1;
+  } else {
+    sortIdx = newIdx;
+    sortDir = 1; // Yangi sort — default asc
+  }
+  // Chip larni yangilaymiz
+  const labels = {
+    chrono:  sortDir===1 ? '🎬 Xronologiya ↑' : '🎬 Xronologiya ↓',
+    year:    sortDir===1 ? '📅 Yil ↑' : '📅 Yil ↓',
+    rating:  sortDir===1 ? '⭐ Reyting ↑' : '⭐ Reyting ↓',
+  };
+  const ids = {chrono:'sort-chrono', year:'sort-year', rating:'sort-rating'};
+  document.querySelectorAll('.sort-chip').forEach(el => {
+    el.classList.remove('active');
+    const key = Object.keys(ids).find(k=>ids[k]===el.id);
+    if(key) el.textContent = labels[key].replace(/ [↑↓]$/,'');
+  });
+  const activeEl = document.getElementById(ids[s]);
+  if(activeEl){
+    activeEl.classList.add('active');
+    activeEl.textContent = labels[s];
+  }
   renderMovies();
 }
 
