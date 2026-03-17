@@ -1034,24 +1034,9 @@ function downloadMovie(id){
 
   if(!fileId){ showToast("Bu film hali qo'shilmagan ⏳"); return; }
 
-  // Film ma'lumotlarini caption uchun tayyorlaymiz
-  const title  = (m.title  && m.title[curLang])  || m.title?.uz  || '';
-  const quality = m.quality || '';
-  const year    = m.year    || '';
-  const rating  = m.rating  || '';
-  const size    = (m.size && typeof m.size === 'object')
-                  ? (m.size[curLang] || m.size.uz || '')
-                  : (m.size || '');
-
-  // Caption: URL-encoded holda start parametriga joylashtiramiz
-  const caption = encodeURIComponent(
-    title + '|' + year + '|' + quality + '|' + rating + '|' + size
-  );
-
+  // Faqat fileId ni yuboramiz (Telegram start param maks 64 belgi)
   if(tg){
-    tg.openTelegramLink(
-      'https://t.me/kinokolleksiyabot?start=dl_' + fileId + '_' + caption
-    );
+    tg.openTelegramLink('https://t.me/kinokolleksiyabot?start=dl_' + fileId);
     tg.close();
   } else {
     showToast(T[lang].download + '...');
