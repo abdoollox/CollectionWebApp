@@ -709,7 +709,7 @@ let adminTab='collections', adminColFilter=null;
 let editingColId=null, editingMovId=null;
 const FLAGS={uz:'🇺🇿',ru:'🇷🇺',en:'🇬🇧'};
 const CODES={uz:'UZ',ru:'RU',en:'EN'};
-const SORTS=['year','rating','year_asc'];
+const SORTS=['year_asc','year','rating'];
 const BG={hp:'#1A0000',marvel:'#1C0000',lotr:'#071205',sw:'#050B14'};
 const DB_KEY_LANG='kk_lang_v1';
 
@@ -857,7 +857,7 @@ function openCollection(id){
   document.getElementById('mov-srch').value='';
   const col=COLLECTIONS.find(c=>c.id===id);
   document.getElementById('mov-title').textContent=col.name[lang];
-  document.getElementById('sort-lbl').textContent=T[lang].sort_yd;
+  document.getElementById('sort-lbl').textContent=T[lang].sort_ya;
   document.getElementById('mov-sec-lbl').textContent=T[lang].all_mov;
   showScreen('screen-movies');
   renderMovies();
@@ -907,7 +907,7 @@ function renderMovies(){
 function toggleSort(){
   sortIdx=(sortIdx+1)%3;
   const t=T[lang];
-  document.getElementById('sort-lbl').textContent=[t.sort_yd,t.sort_r,t.sort_ya][sortIdx];
+  document.getElementById('sort-lbl').textContent=[t.sort_ya,t.sort_yd,t.sort_r][sortIdx];
   renderMovies();
 }
 
