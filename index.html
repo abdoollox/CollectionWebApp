@@ -252,7 +252,8 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 }
 .modal-stat strong{color:var(--text);font-weight:500}
 .modal-desc{font-size:13px;color:var(--muted);line-height:1.7;margin-bottom:20px}
-.modal-acts{display:flex;gap:10px}
+.modal-acts{display:flex;flex-direction:column;gap:8px}
+.modal-acts-row{display:flex;gap:8px}
 .btn-p{flex:1;padding:13px;background:var(--red);border:none;border-radius:12px;color:#fff;font-family:'Inter',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .2s}
 .btn-p:active{opacity:.85}
 .btn-p:hover{opacity:.9}
@@ -991,20 +992,22 @@ function openModal(id){
     </div>
     <div class="modal-desc">${esc(m.desc[lang])}</div>
     <div class="modal-acts">
-      <button class="btn-p" onclick="downloadMovie(${m.id})">${t.download}</button>
-      ${m.trailer ? `<a class="btn-trailer" href="${esc(m.trailer)}" target="_blank" onclick="event.stopPropagation()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Trailer
-      </a>` : ''}
-      <button class="btn-s" onclick="toggleWatchedModal(${m.id})" title="${lang==='ru'?'Я смотрел':lang==='en'?'Watched':'Ko\'rganman'}" style="${isWatched(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}">
-        ${isWatched(m.id)
-          ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg>`
-          : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`
-        }
-      </button>
-      <button class="btn-s" onclick="toggleLikeModal(${m.id})" style="${isLiked(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="${isLiked(m.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-      </button>
+      <button class="btn-p" style="width:100%" onclick="downloadMovie(${m.id})">${t.download}</button>
+      <div class="modal-acts-row">
+        ${m.trailer ? `<a class="btn-trailer" style="flex:1" href="${esc(m.trailer)}" target="_blank" onclick="event.stopPropagation()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Trailer
+        </a>` : ''}
+        <button class="btn-s" style="flex:1;${isWatched(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}" onclick="toggleWatchedModal(${m.id})">
+          ${isWatched(m.id)
+            ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ko'rildi`
+            : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Ko'rdim`
+          }
+        </button>
+        <button class="btn-s" style="${isLiked(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}" onclick="toggleLikeModal(${m.id})">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="${isLiked(m.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+      </div>
     </div>`;
 
   document.getElementById('modal').classList.add('open');
