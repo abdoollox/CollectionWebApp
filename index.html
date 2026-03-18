@@ -1073,10 +1073,14 @@ function downloadMovie(id){
   if(!fileId){ showToast("Bu film hali qo'shilmagan ⏳"); return; }
   incrementGlobalStat('d', m.id);
 
-  // Faqat fileId yuboramiz — nom DB kanaldagi captiondan olinadi
   if(tg){
+    // 1. Telegramga botni ochish va parametrni berish buyrug'i
     tg.openTelegramLink('https://t.me/kinokolleksiyabot?start=dl_' + fileId);
-    tg.close();
+    
+    // 2. Link ishga tushib ulgurishi uchun pauza, so'ng WebApp'ni yopish
+    setTimeout(() => {
+      tg.close();
+    }, 500); 
   } else {
     showToast(T[lang].download + '...');
   }
