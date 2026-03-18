@@ -1059,12 +1059,12 @@ function closeModalOutside(e){if(e.target===document.getElementById('modal'))clo
 ═══════════════════════════════════════ */
 function downloadMovie(id){
   try {
-    // 1. Filmni va ID ni topamiz
     const m = loadMovies().find(x => x.id === id || x.id === +id);
     if(!m){ showToast('Film topilmadi ❌'); return; }
 
     const curLang = lang || 'uz';
     let fileId = '';
+    
     if(m.fileId && typeof m.fileId === 'object'){
       fileId = String(m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '').trim();
     } else {
@@ -1072,35 +1072,32 @@ function downloadMovie(id){
     }
 
     if(!fileId){ 
-      showToast("Bu film uchun Telegram File ID kiritilmagan ⏳"); 
+      showToast("Telegram File ID kiritilmagan ⏳"); 
       return; 
     }
 
-    // 2. Bot manzilini tayyorlaymiz
+    // 1. Manzilni tayyorlaymiz
     const botLink = 'https://t.me/kinokolleksiyabot?start=dl_' + fileId;
 
-    // 3. BIRINCHI NAVBATDA YO'NALTIRAMIZ (Boshqa ishlarni kutib o'tirmaymiz!)
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
-      // Haqiqiy Telegram ilovasi ichida bo'lsa
-      window.Telegram.WebApp.openTelegramLink(botLink);
+    // 2. Oynani yopib, statistikani yozish (Bu ishlarni tezda hal qilamiz)
+    closeModal();
+    try { incrementGlobalStat('d', m.id); } catch(err){}
+
+    // 3. TELEGRAMNI MAJBURLASH (Fail-safe mexanizmi)
+    const tg = window.Telegram?.WebApp;
+    
+    // Agar dastur to'liq Telegram WebApp muhitida bo'lsa
+    if (tg && typeof tg.openTelegramLink === 'function') {
+        tg.openTelegramLink(botLink);
+        // Telegram linkni ochishni boshlashi bilan, orqasidan WebApp'ni majburan yopamiz
+        setTimeout(() => { tg.close(); }, 100);
     } else {
-      // Kompyuterda (Oddiy brauzerda) test qilinayotgan bo'lsa
-      window.location.href = botLink;
+        // Agar siz shunchaki Chrome/Safari kabi oddiy brauzerda test qilayotgan bo'lsangiz
+        window.open(botLink, '_blank');
     }
 
-    // 4. Vizual va bazaviy ishlarni orqa fonda xavfsiz bajaramiz
-    setTimeout(() => {
-      closeModal();
-      try { 
-        incrementGlobalStat('d', m.id); 
-      } catch(err) { 
-        console.warn("Statistika yozishda xato, lekin kino yuklandi:", err); 
-      }
-    }, 50);
-
   } catch (err) {
-    // Agar umuman kutilmagan xato chiqsa, ekranda yuzingga aytadi (Jim turmaydi)
-    alert("Kutilmagan xato yuz berdi: " + err.message);
+    alert("Xato yuz berdi: " + err.message);
   }
 }
 
