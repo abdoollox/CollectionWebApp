@@ -1229,12 +1229,8 @@ function openColForm(id){
       <input class="a-input" id="f-col-id" value="${esc(c.id)}" placeholder="hp" ${id?'readonly style="opacity:.5"':''}>
     </div>
     <div class="f-group">
-      <label class="f-label">Xronologiya tartibi (har kolleksiya uchun)</label>
-      <input class="a-input" id="f-mov-chrono" type="number" value="${m.chronoOrder||1}" placeholder="1" min="1">
-    </div>
-    <div class="f-group">
       <label class="f-label">Emoji</label>
-      <input class="a-input" id="f-col-emoji" value="${c.emoji}" placeholder="🎬" style="font-size:20px">
+      <input class="a-input" id="f-col-emoji" value="${esc(c.emoji)}" placeholder="🎬" style="font-size:20px">
     </div>
     <div class="f-group">
       <label class="f-label">Thumbnail URL (16:9 rasm)</label>
