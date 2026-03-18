@@ -1058,43 +1058,49 @@ function closeModalOutside(e){if(e.target===document.getElementById('modal'))clo
    ACTIONS
 ═══════════════════════════════════════ */
 function downloadMovie(id){
-  const m = loadMovies().find(x => x.id === id || x.id === +id);
-  closeModal(); // 1. Modalni yopamiz
-  if(!m){ showToast('Film topilmadi ❌'); return; }
-
-  const curLang = lang || 'uz';
-  let fileId = '';
-  
-  // 2. ID ni olamiz va ortiqcha bo'sh joylarni kesib tashlaymiz (Juda muhim!)
-  if(m.fileId && typeof m.fileId === 'object'){
-    fileId = String(m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '').trim();
-  } else {
-    fileId = String(m.fileId || '').trim();
-  }
-
-  if(!fileId){ 
-    showToast("Bu film uchun Telegram File ID kiritilmagan ⏳"); 
-    return; 
-  }
-  
-  // 3. Statistikani yozamiz
-  incrementGlobalStat('d', m.id);
-
-  // 4. Linkni tayyorlaymiz
-  const botLink = 'https://t.me/kinokolleksiyabot?start=dl_' + fileId;
-
-  // 5. O'q o'tmas (Bulletproof) Yo'naltirish mexanizmi
   try {
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
-      // tg.close() KERAK EMAS! openTelegramLink o'zi yopadi.
+    // 1. Filmni va ID ni topamiz
+    const m = loadMovies().find(x => x.id === id || x.id === +id);
+    if(!m){ showToast('Film topilmadi ❌'); return; }
+
+    const curLang = lang || 'uz';
+    let fileId = '';
+    if(m.fileId && typeof m.fileId === 'object'){
+      fileId = String(m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '').trim();
+    } else {
+      fileId = String(m.fileId || '').trim();
+    }
+
+    if(!fileId){ 
+      showToast("Bu film uchun Telegram File ID kiritilmagan ⏳"); 
+      return; 
+    }
+
+    // 2. Bot manzilini tayyorlaymiz
+    const botLink = 'https://t.me/kinokolleksiyabot?start=dl_' + fileId;
+
+    // 3. BIRINCHI NAVBATDA YO'NALTIRAMIZ (Boshqa ishlarni kutib o'tirmaymiz!)
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) {
+      // Haqiqiy Telegram ilovasi ichida bo'lsa
       window.Telegram.WebApp.openTelegramLink(botLink);
     } else {
-      // Agar kompyuterda yoki eski versiyada ochsa, to'g'ridan-to'g'ri brauzer orqali o'tkazamiz
+      // Kompyuterda (Oddiy brauzerda) test qilinayotgan bo'lsa
       window.location.href = botLink;
     }
-  } catch (e) {
-    // Kutilmagan xato bersa ham, ishni to'xtatmaymiz
-    window.location.href = botLink;
+
+    // 4. Vizual va bazaviy ishlarni orqa fonda xavfsiz bajaramiz
+    setTimeout(() => {
+      closeModal();
+      try { 
+        incrementGlobalStat('d', m.id); 
+      } catch(err) { 
+        console.warn("Statistika yozishda xato, lekin kino yuklandi:", err); 
+      }
+    }, 50);
+
+  } catch (err) {
+    // Agar umuman kutilmagan xato chiqsa, ekranda yuzingga aytadi (Jim turmaydi)
+    alert("Kutilmagan xato yuz berdi: " + err.message);
   }
 }
 
