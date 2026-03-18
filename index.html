@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Kino Kolleksiya</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&subset=latin,cyrillic&display=swap" rel="stylesheet">
 <style>
@@ -626,63 +628,67 @@ const DEFAULT_MOVIES = [
 ];
 
 /* ═══════════════════════════════════════
-   CLOUD BAZA (JSONBIN)
+   FIREBASE BAZA SOZLAMALARI
 ═══════════════════════════════════════ */
+const firebaseConfig = {
+  apiKey: "AIzaSyDXTEo-xxh9jLRE7IWtLXUPhcVBb7st_6U",
+  authDomain: "collection-e9ebb.firebaseapp.com",
+  projectId: "collection-e9ebb",
+  storageBucket: "collection-e9ebb.firebasestorage.app",
+  messagingSenderId: "546567976878",
+  appId: "1:546567976878:web:9f00beb2da92a90d797a3f"
+};
+
+// Firebase ni ishga tushirish
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 const DB_KEY_COL = 'kk_col_backup';
 const DB_KEY_MOV = 'kk_mov_backup';
 const ADMIN_PASS = 'kino';
-
-const DB_BIN_ID  = '69b7de99b7ec241ddc722d74';
-const DB_READ_KEY = '69b7d54caa77b81da9ebd7d5';
-let ADMIN_TOKEN = null;
+let ADMIN_TOKEN = false; // Parol tasdiqlanganda true bo'ladi
 
 let COLLECTIONS = [];
 let MOVIES = [];
 
+// Firestore dan o'qish
 async function fetchCloudData(){
-  try{
-    // Bin public — kalit shart emas
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}/latest`);
-    if(!res.ok) throw new Error('Read error: ' + res.status);
-    const data = await res.json();
-    COLLECTIONS = data.record.collections || [];
-    MOVIES      = data.record.movies      || [];
-    // Global stats ni yuklab olamiz
-    if(data.record.stats){
-      const remoteStats = data.record.stats;
-      mergeRemoteStats(remoteStats);
+  try {
+    const docRef = await db.collection("kino").doc("main").get();
+    if (docRef.exists) {
+      const data = docRef.data();
+      COLLECTIONS = data.collections || [];
+      MOVIES = data.movies || [];
+    }
+    const statsRef = await db.collection("kino").doc("stats").get();
+    if (statsRef.exists) {
+      mergeRemoteStats(statsRef.data());
     }
     localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
     localStorage.setItem(DB_KEY_MOV, JSON.stringify(MOVIES));
-  }catch(err){
-    console.warn('Cloud o\'qish xatosi:', err);
+  } catch(err) {
+    console.warn("Firebase o'qish xatosi:", err);
     COLLECTIONS = JSON.parse(localStorage.getItem(DB_KEY_COL) || '[]');
-    MOVIES      = JSON.parse(localStorage.getItem(DB_KEY_MOV) || '[]');
+    MOVIES = JSON.parse(localStorage.getItem(DB_KEY_MOV) || '[]');
     if(!COLLECTIONS.length) COLLECTIONS = JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS));
-    if(!MOVIES.length)      MOVIES      = JSON.parse(JSON.stringify(DEFAULT_MOVIES));
+    if(!MOVIES.length)      MOVIES = JSON.parse(JSON.stringify(DEFAULT_MOVIES));
   }
 }
 
 async function syncToCloud(){
-  if(!ADMIN_TOKEN){ showToast('Admin kirish kerak!'); return; }
-  showToast('Saqlanmoqda... ⏳');
-  try{
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}`,{
-      method:'PUT',
-      headers:{
-        'Content-Type':'application/json',
-        'X-Master-Key': ADMIN_TOKEN,
-        'X-Bin-Versioning':'false'
-      },
-      body: JSON.stringify({collections: COLLECTIONS, movies: MOVIES, stats: loadGlobalStats()})
-    });
-    if(!res.ok) throw new Error('Write error: ' + res.status);
+  if(!ADMIN_TOKEN){ showToast('Admin emas!'); return; }
+  showToast('Bulutga saqlanmoqda... ⏳');
+  try {
+    await db.collection("kino").doc("main").set({
+      collections: COLLECTIONS,
+      movies: MOVIES
+    }, { merge: true });
     localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
     localStorage.setItem(DB_KEY_MOV, JSON.stringify(MOVIES));
-    showToast('Saqlandi ✅');
-  }catch(e){
+    showToast('Barcha qurilmalarda saqlandi ✅');
+  } catch(e) {
     showToast('Saqlashda xato ❌');
-    console.warn('Cloud yozish xatosi:', e);
+    console.error(e);
   }
 }
 
@@ -812,26 +818,18 @@ function logoTap(){
 ═══════════════════════════════════════ */
 async function adminLogin(){
   const inputKey = document.getElementById('a-pass').value.trim();
-  const btn = document.querySelector('.a-btn');
   const err = document.getElementById('a-err');
-  if(!inputKey) return;
-  btn.textContent = 'Tekshirilmoqda...';
-  err.style.display = 'none';
-  try{
-    const res = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}/latest`,{
-      headers:{'X-Master-Key': inputKey}
-    });
-    if(res.ok){
-      ADMIN_TOKEN = inputKey;
-      document.getElementById('a-pass').value = '';
-      showScreen('screen-admin');
-      switchAdminTab('collections');
-    } else { throw new Error(); }
-  }catch(e){
-    err.textContent = "Maxfiy kalit noto'g'ri!";
+
+  // Hozircha oddiy parol. Firebase Authentication ga o'tgach yangilanadi.
+  if(inputKey === "kino") {
+    ADMIN_TOKEN = true;
+    document.getElementById('a-pass').value = '';
+    showScreen('screen-admin');
+    switchAdminTab('collections');
+  } else {
+    err.textContent = "Parol noto'g'ri!";
     err.style.display = 'block';
   }
-  btn.textContent = 'Kirish';
 }
 
 function adminLogout(){
@@ -1474,66 +1472,27 @@ function todayStr(){
   return y+'-'+m+'-'+dd;
 }
 
-function incrementGlobalStat(type, movieId){
-  // type: 'd'=download, 'w'=watched, 'l'=like
-  const s = loadGlobalStats();
+function incrementGlobalStat(type, movieId) {
   const id = String(movieId);
-  const today = todayStr();
 
-  // Total
+  // Local UI tez ishlashi uchun o'zimizda saqlaymiz
+  const s = loadGlobalStats();
   if(!s[type]) s[type] = {};
   s[type][id] = (s[type][id]||0) + 1;
 
   // Daily log
+  const today = todayStr();
   if(!s.log) s.log = {};
   if(!s.log[today]) s.log[today] = {};
   if(!s.log[today][type]) s.log[today][type] = {};
   s.log[today][type][id] = (s.log[today][type][id]||0) + 1;
-
-  // 365 kundan eski loglarni tozalaymiz
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - 365);
-  Object.keys(s.log).forEach(d => {
-    if(new Date(d) < cutoff) delete s.log[d];
-  });
-
   saveGlobalStats(s);
-  scheduleSyncStats();
-}
 
-// Stats ni cloud ga yuborish (debounced — 10 soniyada bir marta)
-let _statsSyncTimer = null;
-function scheduleSyncStats(){
-  if(_statsSyncTimer) clearTimeout(_statsSyncTimer);
-  _statsSyncTimer = setTimeout(syncStatsToCloud, 5000);
-}
-
-async function syncStatsToCloud(){
-  // Stats uchun master key — barcha foydalanuvchilar uchun ishlaydi
-  const STATS_KEY = JBIN_KEY; // mavjud kalit
-  try{
-    // Avval clouddan o'qib, stats ni merge qilamiz
-    const res = await fetch('https://api.jsonbin.io/v3/b/' + DB_BIN_ID + '/latest');
-    const current = await res.json();
-    const remoteStats = current.record?.stats || {};
-    // Remote stats bilan merge
-    mergeRemoteStats(remoteStats);
-    // Yangilangan stats ni cloud ga yozamiz
-    const merged = {
-      collections: current.record?.collections || COLLECTIONS,
-      movies:      current.record?.movies      || MOVIES,
-      stats:       loadGlobalStats()
-    };
-    await fetch('https://api.jsonbin.io/v3/b/' + DB_BIN_ID, {
-      method:'PUT',
-      headers:{
-        'Content-Type':'application/json',
-        'X-Master-Key': STATS_KEY,
-        'X-Bin-Versioning':'false'
-      },
-      body: JSON.stringify(merged)
-    });
-  }catch(e){ console.warn('Stats sync xatosi:', e); }
+  // FIREBASE: Poygasiz (Race-condition-siz) +1 qo'shish
+  const updateData = {};
+  updateData[type + '.' + id] = firebase.firestore.FieldValue.increment(1);
+  db.collection("kino").doc("stats").set(updateData, { merge: true })
+    .catch(err => console.warn("Stats yozishda xato:", err));
 }
 
 function mergeRemoteStats(remote){
