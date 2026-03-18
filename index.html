@@ -1466,7 +1466,12 @@ function saveGlobalStats(s){
 }
 
 function todayStr(){
-  return new Date().toISOString().slice(0,10); // "YYYY-MM-DD"
+  // Local sana (UTC emas) — timezone muammosini oldini oladi
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+dd;
 }
 
 function incrementGlobalStat(type, movieId){
@@ -1500,26 +1505,32 @@ function incrementGlobalStat(type, movieId){
 let _statsSyncTimer = null;
 function scheduleSyncStats(){
   if(_statsSyncTimer) clearTimeout(_statsSyncTimer);
-  _statsSyncTimer = setTimeout(syncStatsToCloud, 10000);
+  _statsSyncTimer = setTimeout(syncStatsToCloud, 5000);
 }
 
 async function syncStatsToCloud(){
-  // Master key yo'q bo'lsa — faqat local saqlaydi
-  if(!ADMIN_TOKEN){
-    // Public write uchun — bin public bo'lgani uchun PUT ham ishlaydimi?
-    // Ishlamasa — faqat local, admin keyingisi sync qiladi
-    return;
-  }
+  // Stats uchun master key — barcha foydalanuvchilar uchun ishlaydi
+  const STATS_KEY = JBIN_KEY; // mavjud kalit
   try{
-    const current = await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}/latest`).then(r=>r.json());
+    // Avval clouddan o'qib, stats ni merge qilamiz
+    const res = await fetch('https://api.jsonbin.io/v3/b/' + DB_BIN_ID + '/latest');
+    const current = await res.json();
+    const remoteStats = current.record?.stats || {};
+    // Remote stats bilan merge
+    mergeRemoteStats(remoteStats);
+    // Yangilangan stats ni cloud ga yozamiz
     const merged = {
       collections: current.record?.collections || COLLECTIONS,
       movies:      current.record?.movies      || MOVIES,
       stats:       loadGlobalStats()
     };
-    await fetch(`https://api.jsonbin.io/v3/b/${DB_BIN_ID}`,{
+    await fetch('https://api.jsonbin.io/v3/b/' + DB_BIN_ID, {
       method:'PUT',
-      headers:{'Content-Type':'application/json','X-Master-Key': ADMIN_TOKEN,'X-Bin-Versioning':'false'},
+      headers:{
+        'Content-Type':'application/json',
+        'X-Master-Key': STATS_KEY,
+        'X-Bin-Versioning':'false'
+      },
       body: JSON.stringify(merged)
     });
   }catch(e){ console.warn('Stats sync xatosi:', e); }
@@ -1555,17 +1566,24 @@ function mergeRemoteStats(remote){
 // Davr bo'yicha stats hisoblash
 function getStatsByPeriod(type, days){
   const s = loadGlobalStats();
-  if(!s.log) return {};
 
-  // days: 1=kunlik, 7=haftalik, 30=oylik, 365=yillik, 0=barcha vaqt
+  // days: 0 = barcha vaqt (total)
   if(days === 0) return s[type] || {};
+
+  if(!s.log) return {};
 
   const result = {};
   const now = new Date();
+
   for(let i=0; i<days; i++){
     const d = new Date(now);
     d.setDate(d.getDate() - i);
-    const key = d.toISOString().slice(0,10);
+    // Local sana formatida
+    const y = d.getFullYear();
+    const m = String(d.getMonth()+1).padStart(2,'0');
+    const dd = String(d.getDate()).padStart(2,'0');
+    const key = y+'-'+m+'-'+dd;
+
     const dayData = s.log[key]?.[type];
     if(!dayData) continue;
     Object.entries(dayData).forEach(([id, cnt]) => {
@@ -1602,10 +1620,11 @@ function renderStatsPage(){
   ];
 
   const periods = [
-    {label:'Kunlik',  days:1},
-    {label:'Haftalik',days:7},
-    {label:'Oylik',   days:30},
-    {label:'Yillik',  days:365},
+    {label:'Bugun',   days:1},
+    {label:'Hafta',   days:7},
+    {label:'Oy',      days:30},
+    {label:'Yil',     days:365},
+    {label:'Jami',    days:0},
   ];
 
   const grid = document.getElementById('stats-grid');
