@@ -1059,30 +1059,42 @@ function closeModalOutside(e){if(e.target===document.getElementById('modal'))clo
 ═══════════════════════════════════════ */
 function downloadMovie(id){
   const m = loadMovies().find(x => x.id === id || x.id === +id);
-  closeModal();
+  closeModal(); // 1. Modalni yopamiz
   if(!m){ showToast('Film topilmadi ❌'); return; }
 
   const curLang = lang || 'uz';
   let fileId = '';
+  
+  // 2. ID ni olamiz va ortiqcha bo'sh joylarni kesib tashlaymiz (Juda muhim!)
   if(m.fileId && typeof m.fileId === 'object'){
-    fileId = m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '';
+    fileId = String(m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '').trim();
   } else {
-    fileId = String(m.fileId || '');
+    fileId = String(m.fileId || '').trim();
   }
 
-  if(!fileId){ showToast("Bu film hali qo'shilmagan ⏳"); return; }
+  if(!fileId){ 
+    showToast("Bu film uchun Telegram File ID kiritilmagan ⏳"); 
+    return; 
+  }
+  
+  // 3. Statistikani yozamiz
   incrementGlobalStat('d', m.id);
 
-  if(tg){
-    // 1. Telegramga botni ochish va parametrni berish buyrug'i
-    tg.openTelegramLink('https://t.me/kinokolleksiyabot?start=dl_' + fileId);
-    
-    // 2. Link ishga tushib ulgurishi uchun pauza, so'ng WebApp'ni yopish
-    setTimeout(() => {
-      tg.close();
-    }, 500); 
-  } else {
-    showToast(T[lang].download + '...');
+  // 4. Linkni tayyorlaymiz
+  const botLink = 'https://t.me/kinokolleksiyabot?start=dl_' + fileId;
+
+  // 5. O'q o'tmas (Bulletproof) Yo'naltirish mexanizmi
+  try {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
+      // tg.close() KERAK EMAS! openTelegramLink o'zi yopadi.
+      window.Telegram.WebApp.openTelegramLink(botLink);
+    } else {
+      // Agar kompyuterda yoki eski versiyada ochsa, to'g'ridan-to'g'ri brauzer orqali o'tkazamiz
+      window.location.href = botLink;
+    }
+  } catch (e) {
+    // Kutilmagan xato bersa ham, ishni to'xtatmaymiz
+    window.location.href = botLink;
   }
 }
 
