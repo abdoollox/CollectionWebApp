@@ -640,8 +640,16 @@ const firebaseConfig = {
 };
 
 // Firebase ni ishga tushirish
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+let db;
+try {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+  // Offline cache yoqamiz — tezroq ishlaydi
+  db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
+  db.enablePersistence().catch(() => {});
+} catch(e) {
+  console.error('Firebase init xatosi:', e);
+}
 
 const DB_KEY_COL = 'kk_col_backup';
 const DB_KEY_MOV = 'kk_mov_backup';
@@ -659,10 +667,6 @@ async function fetchCloudData(){
       const data = docRef.data();
       COLLECTIONS = data.collections || [];
       MOVIES = data.movies || [];
-    }
-    const statsRef = await db.collection("kino").doc("stats").get();
-    if (statsRef.exists) {
-      mergeRemoteStats(statsRef.data());
     }
     localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
     localStorage.setItem(DB_KEY_MOV, JSON.stringify(MOVIES));
@@ -1433,124 +1437,44 @@ function saveMovForm(){
 }
 
 
+
 /* ═══════════════════════════════════════
-   GLOBAL STATISTIKA
-   Tuzilma: {
-     d: {movieId: totalCount, ...},   // downloads
-     w: {movieId: totalCount, ...},   // watched
-     l: {movieId: totalCount, ...},   // likes
-     log: {
-       "YYYY-MM-DD": {
-         d: {movieId: count},
-         w: {movieId: count},
-         l: {movieId: count}
-       }
-     }
-   }
+   GLOBAL STATISTIKA & JONLI (LIVE) LISTENER
 ═══════════════════════════════════════ */
-const DB_KEY_GSTATS = 'kk_global_stats_v1';
+let GLOBAL_STATS = { d: {}, w: {}, l: {} };
 
-function loadGlobalStats(){
-  try{return JSON.parse(localStorage.getItem(DB_KEY_GSTATS)||'{}')}
-  catch{return {}}
+// Firebase'ni jonli efirda kuzatib turamiz
+// Bu funksiya init() ichidan chaqiriladi — Firebase tayyor bo'lgandan keyin
+function startStatsListener(){
+  db.collection("kino").doc("stats").onSnapshot((doc) => {
+    if (doc.exists) {
+      GLOBAL_STATS = doc.data();
+      if (curCol === '__stats__') {
+        renderStatsPage();
+      }
+      const movGrid = document.getElementById('mov-grid');
+      if (movGrid && movGrid.style.display !== 'none' && curCol && curCol !== '__stats__') {
+        renderMovies();
+      }
+    }
+  });
 }
 
-function saveGlobalStats(s){
-  localStorage.setItem(DB_KEY_GSTATS, JSON.stringify(s));
-}
-
-function todayStr(){
-  // Local sana (UTC emas) — timezone muammosini oldini oladi
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = String(d.getMonth()+1).padStart(2,'0');
-  const dd = String(d.getDate()).padStart(2,'0');
-  return y+'-'+m+'-'+dd;
-}
-
-function incrementGlobalStat(type, movieId) {
+// Poygasiz (Atomic) yangilash
+function updateGlobalStat(type, movieId, amount) {
   const id = String(movieId);
-
-  // Local UI tez ishlashi uchun o'zimizda saqlaymiz
-  const s = loadGlobalStats();
-  if(!s[type]) s[type] = {};
-  s[type][id] = (s[type][id]||0) + 1;
-
-  // Daily log
-  const today = todayStr();
-  if(!s.log) s.log = {};
-  if(!s.log[today]) s.log[today] = {};
-  if(!s.log[today][type]) s.log[today][type] = {};
-  s.log[today][type][id] = (s.log[today][type][id]||0) + 1;
-  saveGlobalStats(s);
-
-  // FIREBASE: Poygasiz (Race-condition-siz) +1 qo'shish
   const updateData = {};
-  updateData[type + '.' + id] = firebase.firestore.FieldValue.increment(1);
+  updateData[type + '.' + id] = firebase.firestore.FieldValue.increment(amount);
   db.collection("kino").doc("stats").set(updateData, { merge: true })
     .catch(err => console.warn("Stats yozishda xato:", err));
 }
 
-function mergeRemoteStats(remote){
-  // Remote stats bilan local ni birlashtirish (kattasini oladi)
-  const local = loadGlobalStats();
-  ['d','w','l'].forEach(type => {
-    if(!remote[type]) return;
-    if(!local[type]) local[type] = {};
-    Object.entries(remote[type]).forEach(([id, cnt]) => {
-      local[type][id] = Math.max(local[type][id]||0, cnt);
-    });
-  });
-  // Log ham birlashtirish
-  if(remote.log){
-    if(!local.log) local.log = {};
-    Object.entries(remote.log).forEach(([date, dayData]) => {
-      if(!local.log[date]) local.log[date] = {};
-      ['d','w','l'].forEach(type => {
-        if(!dayData[type]) return;
-        if(!local.log[date][type]) local.log[date][type] = {};
-        Object.entries(dayData[type]).forEach(([id, cnt]) => {
-          local.log[date][type][id] = Math.max(local.log[date][type][id]||0, cnt);
-        });
-      });
-    });
-  }
-  saveGlobalStats(local);
+function incrementGlobalStat(type, movieId) {
+  updateGlobalStat(type, movieId, 1);
 }
 
-// Davr bo'yicha stats hisoblash
-function getStatsByPeriod(type, days){
-  const s = loadGlobalStats();
-
-  // days: 0 = barcha vaqt (total)
-  if(days === 0) return s[type] || {};
-
-  if(!s.log) return {};
-
-  const result = {};
-  const now = new Date();
-
-  for(let i=0; i<days; i++){
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    // Local sana formatida
-    const y = d.getFullYear();
-    const m = String(d.getMonth()+1).padStart(2,'0');
-    const dd = String(d.getDate()).padStart(2,'0');
-    const key = y+'-'+m+'-'+dd;
-
-    const dayData = s.log[key]?.[type];
-    if(!dayData) continue;
-    Object.entries(dayData).forEach(([id, cnt]) => {
-      result[id] = (result[id]||0) + cnt;
-    });
-  }
-  return result;
-}
-
-// Top N filmlarni qaytaradi
 function getTopMovies(type, days, n=5){
-  const counts = getStatsByPeriod(type, days);
+  const counts = GLOBAL_STATS[type] || {};
   return Object.entries(counts)
     .sort((a,b) => b[1]-a[1])
     .slice(0, n)
@@ -1562,138 +1486,80 @@ function getTopMovies(type, days, n=5){
 }
 
 /* ═══════════════════════════════════════
-   STATS PAGE RENDER
+   VIEWS & LIKES (FAQAT FIREBASE'DAN O'QILADI)
 ═══════════════════════════════════════ */
-let statsPeriod = 7; // default haftalik
-
-function renderStatsPage(){
-  const periodDays = statsPeriod;
-  const sections = [
-    {type:'d', icon:'⬇️', label:'Top Yuklamalar'},
-    {type:'w', icon:'👁',  label:"Top Ko'rishlar"},
-    {type:'l', icon:'❤️',  label:'Top Likelar'},
-  ];
-
-  const periods = [
-    {label:'Bugun',   days:1},
-    {label:'Hafta',   days:7},
-    {label:'Oy',      days:30},
-    {label:'Yil',     days:365},
-    {label:'Jami',    days:0},
-  ];
-
-  const grid = document.getElementById('stats-grid');
-  if(!grid) return;
-
-  // Period chips
-  const bar = document.getElementById('stats-period-bar');
-  if(bar){
-    bar.innerHTML = periods.map(p =>
-      `<button class="period-chip${periodDays===p.days?' active':''}" onclick="setStatsPeriod(${p.days})">${p.label}</button>`
-    ).join('');
-  }
-
-  // Sections
-  let html = '';
-  sections.forEach(sec => {
-    const top = getTopMovies(sec.type, periodDays, 5);
-    html += `<div class="stats-section">
-      <div class="stats-section-title">${sec.icon} ${sec.label}</div>`;
-
-    if(!top.length){
-      html += `<div class="stats-empty">Hali ma'lumot yo'q</div>`;
-    } else {
-      top.forEach(({movie: m, count}, i) => {
-        const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-        const col = COLLECTIONS.find(c=>c.id===(Array.isArray(m.cols)?m.cols[0]:m.col));
-        const colName = col ? esc(col.name[lang]) : '';
-        const bg = BG[Array.isArray(m.cols)?m.cols[0]:m.col] || '#1A1A1A';
-        const thumb = (m.thumbnail && m.thumbnail[lang]) || (m.thumbnail && m.thumbnail.uz) || '';
-        html += `<div class="stats-card" onclick="openStatsMovie(${m.id})">
-          <div class="stats-rank ${rankClass}">${i+1}</div>
-          <div class="stats-poster" style="background:${bg}">
-            <span>${m.emoji}</span>
-            ${thumb ? `<img loading="lazy" src="${thumb}" alt="" onerror="this.style.display='none'">` : ''}
-          </div>
-          <div class="stats-info">
-            <div class="stats-title">${esc(m.title[lang])}</div>
-            <div class="stats-col">${colName} · ${m.year}</div>
-          </div>
-          <div class="stats-count">${count}</div>
-        </div>`;
-      });
-    }
-    html += '</div>';
-  });
-
-  grid.innerHTML = html;
-}
-
-function setStatsPeriod(days){
-  statsPeriod = days;
-  renderStatsPage();
-}
-
-function openStatsMovie(id){
-  // Stats sahifasidan film modalini ochish
-  MOVIES = loadMovies();
-  const m = MOVIES.find(x=>x.id===id);
-  if(!m) return;
-  // Kolleksiyaga o'tamiz keyin modalni ochamiz
-  const colId = Array.isArray(m.cols) ? m.cols[0] : m.col;
-  openCollection(colId);
-  setTimeout(() => openModal(id), 300);
-}
-
-/* ═══════════════════════════════════════
-   VIEWS (Ko'rishlar soni) + WATCHED
-═══════════════════════════════════════ */
-const DB_KEY_VIEWS   = 'kk_views_v1';
-const DB_KEY_WATCHED = 'kk_watched_v1';
-
-function loadViews(){
-  try{return JSON.parse(localStorage.getItem(DB_KEY_VIEWS)||'{}')}
-  catch{return {}}
-}
-
 function getViews(id){
-  return loadViews()[id]||0;
-}
-
-function incrementViews(id){
-  // Ko'rishlar: har safar modal ochilganda +1
-  const v = loadViews();
-  v[id] = (v[id]||0)+1;
-  localStorage.setItem(DB_KEY_VIEWS, JSON.stringify(v));
-
-  // Watched: faqat bir marta belgilanadi
-  const w = loadWatched();
-  if(!w.includes(id)){
-    w.push(id);
-    saveWatched(w);
-  }
-}
-
-function loadWatched(){
-  try{return JSON.parse(localStorage.getItem(DB_KEY_WATCHED)||'[]')}
-  catch{return []}
-}
-
-function saveWatched(arr){
-  localStorage.setItem(DB_KEY_WATCHED, JSON.stringify(arr));
-}
-
-function isWatched(id){
-  return loadWatched().includes(id);
+  return GLOBAL_STATS.w && GLOBAL_STATS.w[String(id)] ? GLOBAL_STATS.w[String(id)] : 0;
 }
 
 function getCollectionViews(colId){
-  // Kolleksiyaga tegishli barcha filmlar ko'rishlar sonining yig'indisi
-  const v = loadViews();
-  return MOVIES
-    .filter(m=>Array.isArray(m.cols)?m.cols.includes(colId):(m.col===colId))
-    .reduce((sum,m)=>(sum + (v[m.id]||0)), 0);
+  let sum = 0;
+  MOVIES.forEach(m => {
+    if(Array.isArray(m.cols) ? m.cols.includes(colId) : m.col === colId){
+      sum += getViews(m.id);
+    }
+  });
+  return sum;
 }
+
+// Shaxsiy xotira (Bu qurilmada nimalarga like/watched bosilgani)
+const DB_KEY_WATCHED = 'kk_watched_v1';
+const DB_KEY_LIKES   = 'kk_likes_v1';
+
+function loadWatched(){ try{return JSON.parse(localStorage.getItem(DB_KEY_WATCHED)||'[]')} catch{return []} }
+function saveWatched(arr){ localStorage.setItem(DB_KEY_WATCHED, JSON.stringify(arr)); }
+function isWatched(id){ return loadWatched().includes(id); }
+
+function loadLikes(){ try{return JSON.parse(localStorage.getItem(DB_KEY_LIKES)||'[]')} catch{return []} }
+function saveLikes(arr){ localStorage.setItem(DB_KEY_LIKES, JSON.stringify(arr)); }
+function isLiked(id){ return loadLikes().includes(id); }
+
+/* ═══════════════════════════════════════
+   LIKE / WATCHED TOGGLE (TO'G'RI ARXITEKTURA)
+═══════════════════════════════════════ */
+function toggleLikeModal(id){
+  const likes = loadLikes();
+  const idx = likes.indexOf(id);
+  if(idx>=0){
+    likes.splice(idx,1);
+    updateGlobalStat('l', id, -1);
+  } else {
+    likes.push(id);
+    updateGlobalStat('l', id, 1);
+  }
+  saveLikes(likes);
+  openModal(id);
+}
+
+function toggleWatchedModal(id){
+  const w = loadWatched();
+  const idx = w.indexOf(id);
+  if(idx>=0){
+    w.splice(idx,1);
+    updateGlobalStat('w', id, -1);
+  } else {
+    w.push(id);
+    updateGlobalStat('w', id, 1);
+  }
+  saveWatched(w);
+  openModal(id);
+}
+
+function toggleLike(event, id){
+  event.stopPropagation();
+  const likes = loadLikes();
+  const idx = likes.indexOf(id);
+  if(idx>=0){
+    likes.splice(idx,1);
+    updateGlobalStat('l', id, -1);
+  } else {
+    likes.push(id);
+    updateGlobalStat('l', id, 1);
+  }
+  saveLikes(likes);
+  // renderMovies() shart emas — onSnapshot o'zi yangilaydi
+}
+
 
 /* ═══════════════════════════════════════
    GLOBAL QIDIRUV
@@ -1795,53 +1661,6 @@ function handleDeepLink(){
   return true;
 }
 
-/* ═══════════════════════════════════════
-   LIKE MODAL
-═══════════════════════════════════════ */
-function toggleLikeModal(id){
-  const likes = loadLikes();
-  const idx = likes.indexOf(id);
-  if(idx>=0){ likes.splice(idx,1); }
-  else{ likes.push(id); incrementGlobalStat('l', id); }
-  saveLikes(likes);
-  openModal(id);
-}
-
-function toggleWatchedModal(id){
-  const w = loadWatched();
-  const idx = w.indexOf(id);
-  if(idx>=0){
-    // Ko'rilgan belgisini olib tashlash
-    w.splice(idx,1);
-  } else {
-    // Ko'rilgan deb belgilash + views +1
-    w.push(id);
-    incrementViews(id);
-    incrementGlobalStat('w', id);
-  }
-  saveWatched(w);
-  openModal(id);
-}
-const DB_KEY_LIKES = 'kk_likes_v1';
-
-function loadLikes(){
-  try{return JSON.parse(localStorage.getItem(DB_KEY_LIKES)||'[]')}
-  catch{return []}
-}
-
-function saveLikes(arr){localStorage.setItem(DB_KEY_LIKES,JSON.stringify(arr))}
-
-function isLiked(id){return loadLikes().includes(id)}
-
-function toggleLike(event, id){
-  event.stopPropagation();
-  const likes = loadLikes();
-  const idx = likes.indexOf(id);
-  if(idx>=0){ likes.splice(idx,1); }
-  else{ likes.push(id); incrementGlobalStat('l', id); }
-  saveLikes(likes);
-  renderMovies();
-}
 
 /* ═══════════════════════════════════════
    NAV PAGES
@@ -1970,6 +1789,9 @@ function esc(s){
 (async function init(){
   // Cloud dan ma'lumotlarni yuklab olamiz
   await fetchCloudData();
+
+  // Firebase tayyor — stats listener ni ishga tushiramiz
+  startStatsListener();
 
   const saved = localStorage.getItem(DB_KEY_LANG);
   if(saved && ['uz','ru','en'].includes(saved)){
