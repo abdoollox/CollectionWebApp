@@ -1064,37 +1064,34 @@ function downloadMovie(id){
 
     const curLang = lang || 'uz';
     let fileId = '';
-    
+
     if(m.fileId && typeof m.fileId === 'object'){
       fileId = String(m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '').trim();
     } else {
       fileId = String(m.fileId || '').trim();
     }
 
-    if(!fileId){ 
-      showToast("Telegram File ID kiritilmagan ⏳"); 
-      return; 
+    if(!fileId){
+      showToast("Telegram File ID kiritilmagan ⏳");
+      return;
     }
 
-    // 1. Manzilni tayyorlaymiz
-    const botLink = 'https://t.me/kinokolleksiyabot?start=dl_' + fileId;
-
-    // 2. Oynani yopib, statistikani yozish (Bu ishlarni tezda hal qilamiz)
     closeModal();
-    try { incrementGlobalStat('d', m.id); } catch(err){}
 
-    // 3. TELEGRAMNI MAJBURLASH (Fail-safe mexanizmi)
-    const tg = window.Telegram?.WebApp;
-    
-    // Agar dastur to'liq Telegram WebApp muhitida bo'lsa
-    if (tg && typeof tg.openTelegramLink === 'function') {
-        tg.openTelegramLink(botLink);
-        // Telegram linkni ochishni boshlashi bilan, orqasidan WebApp'ni majburan yopamiz
-        setTimeout(() => { tg.close(); }, 100);
-    } else {
-        // Agar siz shunchaki Chrome/Safari kabi oddiy brauzerda test qilayotgan bo'lsangiz
+    // 1. Avval statistikani Firebase ga yozamiz
+    updateGlobalStat('d', m.id, 1);
+
+    // 2. 300ms kutamiz — Firebase yozish ulgursin, keyin yo'naltiramiz
+    const botLink = 'https://t.me/kinokolleksiyabot?start=dl_' + fileId;
+    const tgApp = window.Telegram?.WebApp;
+
+    setTimeout(() => {
+      if (tgApp && typeof tgApp.openTelegramLink === 'function') {
+        tgApp.openTelegramLink(botLink);
+      } else {
         window.open(botLink, '_blank');
-    }
+      }
+    }, 300);
 
   } catch (err) {
     alert("Xato yuz berdi: " + err.message);
