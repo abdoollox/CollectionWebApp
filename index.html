@@ -1460,49 +1460,96 @@ function saveMovForm(){
 /* ═══════════════════════════════════════
    GLOBAL STATISTIKA & JONLI (LIVE) LISTENER
 ═══════════════════════════════════════ */
-let GLOBAL_STATS = { d: {}, w: {}, l: {} };
 
-// Firebase'ni jonli efirda kuzatib turamiz
-// Bu funksiya init() ichidan chaqiriladi — Firebase tayyor bo'lgandan keyin
+// GLOBAL_STATS: jami yig'indi  { d:{movieId:count}, w:{...}, l:{...} }
+// STATS_LOG:    kunlik log      { "YYYY-MM-DD": { d:{...}, w:{...}, l:{...} } }
+let GLOBAL_STATS = { d: {}, w: {}, l: {} };
+let STATS_LOG    = {};
+
+// Bugungi sanani lokal vaqtda oladi (UTC muammosini oldini oladi)
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear() + '-' +
+    String(d.getMonth()+1).padStart(2,'0') + '-' +
+    String(d.getDate()).padStart(2,'0');
+}
+
+// Firebase ni jonli tinglaydi — init() dan chaqiriladi
 function startStatsListener(){
   if(!db) return;
+
+  // 1. Jami yig'indi uchun listener (kino/stats)
   db.collection("kino").doc("stats").onSnapshot((doc) => {
-    // Agar baza bo'sh bo'lsa xato bermasligi uchun default obyekt
-    if (doc.exists) {
-      GLOBAL_STATS = doc.data();
-    } else {
-      GLOBAL_STATS = { d: {}, w: {}, l: {} };
-    }
-    
-    // Qaysi ekranda turganiga qarab HTML ni jonli yangilaymiz
-    if (curCol === '__stats__' && typeof renderStatsPage === 'function') {
-      renderStatsPage();
-    } else if (curCol && curCol !== '__stats__' && typeof renderMovies === 'function') {
-      const movGrid = document.getElementById('mov-grid');
-      if (movGrid && movGrid.style.display !== 'none') renderMovies();
-    } else if (!curCol && typeof renderCollections === 'function') {
-      const colGrid = document.getElementById('col-grid');
-      if (colGrid && colGrid.style.display !== 'none') renderCollections();
-    }
+    GLOBAL_STATS = doc.exists ? doc.data() : { d:{}, w:{}, l:{} };
+    _refreshUI();
+  });
+
+  // 2. Kunlik log uchun listener (kino/stats_log)
+  db.collection("kino").doc("stats_log").onSnapshot((doc) => {
+    STATS_LOG = doc.exists ? doc.data() : {};
+    _refreshUI();
   });
 }
 
-// Poygasiz (Atomic) yangilash — To'g'rilangan versiya
-function updateGlobalStat(type, movieId, amount) {
-  const id = String(movieId);
-  const updateData = {};
-  
-  // Firebase "set" funksiyasi ichma-ich obyektlarni to'g'ri merge qilishi uchun 
-  // kalitlarni nuqta bilan emas, haqiqiy obyekt qilib yig'amiz:
-  updateData[type] = {};
-  updateData[type][id] = firebase.firestore.FieldValue.increment(amount);
-  
-  db.collection("kino").doc("stats").set(updateData, { merge: true })
-    .catch(err => console.warn("Stats yozishda xato:", err));
+function _refreshUI(){
+  if (curCol === '__stats__' && typeof renderStatsPage === 'function') {
+    renderStatsPage();
+  } else if (curCol && curCol !== '__stats__' && typeof renderMovies === 'function') {
+    const movGrid = document.getElementById('mov-grid');
+    if (movGrid && movGrid.style.display !== 'none') renderMovies();
+  } else if (!curCol && typeof renderCollections === 'function') {
+    renderCollections();
+  }
 }
 
+// Atomic +1/-1 — ikkita hujjatga bir vaqtda yozadi
+function updateGlobalStat(type, movieId, amount) {
+  if(!db) return;
+  const id    = String(movieId);
+  const today = todayKey();
+  const inc   = firebase.firestore.FieldValue.increment(amount);
+
+  // 1. Jami yig'indi
+  const totalData = {};
+  totalData[type] = {};
+  totalData[type][id] = inc;
+  db.collection("kino").doc("stats").set(totalData, { merge: true })
+    .catch(err => console.warn("Stats (total) xato:", err));
+
+  // 2. Kunlik log
+  const logData = {};
+  logData[today] = {};
+  logData[today][type] = {};
+  logData[today][type][id] = inc;
+  db.collection("kino").doc("stats_log").set(logData, { merge: true })
+    .catch(err => console.warn("Stats (log) xato:", err));
+}
+
+// Davr bo'yicha sanalarni yig'adi
+function _countsByPeriod(type, days){
+  // days=0 → jami (GLOBAL_STATS dan)
+  if(days === 0) return GLOBAL_STATS[type] || {};
+
+  const result = {};
+  const now = new Date();
+  for(let i = 0; i < days; i++){
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const key = d.getFullYear() + '-' +
+      String(d.getMonth()+1).padStart(2,'0') + '-' +
+      String(d.getDate()).padStart(2,'0');
+    const dayData = STATS_LOG[key]?.[type];
+    if(!dayData) continue;
+    Object.entries(dayData).forEach(([id, cnt]) => {
+      result[id] = (result[id] || 0) + cnt;
+    });
+  }
+  return result;
+}
+
+// Top N filmlarni qaytaradi
 function getTopMovies(type, days, n=5){
-  const counts = GLOBAL_STATS[type] || {};
+  const counts = _countsByPeriod(type, days);
   return Object.entries(counts)
     .sort((a,b) => b[1]-a[1])
     .slice(0, n)
@@ -1693,38 +1740,52 @@ function handleDeepLink(){
 /* ═══════════════════════════════════════
    STATS PAGE RENDER
 ═══════════════════════════════════════ */
-let statsPeriod = 7;
+let statsPeriod = 7; // default: haftalik
 
 function renderStatsPage(){
-  const sections = [
+  const grid = document.getElementById('stats-grid');
+  if(!grid) return;
+
+  const PERIODS = [
+    {label:'Bugun',   days:1},
+    {label:'Hafta',   days:7},
+    {label:'Oy',      days:30},
+    {label:'Yil',     days:365},
+    {label:'Jami',    days:0},
+  ];
+
+  const SECTIONS = [
     {type:'d', icon:'⬇️', label:'Top Yuklamalar'},
     {type:'w', icon:'👁',  label:"Top Ko'rishlar"},
     {type:'l', icon:'❤️',  label:'Top Likelar'},
   ];
 
-  const grid = document.getElementById('stats-grid');
-  if(!grid) return;
-
-  // Davr (Period) tugmalarini tozalaymiz
+  // Period chips
   const bar = document.getElementById('stats-period-bar');
-  if(bar) bar.innerHTML = '';
+  if(bar){
+    bar.innerHTML = PERIODS.map(p =>
+      `<button class="period-chip${statsPeriod===p.days?' active':''}"
+               onclick="setStatsPeriod(${p.days})">${p.label}</button>`
+    ).join('');
+  }
 
+  // Har bir bo'lim
   let html = '';
-  sections.forEach(sec => {
-    // 0 beramiz (barcha davrlar uchun)
-    const top = getTopMovies(sec.type, 0, 5);
+  SECTIONS.forEach(sec => {
+    const top = getTopMovies(sec.type, statsPeriod, 5);
     html += `<div class="stats-section">
       <div class="stats-section-title">${sec.icon} ${sec.label}</div>`;
 
     if(!top.length){
-      html += `<div class="stats-empty">Hali ma'lumot yo'q</div>`;
+      html += `<div class="stats-empty">Bu davrda ma'lumot yo'q</div>`;
     } else {
       top.forEach(({movie: m, count}, i) => {
         const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-        const col = COLLECTIONS.find(c=>c.id===(Array.isArray(m.cols)?m.cols[0]:m.col));
-        const colName = col ? esc(col.name[lang]) : '';
-        const bg = BG[Array.isArray(m.cols)?m.cols[0]:m.col] || '#1A1A1A';
-        const thumb = (m.thumbnail && m.thumbnail[lang]) || (m.thumbnail && m.thumbnail.uz) || '';
+        const colId  = Array.isArray(m.cols) ? m.cols[0] : m.col;
+        const col    = COLLECTIONS.find(c => c.id === colId);
+        const colName= col ? esc(col.name[lang]) : '';
+        const bg     = BG[colId] || '#1A1A1A';
+        const thumb  = (m.thumbnail && (m.thumbnail[lang] || m.thumbnail.uz)) || '';
         html += `<div class="stats-card" onclick="openStatsMovie(${m.id})">
           <div class="stats-rank ${rankClass}">${i+1}</div>
           <div class="stats-poster" style="background:${bg}">
