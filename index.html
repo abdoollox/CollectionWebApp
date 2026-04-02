@@ -997,6 +997,8 @@ function openModal(id){
   MOVIES=loadMovies();
   const m=MOVIES.find(x=>x.id===id);
   if(!m)return;
+  // Visit statistikasi — modal har ochilganida +1
+  try{ updateGlobalStat('v', id, 1); }catch(e){}
   const t=T[lang];
   const col=COLLECTIONS.find(c=>c.id===(Array.isArray(m.cols)?m.cols[0]:m.col));
   const bg=BG[m.col]||'#1A1A1A';
@@ -1461,7 +1463,7 @@ function saveMovForm(){
 
 // GLOBAL_STATS: jami yig'indi  { d:{movieId:count}, w:{...}, l:{...} }
 // STATS_LOG:    kunlik log      { "YYYY-MM-DD": { d:{...}, w:{...}, l:{...} } }
-let GLOBAL_STATS = { d: {}, w: {}, l: {} };
+let GLOBAL_STATS = { d: {}, v: {}, w: {}, l: {} };
 let STATS_LOG    = {};
 
 // Bugungi sanani lokal vaqtda oladi (UTC muammosini oldini oladi)
@@ -1562,7 +1564,8 @@ function getTopMovies(type, days, n=5){
    VIEWS & LIKES (FAQAT FIREBASE'DAN O'QILADI)
 ═══════════════════════════════════════ */
 function getViews(id){
-  return GLOBAL_STATS.w && GLOBAL_STATS.w[String(id)] ? GLOBAL_STATS.w[String(id)] : 0;
+  // Modal dagi ko'rishlar soni = visit soni
+  return (GLOBAL_STATS.v && GLOBAL_STATS.v[String(id)]) || 0;
 }
 
 function getCollectionViews(colId){
@@ -1753,8 +1756,8 @@ function renderStatsPage(){
   ];
 
   const SECTIONS = [
+    {type:'v', icon:'👁',  label:'Top Qaralganlar'},
     {type:'d', icon:'⬇️', label:'Top Yuklamalar'},
-    {type:'w', icon:'👁',  label:"Top Ko'rishlar"},
     {type:'l', icon:'❤️',  label:'Top Likelar'},
   ];
 
