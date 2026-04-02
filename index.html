@@ -1839,7 +1839,7 @@ function showNavPage(page){
   const titles = {
     stats:     {uz:'Statistika',  ru:'Статистика', en:'Statistics', ico:'📊'},
     actors:    {uz:'Aktyorlar',   ru:'Актёры',    en:'Actors',    ico:'🌟'},
-    saved:     {uz:'Saqlanganlar',ru:'Сохранённые',en:'Saved',     ico:'🔖'},
+    saved:     {uz:'Saqlanganlar',ru:'Сохранённые',en:'Saved',     ico:'❤️'},
   };
   const info = titles[page];
 
@@ -1864,7 +1864,7 @@ function showNavPage(page){
     const grid = document.getElementById('mov-grid');
     document.getElementById('mov-badge').textContent = t.count(savedMovies.length);
     if(!savedMovies.length){
-      grid.innerHTML=`<div class="empty"><div class="empty-ico">🔖</div><div class="empty-t">${info[lang]||info.uz}</div><div class="empty-s">${lang==='ru'?'Вы ещё ничего не сохранили':lang==='en'?'Nothing saved yet':'Hali hech narsa saqlanmagan'}</div></div>`;
+      grid.innerHTML=`<div class="empty"><div class="empty-ico">❤️</div><div class="empty-t">${info[lang]||info.uz}</div><div class="empty-s">${lang==='ru'?'Вы ещё ничего не сохранили':lang==='en'?'Nothing saved yet':'Hali hech narsa saqlanmagan'}</div></div>`;
       return;
     }
     const bg_map = BG;
