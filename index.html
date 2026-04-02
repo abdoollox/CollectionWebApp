@@ -1088,6 +1088,7 @@ function downloadMovie(id){
     setTimeout(() => {
       if (tgApp && typeof tgApp.openTelegramLink === 'function') {
         tgApp.openTelegramLink(botLink);
+        setTimeout(() => tgApp.close(), 300);
       } else {
         window.open(botLink, '_blank');
       }
