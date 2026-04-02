@@ -1842,6 +1842,13 @@ function showNavPage(page){
 
   // Saqlangan filmlar uchun alohida ko'rsatish
   if(page==='saved'){
+    // Stats container ni yashiramiz, mov-grid ni ko'rsatamiz
+    const _sc = document.getElementById('stats-container');
+    if(_sc) _sc.style.display = 'none';
+    const movGrid = document.getElementById('mov-grid');
+    if(movGrid) movGrid.style.display = '';
+    document.querySelectorAll('.sort-chip').forEach(el => el.style.display = 'none');
+
     const likes = loadLikes();
     MOVIES = loadMovies();
     const savedMovies = MOVIES.filter(m=>likes.includes(m.id));
