@@ -413,7 +413,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="bnav">
     <div class="ni active" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl">Bosh sahifa</div></div>
     <div class="ni" onclick="showNavPage('stats')"><div class="ni-ico">📊</div><div class="ni-lbl">Statistika</div></div>
-    <div class="ni" onclick="showNavPage('actors')"><div class="ni-ico">🌟</div><div class="ni-lbl">Aktyorlar</div></div>
+    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">🎬</div><div class="ni-lbl">Rejissyorlar</div></div>
     <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">❤️</div><div class="ni-lbl">Saqlanganlar</div></div>
   </div>
 </div>
@@ -450,7 +450,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="bnav">
     <div class="ni" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl">Bosh sahifa</div></div>
     <div class="ni" onclick="showNavPage('stats')"><div class="ni-ico">📊</div><div class="ni-lbl">Statistika</div></div>
-    <div class="ni" onclick="showNavPage('actors')"><div class="ni-ico">🌟</div><div class="ni-lbl">Aktyorlar</div></div>
+    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">🎬</div><div class="ni-lbl">Rejissyorlar</div></div>
     <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">❤️</div><div class="ni-lbl">Saqlanganlar</div></div>
   </div>
 </div>
@@ -479,6 +479,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="admin-tabs">
     <div class="a-tab active" id="tab-col" onclick="switchAdminTab('collections')">Kolleksiyalar</div>
     <div class="a-tab" id="tab-mov" onclick="switchAdminTab('movies')">Filmlar</div>
+    <div class="a-tab" id="tab-dir" onclick="switchAdminTab('directors')">🎬 Rejissyorlar</div>
     <div class="a-tab" id="tab-sync" onclick="switchAdminTab('sync')">🔗 Sinxron</div>
   </div>
   <div class="admin-content" id="admin-content"></div>
@@ -571,58 +572,58 @@ const DEFAULT_COLLECTIONS = [
 ];
 
 const DEFAULT_MOVIES = [
-  {id:1,cols:['hp'],chronoOrder:1,year:2001,rating:7.6,quality:'1080p',size:{uz:'4.2 GB',ru:'',en:''},hidden:false,emoji:'🧙',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_1',ru:'',en:''},
+  {id:1,cols:['hp'],chronoOrder:1,year:2001,rating:7.6,quality:'1080p',size:{uz:'4.2 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🧙',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_1',ru:'',en:''},
    title:{uz:"Harry Potter va Faylasuf Toshi",ru:"Гарри Поттер и философский камень",en:"Harry Potter and the Philosopher's Stone"},
    desc:{uz:"Yosh sehrgar Harry Potter Hogvarts maktabiga qabul qilinadi.",ru:"Юный волшебник Гарри Поттер поступает в Хогвартс.",en:"Young wizard Harry Potter is admitted to Hogwarts."}},
-  {id:2,cols:['hp'],chronoOrder:1,year:2002,rating:7.4,quality:'1080p',size:{uz:'4.5 GB',ru:'',en:''},hidden:false,emoji:'🐍',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_2',ru:'',en:''},
+  {id:2,cols:['hp'],chronoOrder:1,year:2002,rating:7.4,quality:'1080p',size:{uz:'4.5 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🐍',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_2',ru:'',en:''},
    title:{uz:"Harry Potter va Sirlar Xonasi",ru:"Гарри Поттер и тайная комната",en:"Harry Potter and the Chamber of Secrets"},
    desc:{uz:"Hogvartsda sirli hujumlar boshlanadi.",ru:"В Хогвартсе начинаются таинственные нападения.",en:"Mysterious attacks plague Hogwarts."}},
-  {id:3,cols:['hp'],chronoOrder:1,year:2004,rating:7.9,quality:'4K',size:{uz:'15 GB',ru:'',en:''},hidden:false,emoji:'🌙',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_3',ru:'',en:''},
+  {id:3,cols:['hp'],chronoOrder:1,year:2004,rating:7.9,quality:'4K',size:{uz:'15 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🌙',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_3',ru:'',en:''},
    title:{uz:"Harry Potter va Azkaban Mahbusi",ru:"Гарри Поттер и узник Азкабана",en:"Harry Potter and the Prisoner of Azkaban"},
    desc:{uz:"Xavfli mahbus Azkabandan qochdi.",ru:"Опасный заключённый сбежал из Азкабана.",en:"A dangerous prisoner escapes Azkaban."}},
-  {id:4,cols:['hp'],chronoOrder:1,year:2005,rating:7.7,quality:'1080p',size:{uz:'5.1 GB',ru:'',en:''},hidden:false,emoji:'🏆',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_4',ru:'',en:''},
+  {id:4,cols:['hp'],chronoOrder:1,year:2005,rating:7.7,quality:'1080p',size:{uz:'5.1 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🏆',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_4',ru:'',en:''},
    title:{uz:"Harry Potter va O't Qadahi",ru:"Гарри Поттер и кубок огня",en:"Harry Potter and the Goblet of Fire"},
    desc:{uz:"Hogvarts uch ta maktab o'rtasidagi musobaqaga mezbonlik qiladi.",ru:"Хогвартс принимает Турнир Трёх Волшебников.",en:"Hogwarts hosts the Triwizard Tournament."}},
-  {id:5,cols:['hp'],chronoOrder:1,year:2007,rating:7.5,quality:'1080p',size:{uz:'4.8 GB',ru:'',en:''},hidden:false,emoji:'🦅',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_5',ru:'',en:''},
+  {id:5,cols:['hp'],chronoOrder:1,year:2007,rating:7.5,quality:'1080p',size:{uz:'4.8 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🦅',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_5',ru:'',en:''},
    title:{uz:"Harry Potter va Feniks Ordeni",ru:"Гарри Поттер и орден Феникса",en:"Harry Potter and the Order of the Phoenix"},
    desc:{uz:"Voldemort qaytib kelganiga hech kim ishonmaydi.",ru:"Никто не верит в возвращение Волдеморта.",en:"Nobody believes Voldemort has returned."}},
-  {id:6,cols:['hp'],chronoOrder:1,year:2009,rating:7.6,quality:'4K',size:{uz:'14 GB',ru:'',en:''},hidden:false,emoji:'🧪',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_6',ru:'',en:''},
+  {id:6,cols:['hp'],chronoOrder:1,year:2009,rating:7.6,quality:'4K',size:{uz:'14 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🧪',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_6',ru:'',en:''},
    title:{uz:"Harry Potter va Yarim Qon Shahzoda",ru:"Гарри Поттер и принц-полукровка",en:"Harry Potter and the Half-Blood Prince"},
    desc:{uz:"Harry Dumbledordan maxfiy ta'lim oladi.",ru:"Гарри получает тайные уроки от Дамблдора.",en:"Harry receives secret lessons from Dumbledore."}},
-  {id:7,cols:['hp'],chronoOrder:1,year:2010,rating:7.7,quality:'4K',size:{uz:'16 GB',ru:'',en:''},hidden:false,emoji:'⚔️',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_7a',ru:'',en:''},
+  {id:7,cols:['hp'],chronoOrder:1,year:2010,rating:7.7,quality:'4K',size:{uz:'16 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'⚔️',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_7a',ru:'',en:''},
    title:{uz:"Harry Potter va O'lim Sovg'alari: 1-qism",ru:"Гарри Поттер и Дары Смерти: Часть 1",en:"Harry Potter and the Deathly Hallows: Part 1"},
    desc:{uz:"Harry, Ron va Hermiona maktabni tark etib, gorksinlalarni izlashga otlanadi.",ru:"Гарри, Рон и Гермиона покидают школу и ищут крестражи.",en:"Harry, Ron and Hermione leave Hogwarts to hunt Horcruxes."}},
-  {id:8,cols:['hp'],chronoOrder:1,year:2011,rating:8.1,quality:'4K',size:{uz:'17 GB',ru:'',en:''},hidden:false,emoji:'🏰',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_7b',ru:'',en:''},
+  {id:8,cols:['hp'],chronoOrder:1,year:2011,rating:8.1,quality:'4K',size:{uz:'17 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🏰',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'hp_7b',ru:'',en:''},
    title:{uz:"Harry Potter va O'lim Sovg'alari: 2-qism",ru:"Гарри Поттер и Дары Смерти: Часть 2",en:"Harry Potter and the Deathly Hallows: Part 2"},
    desc:{uz:"Hogvarts jangida yakuniy to'qnashuv sodir bo'ladi.",ru:"В битве за Хогвартс происходит финальное противостояние.",en:"The final battle at Hogwarts."}},
-  {id:9,cols:['marvel'],chronoOrder:1,year:2008,rating:7.9,quality:'4K',size:{uz:'14 GB',ru:'',en:''},hidden:false,emoji:'🦾',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_im1',ru:'',en:''},
+  {id:9,cols:['marvel'],chronoOrder:1,year:2008,rating:7.9,quality:'4K',size:{uz:'14 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🦾',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_im1',ru:'',en:''},
    title:{uz:"Temir Odam",ru:"Железный человек",en:"Iron Man"},
    desc:{uz:"Tony Stark asirlikda zirhli kostyum yaratadi.",ru:"Тони Старк в плену создаёт бронекостюм.",en:"Tony Stark builds an armored suit in captivity."}},
-  {id:10,cols:['marvel'],chronoOrder:1,year:2012,rating:8.0,quality:'4K',size:{uz:'16 GB',ru:'',en:''},hidden:false,emoji:'⚡',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_av1',ru:'',en:''},
+  {id:10,cols:['marvel'],chronoOrder:1,year:2012,rating:8.0,quality:'4K',size:{uz:'16 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'⚡',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_av1',ru:'',en:''},
    title:{uz:"Qasoskorlar",ru:"Мстители",en:"The Avengers"},
    desc:{uz:"Olti super qahramon Lokining bosqiniga qarshi kurashadi.",ru:"Шесть супергероев объединяются против Локи.",en:"Six superheroes unite to stop Loki's invasion."}},
-  {id:11,cols:['marvel'],chronoOrder:1,year:2018,rating:8.4,quality:'4K',size:{uz:'18 GB',ru:'',en:''},hidden:false,emoji:'💎',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_iw',ru:'',en:''},
+  {id:11,cols:['marvel'],chronoOrder:1,year:2018,rating:8.4,quality:'4K',size:{uz:'18 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'💎',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_iw',ru:'',en:''},
    title:{uz:"Qasoskorlar: Sonsizlik Urushi",ru:"Мстители: Война бесконечности",en:"Avengers: Infinity War"},
    desc:{uz:"Thanos olti Sonsizlik Toshini to'plash uchun yo'lga chiqadi.",ru:"Танос отправляется собрать все камни Бесконечности.",en:"Thanos sets out to collect all six Infinity Stones."}},
-  {id:12,cols:['marvel'],chronoOrder:1,year:2019,rating:8.4,quality:'4K',size:{uz:'17 GB',ru:'',en:''},hidden:false,emoji:'🕰️',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_eg',ru:'',en:''},
+  {id:12,cols:['marvel'],chronoOrder:1,year:2019,rating:8.4,quality:'4K',size:{uz:'17 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🕰️',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'mcu_eg',ru:'',en:''},
    title:{uz:"Qasoskorlar: Oxirat",ru:"Мстители: Финал",en:"Avengers: Endgame"},
    desc:{uz:"Qolgan qahramonlar so'nggi kurashar.",ru:"Оставшиеся герои вступают в финальную битву.",en:"The remaining heroes make one final stand."}},
-  {id:13,cols:['lotr'],chronoOrder:1,year:2001,rating:8.8,quality:'4K',size:{uz:'22 GB',ru:'',en:''},hidden:false,emoji:'💍',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_1',ru:'',en:''},
+  {id:13,cols:['lotr'],chronoOrder:1,year:2001,rating:8.8,quality:'4K',size:{uz:'22 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'💍',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_1',ru:'',en:''},
    title:{uz:"Uzuk Egasi: Uzuk Hamdo'stligi",ru:"Властелин колец: Братство кольца",en:"The Lord of the Rings: The Fellowship of the Ring"},
    desc:{uz:"Frodo Baggins Qudrat Uzugini yo'q qilish uchun yo'lga chiqadi.",ru:"Фродо отправляется уничтожить Кольцо Всевластья.",en:"Frodo embarks on a journey to destroy the One Ring."}},
-  {id:14,cols:['lotr'],chronoOrder:1,year:2002,rating:8.7,quality:'4K',size:{uz:'23 GB',ru:'',en:''},hidden:false,emoji:'🏰',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_2',ru:'',en:''},
+  {id:14,cols:['lotr'],chronoOrder:1,year:2002,rating:8.7,quality:'4K',size:{uz:'23 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🏰',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_2',ru:'',en:''},
    title:{uz:"Uzuk Egasi: Ikkita Minora",ru:"Властелин колец: Две крепости",en:"The Lord of the Rings: The Two Towers"},
    desc:{uz:"Hamdo'stlik bo'lingan. Frodo va Sam Mordorga yaqinlashmoqda.",ru:"Братство разделилось. Фродо и Сэм приближаются к Мордору.",en:"The Fellowship is broken. Frodo and Sam draw closer to Mordor."}},
-  {id:15,cols:['lotr'],chronoOrder:1,year:2003,rating:9.0,quality:'4K',size:{uz:'24 GB',ru:'',en:''},hidden:false,emoji:'👑',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_3',ru:'',en:''},
+  {id:15,cols:['lotr'],chronoOrder:1,year:2003,rating:9.0,quality:'4K',size:{uz:'24 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'👑',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'lotr_3',ru:'',en:''},
    title:{uz:"Uzuk Egasi: Qirolning Qaytishi",ru:"Властелин колец: Возвращение короля",en:"The Lord of the Rings: The Return of the King"},
    desc:{uz:"Yakuniy jang. Frodo Mordorga, Aragon esa taxtga.",ru:"Финальная битва. Фродо идёт к Мордору, Арагорн — к трону.",en:"Final battle. Frodo pushes to Mordor, Aragorn reclaims the throne."}},
-  {id:16,cols:['sw'],chronoOrder:1,year:1977,rating:8.6,quality:'4K',size:{uz:'20 GB',ru:'',en:''},hidden:false,emoji:'⭐',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_4',ru:'',en:''},
+  {id:16,cols:['sw'],chronoOrder:1,year:1977,rating:8.6,quality:'4K',size:{uz:'20 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'⭐',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_4',ru:'',en:''},
    title:{uz:"Yulduz Urushlari: Yangi Umid",ru:"Звёздные войны: Новая надежда",en:"Star Wars: A New Hope"},
    desc:{uz:"Luke Skywalker Imperiyaga qarshi Isyonchilar bilan qo'shiladi.",ru:"Люк Скайуокер присоединяется к повстанцам против Империи.",en:"Luke Skywalker joins rebels in the fight against the Empire."}},
-  {id:17,cols:['sw'],chronoOrder:1,year:1980,rating:8.7,quality:'4K',size:{uz:'19 GB',ru:'',en:''},hidden:false,emoji:'🌌',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_5',ru:'',en:''},
+  {id:17,cols:['sw'],chronoOrder:1,year:1980,rating:8.7,quality:'4K',size:{uz:'19 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🌌',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_5',ru:'',en:''},
    title:{uz:"Yulduz Urushlari: Imperiya Zarba Beradi",ru:"Звёздные войны: Империя наносит ответный удар",en:"Star Wars: The Empire Strikes Back"},
    desc:{uz:"Imperiya qahramonlarni quvib yuradi. Luke Jedi ustozidan ta'lim oladi.",ru:"Империя преследует героев. Люк обучается у мастера-джедая.",en:"The Empire strikes back. Luke trains with a Jedi Master."}},
-  {id:18,cols:['sw'],chronoOrder:1,year:1983,rating:8.3,quality:'4K',size:{uz:'18 GB',ru:'',en:''},hidden:false,emoji:'🐻',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_6',ru:'',en:''},
+  {id:18,cols:['sw'],chronoOrder:1,year:1983,rating:8.3,quality:'4K',size:{uz:'18 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🐻',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'sw_6',ru:'',en:''},
    title:{uz:"Yulduz Urushlari: Jedi Qaytadi",ru:"Звёздные войны: Возвращение джедая",en:"Star Wars: Return of the Jedi"},
    desc:{uz:"Luke Darth Veyderga qarshi yakuniy duelga chiqadi.",ru:"Люк вступает в финальную дуэль с Дартом Вейдером.",en:"Luke faces Darth Vader in the final duel."}},
 ];
@@ -670,6 +671,7 @@ async function fetchCloudData(){
     }
     localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
     localStorage.setItem(DB_KEY_MOV, JSON.stringify(MOVIES));
+    await fetchDirectors();
   } catch(err) {
     console.warn("Firebase o'qish xatosi:", err);
     COLLECTIONS = JSON.parse(localStorage.getItem(DB_KEY_COL) || '[]');
@@ -795,6 +797,8 @@ function goBack(){
   // Stats va sort chiplarni reset
   const statsC = document.getElementById('stats-container');
   if(statsC) statsC.style.display='none';
+  const dirsC = document.getElementById('directors-container');
+  if(dirsC) dirsC.style.display='none';
   const movGrid = document.getElementById('mov-grid');
   if(movGrid) movGrid.style.display='';
   document.querySelectorAll('.sort-chip').forEach(el=>el.style.display='');
@@ -997,8 +1001,6 @@ function openModal(id){
   MOVIES=loadMovies();
   const m=MOVIES.find(x=>x.id===id);
   if(!m)return;
-  // Visit statistikasi — modal har ochilganida +1
-  try{ updateGlobalStat('v', id, 1); }catch(e){}
   const t=T[lang];
   const col=COLLECTIONS.find(c=>c.id===(Array.isArray(m.cols)?m.cols[0]:m.col));
   const bg=BG[m.col]||'#1A1A1A';
@@ -1066,35 +1068,37 @@ function downloadMovie(id){
 
     const curLang = lang || 'uz';
     let fileId = '';
-
+    
     if(m.fileId && typeof m.fileId === 'object'){
       fileId = String(m.fileId[curLang] || m.fileId.uz || m.fileId.ru || m.fileId.en || '').trim();
     } else {
       fileId = String(m.fileId || '').trim();
     }
 
-    if(!fileId){
-      showToast("Telegram File ID kiritilmagan ⏳");
-      return;
+    if(!fileId){ 
+      showToast("Telegram File ID kiritilmagan ⏳"); 
+      return; 
     }
 
-    closeModal();
-
-    // 1. Avval statistikani Firebase ga yozamiz
-    updateGlobalStat('d', m.id, 1);
-
-    // 2. 300ms kutamiz — Firebase yozish ulgursin, keyin yo'naltiramiz
+    // 1. Manzilni tayyorlaymiz
     const botLink = 'https://t.me/kinokolleksiyabot?start=dl_' + fileId;
-    const tgApp = window.Telegram?.WebApp;
 
-    setTimeout(() => {
-      if (tgApp && typeof tgApp.openTelegramLink === 'function') {
-        tgApp.openTelegramLink(botLink);
-        setTimeout(() => tgApp.close(), 300);
-      } else {
+    // 2. Oynani yopib, statistikani yozish (Bu ishlarni tezda hal qilamiz)
+    closeModal();
+    try { incrementGlobalStat('d', m.id); } catch(err){}
+
+    // 3. TELEGRAMNI MAJBURLASH (Fail-safe mexanizmi)
+    const tg = window.Telegram?.WebApp;
+    
+    // Agar dastur to'liq Telegram WebApp muhitida bo'lsa
+    if (tg && typeof tg.openTelegramLink === 'function') {
+        tg.openTelegramLink(botLink);
+        // Telegram linkni ochishni boshlashi bilan, orqasidan WebApp'ni majburan yopamiz
+        setTimeout(() => { tg.close(); }, 100);
+    } else {
+        // Agar siz shunchaki Chrome/Safari kabi oddiy brauzerda test qilayotgan bo'lsangiz
         window.open(botLink, '_blank');
-      }
-    }, 300);
+    }
 
   } catch (err) {
     alert("Xato yuz berdi: " + err.message);
@@ -1123,9 +1127,11 @@ function switchAdminTab(tab){
   adminTab=tab;
   document.getElementById('tab-col').classList.toggle('active',tab==='collections');
   document.getElementById('tab-mov').classList.toggle('active',tab==='movies');
+  document.getElementById('tab-dir').classList.toggle('active',tab==='directors');
   document.getElementById('tab-sync').classList.toggle('active',tab==='sync');
   if(tab==='collections')renderAdminCollections();
   else if(tab==='movies')renderAdminMovies();
+  else if(tab==='directors')renderAdminDirectors();
   else if(tab==='sync')renderAdminSync();
 }
 
@@ -1339,8 +1345,8 @@ function openMovForm(id){
   const movs=loadMovies();
   const cols=loadCollections();
   const m=id?movs.find(x=>x.id===id):{
-    id:null,cols:[adminColFilter||cols[0]?.id||''],chronoOrder:1,year:2024,rating:7.0,
-    quality:'1080p',size:{uz:'4 GB',ru:'',en:''},hidden:false,emoji:'🎬',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'',ru:'',en:''},
+    id:null,directorId:'',cols:[adminColFilter||cols[0]?.id||''],chronoOrder:1,year:2024,rating:7.0,
+    quality:'1080p',size:{uz:'4 GB',ru:'',en:''},directorId:'',hidden:false,emoji:'🎬',thumbnail:{uz:'',ru:'',en:''},trailer:'',modalThumb:{uz:'',ru:'',en:''},fileId:{uz:'',ru:'',en:''},
     title:{uz:'',ru:'',en:''},desc:{uz:'',ru:'',en:''}
   };
   const mCols = Array.isArray(m.cols) ? m.cols : (m.col ? [m.col] : []);
@@ -1350,6 +1356,13 @@ function openMovForm(id){
     <div class="f-group">
       <label class="f-label">Kolleksiya</label>
       <div id="f-mov-col">${colOptions}</div>
+    </div>
+    <div class="f-group">
+      <label class="f-label">Rejissyor</label>
+      <select class="a-input" id="f-mov-director">
+        <option value="">— Tanlanmagan —</option>
+        ${loadDirectors().map(d=>`<option value="${d.id}" ${m.directorId===d.id?'selected':''}>${esc(d.name)}</option>`).join('')}
+      </select>
     </div>
     <div class="f-group">
       <label class="f-label">Xronologiya tartibi (har kolleksiya uchun)</label>
@@ -1423,6 +1436,7 @@ function saveMovForm(){
   const newId=editingMovId||(movs.length?Math.max(...movs.map(m=>m.id))+1:1);
   const entry={
     id:newId,
+    directorId:document.getElementById('f-mov-director').value,
     cols:[...document.querySelectorAll('#f-mov-col .col-check:checked')].map(el=>el.value),
     col:[...document.querySelectorAll('#f-mov-col .col-check:checked')].map(el=>el.value)[0]||'',
     chronoOrder:parseInt(document.getElementById('f-mov-chrono').value)||1,
@@ -1460,96 +1474,49 @@ function saveMovForm(){
 /* ═══════════════════════════════════════
    GLOBAL STATISTIKA & JONLI (LIVE) LISTENER
 ═══════════════════════════════════════ */
+let GLOBAL_STATS = { d: {}, w: {}, l: {} };
 
-// GLOBAL_STATS: jami yig'indi  { d:{movieId:count}, w:{...}, l:{...} }
-// STATS_LOG:    kunlik log      { "YYYY-MM-DD": { d:{...}, w:{...}, l:{...} } }
-let GLOBAL_STATS = { d: {}, v: {}, w: {}, l: {} };
-let STATS_LOG    = {};
-
-// Bugungi sanani lokal vaqtda oladi (UTC muammosini oldini oladi)
-function todayKey(){
-  const d = new Date();
-  return d.getFullYear() + '-' +
-    String(d.getMonth()+1).padStart(2,'0') + '-' +
-    String(d.getDate()).padStart(2,'0');
-}
-
-// Firebase ni jonli tinglaydi — init() dan chaqiriladi
+// Firebase'ni jonli efirda kuzatib turamiz
+// Bu funksiya init() ichidan chaqiriladi — Firebase tayyor bo'lgandan keyin
 function startStatsListener(){
   if(!db) return;
-
-  // 1. Jami yig'indi uchun listener (kino/stats)
   db.collection("kino").doc("stats").onSnapshot((doc) => {
-    GLOBAL_STATS = doc.exists ? doc.data() : { d:{}, w:{}, l:{} };
-    _refreshUI();
-  });
-
-  // 2. Kunlik log uchun listener (kino/stats_log)
-  db.collection("kino").doc("stats_log").onSnapshot((doc) => {
-    STATS_LOG = doc.exists ? doc.data() : {};
-    _refreshUI();
+    // Agar baza bo'sh bo'lsa xato bermasligi uchun default obyekt
+    if (doc.exists) {
+      GLOBAL_STATS = doc.data();
+    } else {
+      GLOBAL_STATS = { d: {}, w: {}, l: {} };
+    }
+    
+    // Qaysi ekranda turganiga qarab HTML ni jonli yangilaymiz
+    if (curCol === '__stats__' && typeof renderStatsPage === 'function') {
+      renderStatsPage();
+    } else if (curCol && curCol !== '__stats__' && typeof renderMovies === 'function') {
+      const movGrid = document.getElementById('mov-grid');
+      if (movGrid && movGrid.style.display !== 'none') renderMovies();
+    } else if (!curCol && typeof renderCollections === 'function') {
+      const colGrid = document.getElementById('col-grid');
+      if (colGrid && colGrid.style.display !== 'none') renderCollections();
+    }
   });
 }
 
-function _refreshUI(){
-  if (curCol === '__stats__' && typeof renderStatsPage === 'function') {
-    renderStatsPage();
-  } else if (curCol && curCol !== '__stats__' && typeof renderMovies === 'function') {
-    const movGrid = document.getElementById('mov-grid');
-    if (movGrid && movGrid.style.display !== 'none') renderMovies();
-  } else if (!curCol && typeof renderCollections === 'function') {
-    renderCollections();
-  }
-}
-
-// Atomic +1/-1 — ikkita hujjatga bir vaqtda yozadi
+// Poygasiz (Atomic) yangilash — To'g'rilangan versiya
 function updateGlobalStat(type, movieId, amount) {
-  if(!db) return;
-  const id    = String(movieId);
-  const today = todayKey();
-  const inc   = firebase.firestore.FieldValue.increment(amount);
-
-  // 1. Jami yig'indi
-  const totalData = {};
-  totalData[type] = {};
-  totalData[type][id] = inc;
-  db.collection("kino").doc("stats").set(totalData, { merge: true })
-    .catch(err => console.warn("Stats (total) xato:", err));
-
-  // 2. Kunlik log
-  const logData = {};
-  logData[today] = {};
-  logData[today][type] = {};
-  logData[today][type][id] = inc;
-  db.collection("kino").doc("stats_log").set(logData, { merge: true })
-    .catch(err => console.warn("Stats (log) xato:", err));
+  const id = String(movieId);
+  const updateData = {};
+  
+  // Firebase "set" funksiyasi ichma-ich obyektlarni to'g'ri merge qilishi uchun 
+  // kalitlarni nuqta bilan emas, haqiqiy obyekt qilib yig'amiz:
+  updateData[type] = {};
+  updateData[type][id] = firebase.firestore.FieldValue.increment(amount);
+  
+  db.collection("kino").doc("stats").set(updateData, { merge: true })
+    .catch(err => console.warn("Stats yozishda xato:", err));
 }
 
-// Davr bo'yicha sanalarni yig'adi
-function _countsByPeriod(type, days){
-  // days=0 → jami (GLOBAL_STATS dan)
-  if(days === 0) return GLOBAL_STATS[type] || {};
-
-  const result = {};
-  const now = new Date();
-  for(let i = 0; i < days; i++){
-    const d = new Date(now);
-    d.setDate(d.getDate() - i);
-    const key = d.getFullYear() + '-' +
-      String(d.getMonth()+1).padStart(2,'0') + '-' +
-      String(d.getDate()).padStart(2,'0');
-    const dayData = STATS_LOG[key]?.[type];
-    if(!dayData) continue;
-    Object.entries(dayData).forEach(([id, cnt]) => {
-      result[id] = (result[id] || 0) + cnt;
-    });
-  }
-  return result;
-}
-
-// Top N filmlarni qaytaradi
 function getTopMovies(type, days, n=5){
-  const counts = _countsByPeriod(type, days);
+  const counts = GLOBAL_STATS[type] || {};
   return Object.entries(counts)
     .sort((a,b) => b[1]-a[1])
     .slice(0, n)
@@ -1564,8 +1531,7 @@ function getTopMovies(type, days, n=5){
    VIEWS & LIKES (FAQAT FIREBASE'DAN O'QILADI)
 ═══════════════════════════════════════ */
 function getViews(id){
-  // Modal dagi ko'rishlar soni = visit soni
-  return (GLOBAL_STATS.v && GLOBAL_STATS.v[String(id)]) || 0;
+  return GLOBAL_STATS.w && GLOBAL_STATS.w[String(id)] ? GLOBAL_STATS.w[String(id)] : 0;
 }
 
 function getCollectionViews(colId){
@@ -1634,6 +1600,214 @@ function toggleLike(event, id){
   }
   saveLikes(likes);
   // renderMovies() shart emas — onSnapshot o'zi yangilaydi
+}
+
+
+/* ═══════════════════════════════════════
+   REJISSYORLAR
+═══════════════════════════════════════ */
+const DB_KEY_DIR = 'kk_directors_v1';
+
+function loadDirectors(){
+  try{ return JSON.parse(localStorage.getItem(DB_KEY_DIR)||'[]'); }
+  catch{ return []; }
+}
+function saveDirectorsLocal(data){
+  localStorage.setItem(DB_KEY_DIR, JSON.stringify(data));
+}
+
+// Firestore dan o'qish (fetchCloudData ichida chaqiriladi)
+async function fetchDirectors(){
+  if(!db) return;
+  try{
+    const snap = await db.collection('kino').doc('directors').get();
+    if(snap.exists){
+      saveDirectorsLocal(snap.data().list || []);
+    }
+  }catch(e){ console.warn('Directors fetch xato:', e); }
+}
+
+// Firestore ga yozish (faqat admin)
+async function saveDirectors(data){
+  saveDirectorsLocal(data);
+  if(!db || !ADMIN_TOKEN) return;
+  try{
+    await db.collection('kino').doc('directors').set({list: data}, {merge: true});
+  }catch(e){ console.warn('Directors save xato:', e); }
+}
+
+// ── ADMIN: Rejissyorlar ro'yxati ─────────────────────────
+function renderAdminDirectors(){
+  const dirs = loadDirectors();
+  const ct = document.getElementById('admin-content');
+  ct.innerHTML = `<button class="add-btn" onclick="openDirForm(null)">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Yangi rejissyor qo'shish
+  </button>` + (dirs.length ? dirs.map(d=>`
+    <div class="db-item">
+      ${d.photo ? `<div class="db-thumb"><img loading="lazy" src="${esc(d.photo)}" onerror="this.parentElement.textContent='🎬'"></div>` : `<div class="db-thumb" style="font-size:22px">🎬</div>`}
+      <div class="db-info">
+        <div class="db-title">${esc(d.name)}</div>
+        <div class="db-meta">${loadMovies().filter(m=>m.directorId===d.id).length} ta film</div>
+      </div>
+      <div class="db-acts">
+        <button class="db-btn" onclick="openDirForm('${d.id}')">✏️</button>
+        <button class="db-btn danger" onclick="deleteDirector('${d.id}')">🗑</button>
+      </div>
+    </div>`).join('') : `<div class="empty"><div class="empty-ico">🎬</div><div class="empty-t">Rejissyor yo'q</div></div>`);
+}
+
+function deleteDirector(id){
+  if(!confirm("Rejissyorni o'chirasizmi?")) return;
+  const dirs = loadDirectors().filter(d => d.id !== id);
+  saveDirectors(dirs);
+  renderAdminDirectors();
+  showToast("Rejissyor o'chirildi");
+}
+
+let editingDirId = null;
+
+function openDirForm(id){
+  editingDirId = id;
+  const dirs = loadDirectors();
+  const d = id ? dirs.find(x=>x.id===id) : {id:'', name:'', photo:'', bio:{uz:'',ru:'',en:''}};
+  document.getElementById('form-title').textContent = id ? 'Rejissyorni tahrirlash' : 'Yangi rejissyor';
+  document.getElementById('form-body').innerHTML = `
+    <div class="f-group">
+      <label class="f-label">ID (lotin, bo'sh joysiz)</label>
+      <input class="a-input" id="f-dir-id" value="${esc(d.id)}" placeholder="christopher_nolan" ${id?'readonly style="opacity:.5"':''}>
+    </div>
+    <div class="f-group">
+      <label class="f-label">To'liq ismi</label>
+      <input class="a-input" id="f-dir-name" value="${esc(d.name)}" placeholder="Christopher Nolan">
+    </div>
+    <div class="f-group">
+      <label class="f-label">Rasm URL</label>
+      <input class="a-input" id="f-dir-photo" value="${esc(d.photo||'')}" placeholder="https://...">
+    </div>
+    <div class="f-section">Biografiya</div>
+    <div class="f-group"><label class="f-label">🇺🇿 O'zbek</label><textarea class="a-input" id="f-dir-buz" rows="3" placeholder="Qisqa ma'lumot...">${esc(d.bio?.uz||'')}</textarea></div>
+    <div class="f-group"><label class="f-label">🇷🇺 Rus</label><textarea class="a-input" id="f-dir-bru" rows="3" placeholder="Краткое описание...">${esc(d.bio?.ru||'')}</textarea></div>
+    <div class="f-group"><label class="f-label">🇬🇧 Ingliz</label><textarea class="a-input" id="f-dir-ben" rows="3" placeholder="Short bio...">${esc(d.bio?.en||'')}</textarea></div>
+    <button class="f-save" onclick="saveDirForm()">💾 Saqlash</button>`;
+  openForm();
+}
+
+function saveDirForm(){
+  const did = document.getElementById('f-dir-id').value.trim().replace(/\s/g,'_');
+  const name = document.getElementById('f-dir-name').value.trim();
+  if(!did || !name) return showToast('ID va ism kiritilishi shart!');
+  const dirs = loadDirectors();
+  const entry = {
+    id: did,
+    name,
+    photo: document.getElementById('f-dir-photo').value.trim(),
+    bio: {
+      uz: document.getElementById('f-dir-buz').value.trim(),
+      ru: document.getElementById('f-dir-bru').value.trim(),
+      en: document.getElementById('f-dir-ben').value.trim(),
+    }
+  };
+  const idx = dirs.findIndex(d=>d.id===did);
+  if(idx>=0) dirs[idx]=entry; else dirs.push(entry);
+  saveDirectors(dirs);
+  closeForm();
+  renderAdminDirectors();
+  showToast("Rejissyor saqlandi ✅");
+}
+
+// ── REJISSYORLAR SAHIFASI ─────────────────────────────────
+function showDirectorsPage(){
+  curCol = '__directors__';
+  const dirs = loadDirectors();
+
+  // Stats container yashir, mov-grid ni yashir
+  const _sc = document.getElementById('stats-container');
+  if(_sc) _sc.style.display = 'none';
+  document.querySelectorAll('.sort-chip').forEach(el => el.style.display = 'none');
+
+  document.getElementById('mov-title').textContent = 'Rejissyorlar';
+  const _msl = document.getElementById('mov-sec-lbl');
+  if(_msl) _msl.textContent = '';
+  document.getElementById('mov-badge').textContent = dirs.length + ' ta';
+  showScreen('screen-movies');
+
+  // Directors container
+  let dirsContainer = document.getElementById('directors-container');
+  if(!dirsContainer){
+    dirsContainer = document.createElement('div');
+    dirsContainer.id = 'directors-container';
+    dirsContainer.style.cssText = 'padding:8px 14px 90px';
+    document.getElementById('mov-grid').parentNode.insertBefore(
+      dirsContainer,
+      document.getElementById('mov-grid').nextSibling
+    );
+  }
+  document.getElementById('mov-grid').style.display = 'none';
+  dirsContainer.style.display = 'block';
+
+  if(!dirs.length){
+    dirsContainer.innerHTML = `<div class="empty"><div class="empty-ico">🎬</div><div class="empty-t">Rejissyor qo'shilmagan</div><div class="empty-s">Admin paneldan qo'shing</div></div>`;
+    return;
+  }
+
+  dirsContainer.innerHTML = dirs.map(d => {
+    const filmCount = MOVIES.filter(m => m.directorId === d.id).length;
+    return `<div class="stats-card" style="margin-bottom:10px" onclick="showDirectorFilms('${d.id}')">
+      <div class="stats-poster" style="background:var(--s2);border-radius:50%;width:48px;height:48px;flex-shrink:0">
+        ${d.photo ? `<img loading="lazy" src="${esc(d.photo)}" alt="" style="border-radius:50%;width:100%;height:100%;object-fit:cover">` : '<span style="font-size:22px">🎬</span>'}
+      </div>
+      <div class="stats-info">
+        <div class="stats-title">${esc(d.name)}</div>
+        <div class="stats-col">${filmCount} ta film</div>
+      </div>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </div>`;
+  }).join('');
+}
+
+function showDirectorFilms(dirId){
+  const dir = loadDirectors().find(d=>d.id===dirId);
+  if(!dir) return;
+  curCol = '__director_' + dirId + '__';
+
+  const dirsContainer = document.getElementById('directors-container');
+  if(dirsContainer) dirsContainer.style.display = 'none';
+  document.getElementById('mov-grid').style.display = '';
+  document.querySelectorAll('.sort-chip').forEach(el => el.style.display = '');
+
+  document.getElementById('mov-title').textContent = esc(dir.name);
+  showScreen('screen-movies');
+
+  const films = MOVIES.filter(m => m.directorId === dirId && !m.hidden);
+  document.getElementById('mov-badge').textContent = films.length + ' ta film';
+
+  if(!films.length){
+    document.getElementById('mov-grid').innerHTML = `<div class="empty"><div class="empty-ico">🎬</div><div class="empty-t">${esc(dir.name)}</div><div class="empty-s">Bu rejissyor filmlari yo'q</div></div>`;
+    return;
+  }
+
+  const t = T[lang];
+  document.getElementById('mov-grid').innerHTML = films.map(m => {
+    const bg = BG[Array.isArray(m.cols)?m.cols[0]:m.col] || '#1A1A1A';
+    const movThumb = (m.thumbnail && (m.thumbnail[lang] || m.thumbnail.uz)) || '';
+    const posterContent = `<div class="mov-poster-emoji">${m.emoji}</div>` +
+      (movThumb ? `<img loading="lazy" src="${movThumb}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+    return `<div class="mov-card" onclick="openModal(${m.id})">
+      <div class="mov-poster" style="background-color:${bg}">${posterContent}</div>
+      <span class="q-badge">${esc(m.quality)}</span>
+      <div class="mov-body">
+        <div class="mov-title">${esc(m.title[lang])}</div>
+        <div class="mov-meta"><span class="mov-year">${m.year}</span><span class="mov-rating">★ ${m.rating}</span></div>
+        <div class="mov-btn-wrap" style="display:flex;gap:8px">
+          <button class="like-btn${isLiked(m.id)?' liked':''}" onclick="toggleLike(event,${m.id})">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="${isLiked(m.id)?'currentColor':'none'}" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </button>
+          <button class="shr-btn" style="flex:1" onclick="openModal(${m.id})">${t.watch}</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 
@@ -1741,52 +1915,38 @@ function handleDeepLink(){
 /* ═══════════════════════════════════════
    STATS PAGE RENDER
 ═══════════════════════════════════════ */
-let statsPeriod = 7; // default: haftalik
+let statsPeriod = 7;
 
 function renderStatsPage(){
-  const grid = document.getElementById('stats-grid');
-  if(!grid) return;
-
-  const PERIODS = [
-    {label:'Bugun',   days:1},
-    {label:'Hafta',   days:7},
-    {label:'Oy',      days:30},
-    {label:'Yil',     days:365},
-    {label:'Jami',    days:0},
-  ];
-
-  const SECTIONS = [
-    {type:'v', icon:'👁',  label:'Top Qaralganlar'},
+  const sections = [
     {type:'d', icon:'⬇️', label:'Top Yuklamalar'},
+    {type:'w', icon:'👁',  label:"Top Ko'rishlar"},
     {type:'l', icon:'❤️',  label:'Top Likelar'},
   ];
 
-  // Period chips
-  const bar = document.getElementById('stats-period-bar');
-  if(bar){
-    bar.innerHTML = PERIODS.map(p =>
-      `<button class="period-chip${statsPeriod===p.days?' active':''}"
-               onclick="setStatsPeriod(${p.days})">${p.label}</button>`
-    ).join('');
-  }
+  const grid = document.getElementById('stats-grid');
+  if(!grid) return;
 
-  // Har bir bo'lim
+  // Davr (Period) tugmalarini tozalaymiz
+  const bar = document.getElementById('stats-period-bar');
+  if(bar) bar.innerHTML = '';
+
   let html = '';
-  SECTIONS.forEach(sec => {
-    const top = getTopMovies(sec.type, statsPeriod, 5);
+  sections.forEach(sec => {
+    // 0 beramiz (barcha davrlar uchun)
+    const top = getTopMovies(sec.type, 0, 5);
     html += `<div class="stats-section">
       <div class="stats-section-title">${sec.icon} ${sec.label}</div>`;
 
     if(!top.length){
-      html += `<div class="stats-empty">Bu davrda ma'lumot yo'q</div>`;
+      html += `<div class="stats-empty">Hali ma'lumot yo'q</div>`;
     } else {
       top.forEach(({movie: m, count}, i) => {
         const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
-        const colId  = Array.isArray(m.cols) ? m.cols[0] : m.col;
-        const col    = COLLECTIONS.find(c => c.id === colId);
-        const colName= col ? esc(col.name[lang]) : '';
-        const bg     = BG[colId] || '#1A1A1A';
-        const thumb  = (m.thumbnail && (m.thumbnail[lang] || m.thumbnail.uz)) || '';
+        const col = COLLECTIONS.find(c=>c.id===(Array.isArray(m.cols)?m.cols[0]:m.col));
+        const colName = col ? esc(col.name[lang]) : '';
+        const bg = BG[Array.isArray(m.cols)?m.cols[0]:m.col] || '#1A1A1A';
+        const thumb = (m.thumbnail && m.thumbnail[lang]) || (m.thumbnail && m.thumbnail.uz) || '';
         html += `<div class="stats-card" onclick="openStatsMovie(${m.id})">
           <div class="stats-rank ${rankClass}">${i+1}</div>
           <div class="stats-poster" style="background:${bg}">
@@ -1838,20 +1998,13 @@ function goHome(){
 function showNavPage(page){
   const titles = {
     stats:     {uz:'Statistika',  ru:'Статистика', en:'Statistics', ico:'📊'},
-    actors:    {uz:'Aktyorlar',   ru:'Актёры',    en:'Actors',    ico:'🌟'},
-    saved:     {uz:'Saqlanganlar',ru:'Сохранённые',en:'Saved',     ico:'❤️'},
+    directors: {uz:'Rejissyorlar', ru:'Режиссёры',  en:'Directors', ico:'🎬'},
+    saved:     {uz:'Saqlanganlar',ru:'Сохранённые',en:'Saved',     ico:'🔖'},
   };
   const info = titles[page];
 
   // Saqlangan filmlar uchun alohida ko'rsatish
   if(page==='saved'){
-    // Stats container ni yashiramiz, mov-grid ni ko'rsatamiz
-    const _sc = document.getElementById('stats-container');
-    if(_sc) _sc.style.display = 'none';
-    const movGrid = document.getElementById('mov-grid');
-    if(movGrid) movGrid.style.display = '';
-    document.querySelectorAll('.sort-chip').forEach(el => el.style.display = 'none');
-
     const likes = loadLikes();
     MOVIES = loadMovies();
     const savedMovies = MOVIES.filter(m=>likes.includes(m.id));
@@ -1864,7 +2017,7 @@ function showNavPage(page){
     const grid = document.getElementById('mov-grid');
     document.getElementById('mov-badge').textContent = t.count(savedMovies.length);
     if(!savedMovies.length){
-      grid.innerHTML=`<div class="empty"><div class="empty-ico">❤️</div><div class="empty-t">${info[lang]||info.uz}</div><div class="empty-s">${lang==='ru'?'Вы ещё ничего не сохранили':lang==='en'?'Nothing saved yet':'Hali hech narsa saqlanmagan'}</div></div>`;
+      grid.innerHTML=`<div class="empty"><div class="empty-ico">🔖</div><div class="empty-t">${info[lang]||info.uz}</div><div class="empty-s">${lang==='ru'?'Вы ещё ничего не сохранили':lang==='en'?'Nothing saved yet':'Hali hech narsa saqlanmagan'}</div></div>`;
       return;
     }
     const bg_map = BG;
@@ -1923,8 +2076,11 @@ function showNavPage(page){
     return;
   }
 
-  // Aktyorlar — tez orada qo'shiladi
-  showToast(`${info.ico} ${info[lang]||info.uz} — tez orada!`);
+  // Rejissyorlar sahifasi
+  if(page === 'directors'){
+    showDirectorsPage();
+    return;
+  }
 }
 function renderAdminSync(){
   const ct = document.getElementById('admin-content');
