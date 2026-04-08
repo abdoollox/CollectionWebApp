@@ -50,9 +50,9 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .back{width:32px;height:32px;display:flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--border);border-radius:50%;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .2s;flex-shrink:0}
 .back:active{background:var(--s3)}
 .logo{text-transform:uppercase;font-family:'Oswald',sans-serif;font-weight:700;font-size:20px;letter-spacing:1px;color:var(--red);cursor:pointer;user-select:none}
-.lang-chip{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--s2);border:1px solid var(--border);border-radius:20px;cursor:pointer;font-size:12px;color:var(--muted);-webkit-tap-highlight-color:transparent}
+.lang-chip{display:flex;align-items:center;justify-content:center;height:34px;gap:6px;padding:0 12px;background:var(--s2);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-size:12px;color:var(--muted);-webkit-tap-highlight-color:transparent;transition:background .2s,border-color .2s}
 .lang-chip:active{border-color:var(--red-b)}
-.theme-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--border);border-radius:50%;cursor:pointer;font-size:16px;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s;flex-shrink:0}
+.theme-btn{width:34px;height:34px;display:flex;align-items:center;justify-content:center;background:var(--s2);border:1px solid var(--border);border-radius:12px;cursor:pointer;font-size:15px;-webkit-tap-highlight-color:transparent;transition:border-color .2s,background .2s;flex-shrink:0}
 .theme-btn:active{background:var(--s3)}
 .badge{font-size:12px;color:var(--muted);background:var(--s2);padding:4px 10px;border-radius:20px;border:1px solid var(--border)}
 .srch-wrap{position:relative}
@@ -124,7 +124,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 .mov-btn-wrap{margin-top:auto}
 .shr-btn{width:100%;padding:8px 6px;background:var(--red-dim);border:1px solid var(--red-b);border-radius:8px;color:var(--red);font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:4px;white-space:nowrap;overflow:hidden}
 .shr-btn:active{background:rgba(229,9,20,.25);transform:scale(.97)}
-.sort-chip{padding:6px 12px;border-radius:20px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent}
+.sort-chip{padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--s1);color:var(--muted);font-family:'Inter',sans-serif;font-size:13px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all .2s;-webkit-tap-highlight-color:transparent;flex-shrink:0}
 .sort-chip.active{background:var(--red-dim);border-color:var(--red-b);color:var(--red)}
 .sort-chip:active{transform:scale(.96)}
 .like-btn{
@@ -411,10 +411,10 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="sec-lbl" id="col-sec-lbl">Barcha kolleksiyalar</div>
   <div class="col-grid" id="col-grid"></div>
   <div class="bnav">
-    <div class="ni active" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl">Bosh sahifa</div></div>
-    <div class="ni" onclick="showNavPage('stats')"><div class="ni-ico">📊</div><div class="ni-lbl">Statistika</div></div>
-    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">🎬</div><div class="ni-lbl">Rejissyorlar</div></div>
-    <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">❤️</div><div class="ni-lbl">Saqlanganlar</div></div>
+    <div class="ni active" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl" data-k="nav_home">Bosh sahifa</div></div>
+    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">👤</div><div class="ni-lbl" data-k="nav_dir">Rejissyorlar</div></div>
+    <div class="ni" onclick="showNavPage('stats')"><div class="ni-ico">📊</div><div class="ni-lbl" data-k="nav_stats">Statistika</div></div>
+    <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">❤️</div><div class="ni-lbl" data-k="nav_saved">Saqlanganlar</div></div>
   </div>
 </div>
 
@@ -448,10 +448,10 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   </div>
   <div class="mov-grid" id="mov-grid"></div>
   <div class="bnav">
-    <div class="ni" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl">Bosh sahifa</div></div>
-    <div class="ni" onclick="showNavPage('stats')"><div class="ni-ico">📊</div><div class="ni-lbl">Statistika</div></div>
-    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">🎬</div><div class="ni-lbl">Rejissyorlar</div></div>
-    <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">❤️</div><div class="ni-lbl">Saqlanganlar</div></div>
+    <div class="ni" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl" data-k="nav_home">Bosh sahifa</div></div>
+    <div class="ni" onclick="showNavPage('directors')"><div class="ni-ico">👤</div><div class="ni-lbl" data-k="nav_dir">Rejissyorlar</div></div>
+    <div class="ni" onclick="showNavPage('stats')"><div class="ni-ico">📊</div><div class="ni-lbl" data-k="nav_stats">Statistika</div></div>
+    <div class="ni" onclick="showNavPage('saved')"><div class="ni-ico">❤️</div><div class="ni-lbl" data-k="nav_saved">Saqlanganlar</div></div>
   </div>
 </div>
 
@@ -521,31 +521,52 @@ const T = {
     search_col:"Kolleksiya qidirish...",search_mov:"Film qidirish...",
     all_col:"Barcha kolleksiyalar",all_mov:"Barcha filmlar",
     count:n=>`${n} ta film`,
-    sort_yd:"Yilga ko'ra ↓",sort_r:"Reytingga ko'ra",sort_ya:"Yilga ko'ra ↑",
+    sort_chrono:"Xronologiya",sort_year:"Yil",sort_rating:"Reyting",
     download:"⬇ Yuklab olish",share:"Ulashish",watch:"Tomosha qilish",
-    nav_home:"Bosh sahifa",nav_saved:"Saqlangan",nav_search:"Qidirish",nav_settings:"Sozlamalar",
+    nav_home:"Bosh sahifa",nav_saved:"Saqlanganlar",nav_search:"Qidirish",nav_settings:"Sozlamalar",
+    nav_stats:"Statistika",nav_dir:"Rejissyorlar",
     empty_t:"Topilmadi",empty_s:"Boshqa so'z bilan qidiring",
     toast_share:t=>`"${t}" ulashildi ✅`,
+    stats_today:"Bugun",stats_week:"Haftalik",stats_month:"Oylik",stats_year:"Yillik",stats_all:"Jami",
+    stats_top_dl:"Top Yuklamalar",stats_top_views:"Top Qaralganlar",stats_top_likes:"Top Likelar",
+    stats_empty:"Bu muddat uchun ma'lumot yo'q",
+    watched_yes:"Ko'rildi",watched_no:"Ko'rdim",
+    dir_empty_t:"Rejissyor qo'shilmagan",dir_empty_s:"Admin paneldan qo'shing",count_dir:n=>`${n} ta`,
+    dir_sort_name:"Alifbo",dir_sort_rating:"Reyting",dir_sort_count:"Soni",dir_sort_age:"Yoshi"
   },
   ru:{
     search_col:"Поиск коллекции...",search_mov:"Поиск фильма...",
     all_col:"Все коллекции",all_mov:"Все фильмы",
     count:n=>`${n} фильм(ов)`,
-    sort_yd:"По году ↓",sort_r:"По рейтингу",sort_ya:"По году ↑",
+    sort_chrono:"Хронология",sort_year:"Год",sort_rating:"Рейтинг",
     download:"⬇ Скачать",share:"Поделиться",watch:"Смотреть",
     nav_home:"Главная",nav_saved:"Сохранённые",nav_search:"Поиск",nav_settings:"Настройки",
+    nav_stats:"Статистика",nav_dir:"Режиссёры",
     empty_t:"Ничего не найдено",empty_s:"Попробуйте другой запрос",
     toast_share:t=>`«${t}» отправлено ✅`,
+    stats_today:"Сегодня",stats_week:"За неделю",stats_month:"За месяц",stats_year:"За год",stats_all:"Все время",
+    stats_top_dl:"Топ скачиваний",stats_top_views:"Топ просмотров",stats_top_likes:"Топ лайков",
+    stats_empty:"Нет данных за этот период",
+    watched_yes:"Просмотрено",watched_no:"Посмотрел",
+    dir_empty_t:"Режиссёр не добавлен",dir_empty_s:"Добавьте через админ-панель",count_dir:n=>`${n}`,
+    dir_sort_name:"По алфавиту",dir_sort_rating:"Рейтинг",dir_sort_count:"Количество",dir_sort_age:"Возраст"
   },
   en:{
     search_col:"Search collections...",search_mov:"Search movies...",
     all_col:"All collections",all_mov:"All movies",
     count:n=>`${n} movie${n!==1?'s':''}`,
-    sort_yd:"By year ↓",sort_r:"By rating",sort_ya:"By year ↑",
+    sort_chrono:"Chronology",sort_year:"Year",sort_rating:"Rating",
     download:"⬇ Download",share:"Share",watch:"Watch",
     nav_home:"Home",nav_saved:"Saved",nav_search:"Search",nav_settings:"Settings",
+    nav_stats:"Statistics",nav_dir:"Directors",
     empty_t:"Nothing found",empty_s:"Try a different search",
     toast_share:t=>`"${t}" shared ✅`,
+    stats_today:"Today",stats_week:"This Week",stats_month:"This Month",stats_year:"This Year",stats_all:"All Time",
+    stats_top_dl:"Top Downloads",stats_top_views:"Top Views",stats_top_likes:"Top Likes",
+    stats_empty:"No data for this period",
+    watched_yes:"Watched",watched_no:"Mark as Watched",
+    dir_empty_t:"No directors added",dir_empty_s:"Add from admin panel",count_dir:n=>`${n}`,
+    dir_sort_name:"A-Z",dir_sort_rating:"Rating",dir_sort_count:"Count",dir_sort_age:"Age"
   }
 };
 
@@ -968,10 +989,11 @@ function setSort(s){
     sortDir = 1; // Yangi sort — default asc
   }
   // Chip larni yangilaymiz
+  const t = typeof T !== 'undefined' && T[lang] ? T[lang] : T.uz;
   const labels = {
-    chrono:  sortDir===1 ? '🎬 Xronologiya ↑' : '🎬 Xronologiya ↓',
-    year:    sortDir===1 ? '📅 Yil ↑' : '📅 Yil ↓',
-    rating:  sortDir===1 ? '⭐ Reyting ↑' : '⭐ Reyting ↓',
+    chrono:  sortDir===1 ? `🎬 ${t.sort_chrono} ↑` : `🎬 ${t.sort_chrono} ↓`,
+    year:    sortDir===1 ? `📅 ${t.sort_year} ↑` : `📅 ${t.sort_year} ↓`,
+    rating:  sortDir===1 ? `⭐ ${t.sort_rating} ↑` : `⭐ ${t.sort_rating} ↓`,
   };
   const ids = {chrono:'sort-chrono', year:'sort-year', rating:'sort-rating'};
   document.querySelectorAll('.sort-chip').forEach(el => {
@@ -1042,8 +1064,8 @@ function openModal(id){
         </a>` : ''}
         <button class="btn-s" style="flex:1;${isWatched(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}" onclick="toggleWatchedModal(${m.id})">
           ${isWatched(m.id)
-            ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> Ko'rildi`
-            : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Ko'rdim`
+            ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> ${t.watched_yes}`
+            : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ${t.watched_no}`
           }
         </button>
         <button class="btn-s" style="${isLiked(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}" onclick="toggleLikeModal(${m.id})">
@@ -1053,6 +1075,18 @@ function openModal(id){
     </div>`;
 
   document.getElementById('modal').classList.add('open');
+  
+  // Qaralgan (Visits) hisoblash (kuniga 1 marta)
+  try {
+    const vStr = localStorage.getItem('tracked_views') || '{}';
+    const vObj = JSON.parse(vStr);
+    const today = new Date().toISOString().split('T')[0];
+    if(vObj[m.id] !== today){
+      vObj[m.id] = today;
+      localStorage.setItem('tracked_views', JSON.stringify(vObj));
+      updateGlobalStat('v', m.id, 1);
+    }
+  } catch(e) {}
 }
 
 function closeModal(){document.getElementById('modal').classList.remove('open')}
@@ -1085,7 +1119,7 @@ function downloadMovie(id){
 
     // 2. Oynani yopib, statistikani yozish (Bu ishlarni tezda hal qilamiz)
     closeModal();
-    try { incrementGlobalStat('d', m.id); } catch(err){}
+    try { updateGlobalStat('d', m.id, 1); } catch(err){}
 
     // 3. TELEGRAMNI MAJBURLASH (Fail-safe mexanizmi)
     const tg = window.Telegram?.WebApp;
@@ -1501,22 +1535,56 @@ function startStatsListener(){
   });
 }
 
-// Poygasiz (Atomic) yangilash — To'g'rilangan versiya
-function updateGlobalStat(type, movieId, amount) {
-  const id = String(movieId);
-  const updateData = {};
+// Vaqt davrini aniqlaydigan kichik yordamchi funksiya
+function getPeriodKeys() {
+  const d = new Date();
+  const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  const month = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+  const year = `${d.getFullYear()}`;
   
-  // Firebase "set" funksiyasi ichma-ich obyektlarni to'g'ri merge qilishi uchun 
-  // kalitlarni nuqta bilan emas, haqiqiy obyekt qilib yig'amiz:
-  updateData[type] = {};
-  updateData[type][id] = firebase.firestore.FieldValue.increment(amount);
+  const dNode = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = dNode.getUTCDay() || 7;
+  dNode.setUTCDate(dNode.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(dNode.getUTCFullYear(),0,1));
+  const weekNo = Math.ceil((((dNode - yearStart) / 86400000) + 1)/7);
+  const week = `${dNode.getUTCFullYear()}-W${String(weekNo).padStart(2, '0')}`;
+
+  return { day, week, month, year };
+}
+
+// Poygasiz (Atomic) yangilash — Vaqt filtrlari bilan
+function updateGlobalStat(type, movieId, amount) {
+  if (!db) return;
+  const id = String(movieId);
+  const inc = firebase.firestore.FieldValue.increment(amount);
+  const updateData = {};
+  const p = getPeriodKeys();
+  
+  // Asosiy (Jami) o'zgartirishlar:
+  updateData[type] = { [id]: inc };
+  
+  // Vaqtlar bo'yicha (kunlik, haftalik, oylik, yillik)
+  updateData[`${type}_day`] = { [p.day]: { [id]: inc } };
+  updateData[`${type}_week`] = { [p.week]: { [id]: inc } };
+  updateData[`${type}_month`] = { [p.month]: { [id]: inc } };
+  updateData[`${type}_year`] = { [p.year]: { [id]: inc } };
   
   db.collection("kino").doc("stats").set(updateData, { merge: true })
     .catch(err => console.warn("Stats yozishda xato:", err));
 }
 
-function getTopMovies(type, days, n=5){
-  const counts = GLOBAL_STATS[type] || {};
+function getTopMovies(type, periodFilter, n=5){
+  let counts = {};
+  if (periodFilter === 'all') {
+    counts = GLOBAL_STATS[type] || {};
+  } else {
+    // Tanlangan vaqt oralig'i kalitini olamiz
+    const p = getPeriodKeys();
+    const currentKey = p[periodFilter]; // masalan: '2026-04-06'
+    const branch = GLOBAL_STATS[`${type}_${periodFilter}`] || {};
+    counts = branch[currentKey] || {};
+  }
+
   return Object.entries(counts)
     .sort((a,b) => b[1]-a[1])
     .slice(0, n)
@@ -1531,7 +1599,7 @@ function getTopMovies(type, days, n=5){
    VIEWS & LIKES (FAQAT FIREBASE'DAN O'QILADI)
 ═══════════════════════════════════════ */
 function getViews(id){
-  return GLOBAL_STATS.w && GLOBAL_STATS.w[String(id)] ? GLOBAL_STATS.w[String(id)] : 0;
+  return GLOBAL_STATS.v && GLOBAL_STATS.v[String(id)] ? GLOBAL_STATS.v[String(id)] : 0;
 }
 
 function getCollectionViews(colId){
@@ -1643,18 +1711,36 @@ function renderAdminDirectors(){
   ct.innerHTML = `<button class="add-btn" onclick="openDirForm(null)">
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     Yangi rejissyor qo'shish
-  </button>` + (dirs.length ? dirs.map(d=>`
-    <div class="db-item">
-      ${d.photo ? `<div class="db-thumb"><img loading="lazy" src="${esc(d.photo)}" onerror="this.parentElement.textContent='🎬'"></div>` : `<div class="db-thumb" style="font-size:22px">🎬</div>`}
-      <div class="db-info">
-        <div class="db-title">${esc(d.name)}</div>
-        <div class="db-meta">${loadMovies().filter(m=>m.directorId===d.id).length} ta film</div>
+  </button>` + (dirs.length ? dirs.map((d, i) => {
+    const thumb = d.photo 
+      ? `<div class="db-thumb" style="width:46px;height:46px;border-radius:50%;flex-shrink:0"><img loading="lazy" src="${esc(d.photo)}" onerror="this.parentElement.textContent='👤'"></div>` 
+      : `<div class="db-thumb" style="width:46px;height:46px;border-radius:50%;flex-shrink:0;font-size:20px">👤</div>`;
+    
+    return `<div class="db-card${d.hidden ? ' is-hidden' : ''}" style="animation-delay:${i*0.04}s">
+      <div class="db-card-hdr" style="padding:10px 14px">
+        ${thumb}
+        <div class="db-info">
+          <div class="db-name">${esc(d.name)}</div>
+          <div class="db-meta">${loadMovies().filter(m=>m.directorId===d.id).length} ta film</div>
+        </div>
+        <div class="db-actions">
+          <div class="db-edit" onclick="openDirForm('${d.id}')">✏️</div>
+          <div class="db-hide" onclick="toggleHideDirector('${d.id}')">${d.hidden ? '👁' : '🙈'}</div>
+          <div class="db-del" onclick="deleteDirector('${d.id}')">🗑</div>
+        </div>
       </div>
-      <div class="db-acts">
-        <button class="db-btn" onclick="openDirForm('${d.id}')">✏️</button>
-        <button class="db-btn danger" onclick="deleteDirector('${d.id}')">🗑</button>
-      </div>
-    </div>`).join('') : `<div class="empty"><div class="empty-ico">🎬</div><div class="empty-t">Rejissyor yo'q</div></div>`);
+    </div>`;
+  }).join('') : `<div class="empty"><div class="empty-ico">🎬</div><div class="empty-t">Rejissyor yo'q</div></div>`);
+}
+
+function toggleHideDirector(id){
+  const dirs = loadDirectors();
+  const idx = dirs.findIndex(d => d.id === id);
+  if(idx < 0) return;
+  dirs[idx].hidden = !dirs[idx].hidden;
+  saveDirectors(dirs);
+  renderAdminDirectors();
+  showToast(dirs[idx].hidden ? 'Rejissyor yashirildi 🙈' : "Rejissyor ko'rsatildi 👁");
 }
 
 function deleteDirector(id){
@@ -1685,6 +1771,10 @@ function openDirForm(id){
       <label class="f-label">Rasm URL</label>
       <input class="a-input" id="f-dir-photo" value="${esc(d.photo||'')}" placeholder="https://...">
     </div>
+    <div class="f-group">
+      <label class="f-label">Tug'ilgan yili (Yoshi uchun)</label>
+      <input class="a-input" id="f-dir-year" type="number" value="${d.birthYear||''}" placeholder="Masalan: 1970">
+    </div>
     <div class="f-section">Biografiya</div>
     <div class="f-group"><label class="f-label">🇺🇿 O'zbek</label><textarea class="a-input" id="f-dir-buz" rows="3" placeholder="Qisqa ma'lumot...">${esc(d.bio?.uz||'')}</textarea></div>
     <div class="f-group"><label class="f-label">🇷🇺 Rus</label><textarea class="a-input" id="f-dir-bru" rows="3" placeholder="Краткое описание...">${esc(d.bio?.ru||'')}</textarea></div>
@@ -1702,6 +1792,7 @@ function saveDirForm(){
     id: did,
     name,
     photo: document.getElementById('f-dir-photo').value.trim(),
+    birthYear: Number(document.getElementById('f-dir-year').value) || 0,
     bio: {
       uz: document.getElementById('f-dir-buz').value.trim(),
       ru: document.getElementById('f-dir-bru').value.trim(),
@@ -1717,22 +1808,35 @@ function saveDirForm(){
 }
 
 // ── REJISSYORLAR SAHIFASI ─────────────────────────────────
+let dirSortType = 'count'; // 'name', 'rating', 'count', 'age'
+let dirSortAsc = false;
+let dirViewMode = 'list';  // 'list', 'grid'
+
+function setDirSort(type){
+  if(dirSortType === type){
+    dirSortAsc = !dirSortAsc;
+  } else {
+    dirSortType = type;
+    dirSortAsc = false;
+  }
+  renderDirectorsList();
+}
+
 function showDirectorsPage(){
   curCol = '__directors__';
-  const dirs = loadDirectors();
+  const t = T[lang] || T.uz;
 
   // Stats container yashir, mov-grid ni yashir
   const _sc = document.getElementById('stats-container');
   if(_sc) _sc.style.display = 'none';
   document.querySelectorAll('.sort-chip').forEach(el => el.style.display = 'none');
 
-  document.getElementById('mov-title').textContent = 'Rejissyorlar';
+  document.getElementById('mov-title').textContent = t.nav_dir;
   const _msl = document.getElementById('mov-sec-lbl');
   if(_msl) _msl.textContent = '';
-  document.getElementById('mov-badge').textContent = dirs.length + ' ta';
+  document.getElementById('mov-badge').textContent = t.count_dir(loadDirectors().filter(d => !d.hidden).length);
   showScreen('screen-movies');
 
-  // Directors container
   let dirsContainer = document.getElementById('directors-container');
   if(!dirsContainer){
     dirsContainer = document.createElement('div');
@@ -1746,24 +1850,82 @@ function showDirectorsPage(){
   document.getElementById('mov-grid').style.display = 'none';
   dirsContainer.style.display = 'block';
 
+  renderDirectorsList();
+}
+
+function renderDirectorsList(){
+  const t = T[lang] || T.uz;
+  let dirs = loadDirectors().filter(d => !d.hidden);
+  let dirsContainer = document.getElementById('directors-container');
+  if(!dirsContainer) return;
+  
   if(!dirs.length){
-    dirsContainer.innerHTML = `<div class="empty"><div class="empty-ico">🎬</div><div class="empty-t">Rejissyor qo'shilmagan</div><div class="empty-s">Admin paneldan qo'shing</div></div>`;
+    dirsContainer.innerHTML = `<div class="empty"><div class="empty-ico">🎬</div><div class="empty-t">${t.dir_empty_t}</div><div class="empty-s">${t.dir_empty_s}</div></div>`;
     return;
   }
 
-  dirsContainer.innerHTML = dirs.map(d => {
-    const filmCount = MOVIES.filter(m => m.directorId === d.id).length;
-    return `<div class="stats-card" style="margin-bottom:10px" onclick="showDirectorFilms('${d.id}')">
-      <div class="stats-poster" style="background:var(--s2);border-radius:50%;width:48px;height:48px;flex-shrink:0">
-        ${d.photo ? `<img loading="lazy" src="${esc(d.photo)}" alt="" style="border-radius:50%;width:100%;height:100%;object-fit:cover">` : '<span style="font-size:22px">🎬</span>'}
-      </div>
-      <div class="stats-info">
-        <div class="stats-title">${esc(d.name)}</div>
-        <div class="stats-col">${filmCount} ta film</div>
-      </div>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
-    </div>`;
-  }).join('');
+  const currentYear = new Date().getFullYear();
+  // Hisoblashlar
+  const dirStats = dirs.map(d => {
+    const movs = MOVIES.filter(m => m.directorId === d.id);
+    const count = movs.length;
+    const avgRating = count ? (movs.reduce((sum,m)=>sum+(+m.rating||0),0)/count).toFixed(1) : 0;
+    const age = d.birthYear ? currentYear - d.birthYear : 0;
+    return {...d, count, avgRating: +avgRating, age};
+  });
+
+  // Saralash
+  dirStats.sort((a,b) => {
+    let res = 0;
+    if(dirSortType === 'name') res = a.name.localeCompare(b.name);
+    else if(dirSortType === 'rating') res = b.avgRating - a.avgRating;
+    else if(dirSortType === 'count') res = b.count - a.count;
+    else if(dirSortType === 'age') res = b.age - a.age; 
+    
+    return dirSortAsc ? -res : res;
+  });
+
+  const arrow = dirSortAsc ? '↑' : '↓';
+  const sortHtml = `<div style="display:flex; gap:8px; overflow-x:auto; padding-bottom:10px; margin-bottom:10px;scrollbar-width:none;align-items:center" class="no-scroll">
+    <div style="flex:1"></div>
+    <div onclick="setDirSort('name')" class="period-chip ${dirSortType==='name'?'active':''}">🔤 ${t.dir_sort_name}${dirSortType==='name'?' '+arrow:''}</div>
+    <div onclick="setDirSort('rating')" class="period-chip ${dirSortType==='rating'?'active':''}">⭐ ${t.dir_sort_rating}${dirSortType==='rating'?' '+arrow:''}</div>
+    <div onclick="setDirSort('count')" class="period-chip ${dirSortType==='count'?'active':''}">🎬 ${t.dir_sort_count}${dirSortType==='count'?' '+arrow:''}</div>
+    <div onclick="setDirSort('age')" class="period-chip ${dirSortType==='age'?'active':''}">🗓️ ${t.dir_sort_age}${dirSortType==='age'?' '+arrow:''}</div>
+    
+    <div onclick="dirViewMode=dirViewMode==='list'?'grid':'list';renderDirectorsList()" style="width:34px;height:34px;background:var(--s2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;-webkit-tap-highlight-color:transparent;margin-left:4px;color:var(--text)">
+      ${dirViewMode==='list'?
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>' : 
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>'}
+    </div>
+  </div>`;
+
+  let listHtml = '';
+  if(dirViewMode === 'list'){
+    listHtml = dirStats.map(d => `
+      <div class="stats-card" style="margin-bottom:10px;align-items:center" onclick="showDirectorFilms('${d.id}')">
+        <div class="stats-poster" style="background:var(--s2);border-radius:50%;width:48px;height:48px;flex-shrink:0">
+          ${d.photo ? `<img loading="lazy" src="${esc(d.photo)}" alt="" style="border-radius:50%;width:100%;height:100%;object-fit:cover">` : '<span style="font-size:22px">👤</span>'}
+        </div>
+        <div class="stats-info" style="display:flex;align-items:baseline;flex-wrap:wrap;gap:8px">
+          <div class="stats-title" style="margin:0">${esc(d.name)}</div>
+          <div class="stats-col" style="margin:0;font-size:12px">★ ${d.avgRating} • ${t.count(d.count)} ${d.age ? `• ${d.age} ${lang==='ru'?'лет':lang==='en'?'y.o':'yosh'}` : ''}</div>
+        </div>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2;flex-shrink:0"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+      </div>`).join('');
+  } else {
+    listHtml = `<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px;">` + 
+      dirStats.map(d => `
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:14px;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent" onclick="showDirectorFilms('${d.id}')">
+        <div style="width:90px;height:90px;margin:0 auto 12px;background:var(--s2);border-radius:50%">
+          ${d.photo ? `<img loading="lazy" src="${esc(d.photo)}" style="width:100%;height:100%;border-radius:50%;object-fit:cover">` : '<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:32px">👤</div>'}
+        </div>
+        <div style="font-size:14px;font-weight:600;color:var(--text);margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.2;height:33px;word-break:break-word">${esc(d.name)}</div>
+        <div style="font-size:12px;color:var(--muted)">★ ${d.avgRating} • ${d.count}</div>
+      </div>`).join('') + `</div>`;
+  }
+
+  dirsContainer.innerHTML = sortHtml + listHtml;
 }
 
 function showDirectorFilms(dirId){
@@ -1915,31 +2077,42 @@ function handleDeepLink(){
 /* ═══════════════════════════════════════
    STATS PAGE RENDER
 ═══════════════════════════════════════ */
-let statsPeriod = 7;
+let statsPeriod = 'day'; // 'day', 'week', 'month', 'year', 'all'
 
 function renderStatsPage(){
+  const t = typeof T !== 'undefined' && T[lang] ? T[lang] : T.uz;
   const sections = [
-    {type:'d', icon:'⬇️', label:'Top Yuklamalar'},
-    {type:'w', icon:'👁',  label:"Top Ko'rishlar"},
-    {type:'l', icon:'❤️',  label:'Top Likelar'},
+    {type:'v', icon:'👁',  label: t.stats_top_views},
+    {type:'d', icon:'⬇️', label: t.stats_top_dl},
+    {type:'l', icon:'❤️',  label: t.stats_top_likes},
   ];
 
   const grid = document.getElementById('stats-grid');
   if(!grid) return;
 
-  // Davr (Period) tugmalarini tozalaymiz
   const bar = document.getElementById('stats-period-bar');
-  if(bar) bar.innerHTML = '';
+  if(bar) {
+    const periods = [
+      {id:'day', lbl: t.stats_today},
+      {id:'week', lbl: t.stats_week},
+      {id:'month', lbl: t.stats_month},
+      {id:'year', lbl: t.stats_year},
+      {id:'all', lbl: t.stats_all}
+    ];
+    bar.innerHTML = periods.map(p => 
+      `<div class="period-chip ${statsPeriod===p.id?'active':''}" onclick="setStatsPeriod('${p.id}')">${p.lbl}</div>`
+    ).join('');
+  }
 
   let html = '';
   sections.forEach(sec => {
-    // 0 beramiz (barcha davrlar uchun)
-    const top = getTopMovies(sec.type, 0, 5);
+    // Yangi vaqt filtri yordamida statistikani olish
+    const top = getTopMovies(sec.type, statsPeriod, 5);
     html += `<div class="stats-section">
       <div class="stats-section-title">${sec.icon} ${sec.label}</div>`;
 
     if(!top.length){
-      html += `<div class="stats-empty">Hali ma'lumot yo'q</div>`;
+      html += `<div class="stats-empty">${t.stats_empty}</div>`;
     } else {
       top.forEach(({movie: m, count}, i) => {
         const rankClass = i===0?'gold':i===1?'silver':i===2?'bronze':'';
@@ -1967,8 +2140,8 @@ function renderStatsPage(){
   grid.innerHTML = html;
 }
 
-function setStatsPeriod(days){
-  statsPeriod = days;
+function setStatsPeriod(period){
+  statsPeriod = period;
   renderStatsPage();
 }
 
@@ -1999,9 +2172,15 @@ function showNavPage(page){
   const titles = {
     stats:     {uz:'Statistika',  ru:'Статистика', en:'Statistics', ico:'📊'},
     directors: {uz:'Rejissyorlar', ru:'Режиссёры',  en:'Directors', ico:'🎬'},
-    saved:     {uz:'Saqlanganlar',ru:'Сохранённые',en:'Saved',     ico:'🔖'},
+    saved:     {uz:'Saqlanganlar',ru:'Сохранённые',en:'Saved',     ico:'❤️'},
   };
   const info = titles[page];
+
+  // Oldingi ochiq qolgan bo'limlarni yopamiz (Stuck bo'lib qolmasligi uchun)
+  const _sc = document.getElementById('stats-container'); if(_sc) _sc.style.display='none';
+  const _dc = document.getElementById('directors-container'); if(_dc) _dc.style.display='none';
+  const _grid = document.getElementById('mov-grid'); if(_grid) _grid.style.display='';
+  document.querySelectorAll('.sort-chip').forEach(el=>el.style.display='');
 
   // Saqlangan filmlar uchun alohida ko'rsatish
   if(page==='saved'){
@@ -2017,7 +2196,7 @@ function showNavPage(page){
     const grid = document.getElementById('mov-grid');
     document.getElementById('mov-badge').textContent = t.count(savedMovies.length);
     if(!savedMovies.length){
-      grid.innerHTML=`<div class="empty"><div class="empty-ico">🔖</div><div class="empty-t">${info[lang]||info.uz}</div><div class="empty-s">${lang==='ru'?'Вы ещё ничего не сохранили':lang==='en'?'Nothing saved yet':'Hali hech narsa saqlanmagan'}</div></div>`;
+      grid.innerHTML=`<div class="empty"><div class="empty-ico">❤️</div><div class="empty-t">${info[lang]||info.uz}</div><div class="empty-s">${lang==='ru'?'Вы ещё ничего не сохранили':lang==='en'?'Nothing saved yet':'Hali hech narsa saqlanmagan'}</div></div>`;
       return;
     }
     const bg_map = BG;
