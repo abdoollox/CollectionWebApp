@@ -7,8 +7,16 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&subset=latin,cyrillic&display=swap" rel="stylesheet">
+<script>
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').catch(err => console.log('SW fail:', err));
+    });
+  }
+</script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -408,7 +416,15 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
     <!-- Global qidiruv natijalari -->
     <div id="global-results" style="display:none;padding:0 12px 100px"></div>
   </div>
-  <div class="sec-lbl" id="col-sec-lbl">Barcha kolleksiyalar</div>
+  <div style="padding:8px 14px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+    <span style="font-size:12px;color:var(--muted);flex-shrink:0" id="col-sec-lbl">Barcha kolleksiyalar</span>
+    <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
+      <button class="sort-chip active" id="sort-col-def" onclick="setColSort('def')">🔤 Alifbo ↑</button>
+      <button class="sort-chip" id="sort-col-year" onclick="setColSort('year')">📅 Yil</button>
+      <button class="sort-chip" id="sort-col-rating" onclick="setColSort('rating')">⭐ Reyting</button>
+      <button class="sort-chip" id="sort-col-count" onclick="setColSort('count')">🔢 Soni</button>
+    </div>
+  </div>
   <div class="col-grid" id="col-grid"></div>
   <div class="bnav">
     <div class="ni active" onclick="goHome()"><div class="ni-ico">🎬</div><div class="ni-lbl" data-k="nav_home">Bosh sahifa</div></div>
@@ -766,8 +782,9 @@ applyTheme();
 /* ═══════════════════════════════════════
    STATE
 ═══════════════════════════════════════ */
-let lang='uz', curCol=null, sortIdx=0, sortDir=1, colQ='', movQ='';
+let lang='uz', curCol=null, sortIdx=0, sortDir=1, colSortIdx=0, colSortDir=1, colQ='', movQ='';
 // sortDir: 1=asc, -1=desc
+const COL_SORTS=['def','year','rating','count'];
 let logoTapCount=0, logoTapTimer=null;
 let adminTab='collections', adminColFilter=null;
 let editingColId=null, editingMovId=null;
@@ -809,6 +826,22 @@ function applyLang(){
   if(colSecLbl) colSecLbl.textContent=t.all_col;
   document.querySelectorAll('[data-k]').forEach(el=>{
     const k=el.dataset.k;if(t[k])el.textContent=t[k];
+  });
+  
+  // Kolleksiyalar saralash chiplarini tarjima qilish
+  if(document.getElementById('sort-col-def')) document.getElementById('sort-col-def').textContent = `🔤 ${t.dir_sort_name} ` + (colSortDir===1?'↑':'↓');
+  if(document.getElementById('sort-col-year')) document.getElementById('sort-col-year').textContent = `📅 ${t.sort_year} ` + (colSortDir===1?'↑':'↓');
+  if(document.getElementById('sort-col-rating')) document.getElementById('sort-col-rating').textContent = `⭐ ${t.sort_rating} ` + (colSortDir===1?'↑':'↓');
+  if(document.getElementById('sort-col-count')) document.getElementById('sort-col-count').textContent = `🔢 ${t.dir_sort_count} ` + (colSortDir===1?'↑':'↓');
+
+  // Filmlar saralash chiplarini tarjima qilish
+  if(document.getElementById('sort-chrono')) document.getElementById('sort-chrono').textContent = `🎬 ${t.sort_chrono} ` + (sortDir===1?'↑':'↓');
+  if(document.getElementById('sort-year')) document.getElementById('sort-year').textContent = `📅 ${t.sort_year} ` + (sortDir===1?'↑':'↓');
+  if(document.getElementById('sort-rating')) document.getElementById('sort-rating').textContent = `⭐ ${t.sort_rating} ` + (sortDir===1?'↑':'↓');
+
+  // Active statusdagi chiplardagi strelkalarni faqat string oxiridan uzish (setSort dagi kabi tozalash)
+  document.querySelectorAll('.sort-chip:not(.active)').forEach(el => {
+    el.textContent = el.textContent.replace(/ [↑↓]$/,'');
   });
 }
 
@@ -873,20 +906,42 @@ function renderCollections(){
   const t=T[lang];
   const q=colQ.toLowerCase();
   COLLECTIONS=loadCollections();
-  const list=COLLECTIONS.filter(c=>!c.hidden&&(!q||c.name[lang].toLowerCase().includes(q)));
-  const grid=document.getElementById('col-grid');
+  
+  let list = COLLECTIONS.filter(c=>!c.hidden&&(!q||c.name[lang].toLowerCase().includes(q))).map(c=>{
+    const colMovs = MOVIES.filter(m => Array.isArray(m.cols) ? m.cols.includes(c.id) : m.col === c.id);
+    const cnt = colMovs.length;
+    const avgRating = cnt ? (colMovs.reduce((sum, m) => sum + (m.rating||0), 0) / cnt) : 0;
+    const watchedCount = loadWatched().filter(id => colMovs.find(m => m.id === id)).length;
+    return { ...c, cnt, avgRating, watchedCount };
+  });
 
+  const s = COL_SORTS[colSortIdx] || 'def';
+  list.sort((a,b) => {
+    if(s==='def') {
+      return colSortDir * a.name[lang].localeCompare(b.name[lang]);
+    } else if(s==='year') {
+      return colSortDir * (a.years[0] - b.years[0]);
+    } else if(s==='rating') {
+      return colSortDir * (a.avgRating - b.avgRating);
+    } else if(s==='count') {
+      return colSortDir * (a.cnt - b.cnt);
+    }
+    return 0;
+  });
+
+  const grid=document.getElementById('col-grid');
   if(!list.length){
     grid.innerHTML=`<div class="empty"><div class="empty-ico">🎞️</div><div class="empty-t">${t.empty_t}</div><div class="empty-s">${t.empty_s}</div></div>`;
     return;
   }
 
   grid.innerHTML=list.map(c=>{
-    const cnt=MOVIES.filter(m=>m.col===c.id).length;
     const bg = BG[c.id]||'#1A1A1A';
     const thumb = (c.thumbnail && c.thumbnail[lang]) || '';
     const bannerContent = `<div style="position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;font-size:56px">${c.emoji}</div>` +
       (thumb ? `<img loading="lazy" src="${thumb}" alt="" style="position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;z-index:1;" onerror="this.style.display='none'">` : '');
+    const pct = c.cnt ? Math.round(c.watchedCount/c.cnt*100) : 0;
+    
     return `<div class="col-card" onclick="openCollection('${c.id}')">
       <div class="col-banner" style="background-color:${bg}">
         ${bannerContent}
@@ -896,19 +951,12 @@ function renderCollections(){
       </div>
       <div class="col-body">
         <div class="col-meta" style="flex:1;min-width:0">
-          <div class="col-count">${esc(c.sub[lang])} · <strong>${t.count(cnt)}</strong></div>
-          <div class="col-years">${c.years[0]} – ${c.years[1]}</div>
-          ${(()=>{
-            const watchedCount = loadWatched().filter(id => MOVIES.find(m=>m.col===c.id&&m.id===id)).length;
-            const totalViews = getCollectionViews(c.id);
-            if(!cnt) return '';
-            const pct = Math.round(watchedCount/cnt*100);
-            return `<div class="col-progress"><div class="col-progress-fill" style="width:${pct}%"></div></div>
-                    <div class="col-progress-lbl">👁 ${watchedCount}/${cnt} · ${totalViews} ta qaralgan</div>`;
-          })()}
+          <div class="col-count">${esc(c.sub[lang])} · <strong>${t.count(c.cnt)}</strong></div>
+          <div class="col-years">${c.years[0]} – ${c.years[1]} · ⭐ ${c.avgRating.toFixed(1)}</div>
+          ${c.cnt ? `<div class="col-progress"><div class="col-progress-fill" style="width:${pct}%"></div></div>` : ''}
         </div>
-        <div class="col-arrow">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <div class="col-arrow" style="width:auto; height:36px; padding:0 12px; border-radius:12px; font-weight:500; font-size:13px; color:var(--text); background:var(--s2); border:1px solid var(--border);">
+          🍿 ${c.watchedCount}/${c.cnt}
         </div>
       </div>
     </div>`;
@@ -924,11 +972,13 @@ function openCollection(id){
   const col=COLLECTIONS.find(c=>c.id===id);
   document.getElementById('mov-title').textContent=col.name[lang];
   const _msl=document.getElementById('mov-sec-lbl');if(_msl)_msl.textContent='';
-  // Stats container ni yashir, mov-grid ni ko'rsat
+  // Stats va Directors containerlarni yashir, mov-grid ni ko'rsat
   const _sc=document.getElementById('stats-container');
   if(_sc) _sc.style.display='none';
+  const _dc=document.getElementById('directors-container');
+  if(_dc) _dc.style.display='none';
   document.getElementById('mov-grid').style.display='';
-  document.querySelectorAll('.sort-chip').forEach(el=>el.style.display='');
+  document.querySelectorAll('#screen-movies .sort-chip').forEach(el=>el.style.display='');
   showScreen('screen-movies');
   // Chip larni default (chrono) ga qaytaramiz
   document.querySelectorAll('.sort-chip').forEach(el=>el.classList.remove('active'));
@@ -978,6 +1028,36 @@ function renderMovies(){
   }).join('');
 }
 
+function setColSort(s){
+  const newIdx = COL_SORTS.indexOf(s);
+  if(newIdx < 0) return;
+  if(colSortIdx === newIdx){
+    colSortDir *= -1;
+  } else {
+    colSortIdx = newIdx;
+    colSortDir = 1;
+  }
+  const t = typeof T !== 'undefined' && T[lang] ? T[lang] : T.uz;
+  const labels = {
+    def:     colSortDir===1 ? `🔤 ${t.dir_sort_name} ↑` : `🔤 ${t.dir_sort_name} ↓`,
+    year:    colSortDir===1 ? `📅 ${t.sort_year} ↑` : `📅 ${t.sort_year} ↓`,
+    rating:  colSortDir===1 ? `⭐ ${t.sort_rating} ↑` : `⭐ ${t.sort_rating} ↓`,
+    count:   colSortDir===1 ? `🔢 ${t.dir_sort_count} ↑` : `🔢 ${t.dir_sort_count} ↓`,
+  };
+  const ids = {def:'sort-col-def', year:'sort-col-year', rating:'sort-col-rating', count:'sort-col-count'};
+  document.querySelectorAll('#screen-collections .sort-chip').forEach(el => {
+    el.classList.remove('active');
+    const key = Object.keys(ids).find(k=>ids[k]===el.id);
+    if(key) el.textContent = labels[key].replace(/ [↑↓]$/,'');
+  });
+  const activeEl = document.getElementById(ids[s]);
+  if(activeEl){
+    activeEl.classList.add('active');
+    activeEl.textContent = labels[s];
+  }
+  renderCollections();
+}
+
 function setSort(s){
   const newIdx = SORTS.indexOf(s);
   if(newIdx < 0) return;
@@ -1019,6 +1099,18 @@ document.getElementById('mov-srch').addEventListener('input',e=>{movQ=e.target.v
 /* ═══════════════════════════════════════
    MODAL
 ═══════════════════════════════════════ */
+function openDirectorFromModal(dirId){
+  closeModal();
+  setTimeout(() => {
+    // Navlarni yangilash
+    document.querySelectorAll('.bnav .ni').forEach(el => {
+      const k = el.querySelector('.ni-lbl')?.dataset.k;
+      el.classList.toggle('active', k === 'nav_dir');
+    });
+    showDirectorFilms(dirId);
+  }, 250);
+}
+
 function openModal(id){
   MOVIES=loadMovies();
   const m=MOVIES.find(x=>x.id===id);
@@ -1039,6 +1131,19 @@ function openModal(id){
       <div class="modal-poster-gradient"></div>
     </div>`;
 
+  // Director widget
+  const dir = m.directorId ? loadDirectors().find(d => d.id === m.directorId) : null;
+  const dirHtml = dir ? `<div style="margin-top:12px;display:flex;align-items:center;gap:10px;background:var(--s2);padding:10px 14px;border-radius:12px;cursor:pointer;border:1px solid var(--border);" onclick="openDirectorFromModal('${dir.id}')">
+    <div style="width:36px;height:36px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;">
+      ${dir.photo ? `<img src="${esc(dir.photo)}" style="width:100%;height:100%;object-fit:cover">` : '👤'}
+    </div>
+    <div style="flex:1">
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px">${t.nav_dir || 'Rejissyor'}</div>
+      <div style="font-size:14px;font-weight:600;color:var(--text)">${esc(dir.name)}</div>
+    </div>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--muted)" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+  </div>` : '';
+
   // Body
   document.getElementById('modal-body').innerHTML=`
     <div class="modal-top">
@@ -1055,7 +1160,8 @@ function openModal(id){
       <div class="modal-stat">👁 <strong>${getViews(m.id)}</strong></div>
     </div>
     <div class="modal-desc">${esc(m.desc[lang])}</div>
-    <div class="modal-acts">
+    ${dirHtml}
+    <div class="modal-acts" style="margin-top:16px">
       <button class="btn-p" style="width:100%" onclick="downloadMovie(${m.id})">${t.download}</button>
       <div class="modal-acts-row">
         ${m.trailer ? `<a class="btn-trailer" style="flex:1" href="${esc(m.trailer)}" target="_blank" onclick="event.stopPropagation()">
@@ -1064,8 +1170,8 @@ function openModal(id){
         </a>` : ''}
         <button class="btn-s" style="flex:1;${isWatched(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}" onclick="toggleWatchedModal(${m.id})">
           ${isWatched(m.id)
-            ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg> ${t.watched_yes}`
-            : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> ${t.watched_no}`
+            ? `🍿 ${t.watched_yes}`
+            : `🍿 ${t.watched_no}`
           }
         </button>
         <button class="btn-s" style="${isLiked(m.id)?'color:var(--red);border-color:var(--red-b);background:var(--red-dim)':''}" onclick="toggleLikeModal(${m.id})">
