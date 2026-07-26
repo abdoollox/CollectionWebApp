@@ -697,40 +697,86 @@ let ADMIN_TOKEN = false; // Parol tasdiqlanganda true bo'ladi
 let COLLECTIONS = [];
 let MOVIES = [];
 
+/* ═══ YOZISHDAN HIMOYA ═══
+   CLOUD_OK — bulutdan haqiqiy ma'lumot muvaffaqiyatli o'qildimi.
+   Faqat shu true bo'lgandagina bulutga yozishga ruxsat beriladi.
+   CLOUD_BASE — o'qilgan paytdagi elementlar soni (kamayishni aniqlash uchun). */
+let CLOUD_OK = false;
+let CLOUD_BASE = { cols: 0, movs: 0 };
+
 // Firestore dan o'qish
 async function fetchCloudData(){
+  CLOUD_OK = false;
   try {
     const docRef = await db.collection("kino").doc("main").get();
-    if (docRef.exists) {
-      const data = docRef.data();
-      COLLECTIONS = data.collections || [];
-      MOVIES = data.movies || [];
+
+    if (!docRef.exists) {
+      // Hujjat yo'q — bu kutilmagan holat. Yozishni ochmaymiz.
+      throw new Error("kino/main hujjati topilmadi");
     }
+
+    const data = docRef.data();
+    COLLECTIONS = data.collections || [];
+    MOVIES      = data.movies      || [];
+
+    // Muvaffaqiyat — endi yozishga ruxsat va asos qiymatlar belgilanadi
+    CLOUD_OK   = true;
+    CLOUD_BASE = { cols: COLLECTIONS.length, movs: MOVIES.length };
+
     localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
     localStorage.setItem(DB_KEY_MOV, JSON.stringify(MOVIES));
+
     await fetchDirectors();
   } catch(err) {
     console.warn("Firebase o'qish xatosi:", err);
+    // MUHIM: bu yerda localStorage'ga YOZMAYMIZ — mavjud zaxira buzilmasin.
     COLLECTIONS = JSON.parse(localStorage.getItem(DB_KEY_COL) || '[]');
-    MOVIES = JSON.parse(localStorage.getItem(DB_KEY_MOV) || '[]');
+    MOVIES      = JSON.parse(localStorage.getItem(DB_KEY_MOV) || '[]');
     if(!COLLECTIONS.length) COLLECTIONS = JSON.parse(JSON.stringify(DEFAULT_COLLECTIONS));
-    if(!MOVIES.length)      MOVIES = JSON.parse(JSON.stringify(DEFAULT_MOVIES));
+    if(!MOVIES.length)      MOVIES      = JSON.parse(JSON.stringify(DEFAULT_MOVIES));
+    // CLOUD_OK false bo'lib qoladi → syncToCloud yozishni rad etadi
   }
 }
 
 async function syncToCloud(){
   if(!ADMIN_TOKEN){ showToast('Admin emas!'); return; }
-  showToast('Bulutga saqlanmoqda... ⏳');
+
+  // ── HIMOYA 1: bulut o'qilmagan bo'lsa, hech qachon yozmaymiz ──
+  if(!CLOUD_OK){
+    showToast("Bulut o'qilmadi — saqlash bekor qilindi");
+    console.error("syncToCloud bloklandi: CLOUD_OK=false. Sahifani yangilab qayta urining.");
+    return;
+  }
+
+  // ── HIMOYA 2: ma'lumot keskin kamayayotgan bo'lsa, tasdiq so'raymiz ──
+  const nc = COLLECTIONS.length, nm = MOVIES.length;
+  const shrink = (nc === 0 && CLOUD_BASE.cols > 0)
+              || (nm === 0 && CLOUD_BASE.movs > 0)
+              || (CLOUD_BASE.movs >= 4 && nm < CLOUD_BASE.movs / 2);
+  if(shrink){
+    const ok = confirm(
+      "DIQQAT — ma'lumot keskin kamayyapti!\n\n" +
+      "Bulutda hozir: " + CLOUD_BASE.cols + " kolleksiya, " + CLOUD_BASE.movs + " film\n" +
+      "Yozilmoqchi:   " + nc + " kolleksiya, " + nm + " film\n\n" +
+      "Bu ataylab qilingan o'zgarishmi? Davom etilsinmi?"
+    );
+    if(!ok){ showToast('Bekor qilindi'); return; }
+  }
+
+  showToast('Bulutga saqlanmoqda...');
   try {
     await db.collection("kino").doc("main").set({
       collections: COLLECTIONS,
       movies: MOVIES
     }, { merge: true });
+
+    // Yozish muvaffaqiyatli — yangi asosni belgilaymiz
+    CLOUD_BASE = { cols: nc, movs: nm };
     localStorage.setItem(DB_KEY_COL, JSON.stringify(COLLECTIONS));
     localStorage.setItem(DB_KEY_MOV, JSON.stringify(MOVIES));
-    showToast('Barcha qurilmalarda saqlandi ✅');
+    showToast('Barcha qurilmalarda saqlandi');
   } catch(e) {
-    showToast('Saqlashda xato ❌');
+    showToast('Saqlashda xato');
     console.error(e);
   }
 }
