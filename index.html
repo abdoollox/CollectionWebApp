@@ -1591,6 +1591,19 @@ function openMovForm(id){
   const colOptions=cols.map(c=>`<label style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--s2);border-radius:8px;cursor:pointer;margin-bottom:6px"><input type="checkbox" value="${c.id}" class="col-check" ${mCols.includes(c.id)?'checked':''}> <span style="font-size:14px">${c.emoji} ${c.name.uz}</span></label>`).join('');
   document.getElementById('form-title').textContent=id?'Filmni tahrirlash':'Yangi film';
   document.getElementById('form-body').innerHTML=`
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="font-size:14px;font-weight:500;margin-bottom:4px">\u{1F50D} TMDB dan to'ldirish</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:10px">
+        Film nomini yozing \u2014 nom, tavsif, yil, reyting, rasm va treyler avtomatik to'ladi.
+      </div>
+      <div style="display:flex;gap:8px">
+        <input class="a-input" id="tmdb-q" placeholder="Masalan: Dune" style="flex:1"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();tmdbSearch()}">
+        <button class="a-btn" style="width:auto;padding:0 18px" onclick="tmdbSearch()">Qidirish</button>
+      </div>
+      <div id="tmdb-res" style="margin-top:10px"></div>
+    </div>
+
     <div class="f-group">
       <label class="f-label">Kolleksiya</label>
       <div id="f-mov-col">${colOptions}</div>
@@ -1665,6 +1678,123 @@ function openMovForm(id){
 
     <button class="f-save" onclick="saveMovForm()">💾 Saqlash</button>`;
   openForm();
+}
+
+/* \u2550\u2550\u2550 TMDB INTEGRATSIYASI \u2550\u2550\u2550
+   API kalit ochiq kodda emas \u2014 Firestore'dagi config/tmdb hujjatida saqlanadi
+   va uni faqat admin akkaunti o'qiy oladi (Security Rules orqali). */
+let TMDB_KEY = null;
+
+async function getTmdbKey(){
+  if(TMDB_KEY) return TMDB_KEY;
+  if(!db || !(auth && auth.currentUser)) return null;
+  try{
+    const snap = await db.collection('config').doc('tmdb').get();
+    TMDB_KEY = (snap.exists && snap.data().apiKey) ? String(snap.data().apiKey).trim() : null;
+  }catch(e){
+    console.warn("TMDB kaliti o'qilmadi:", e);
+    TMDB_KEY = null;
+  }
+  return TMDB_KEY;
+}
+
+function tmdbMsg(html, rang){
+  const box = document.getElementById('tmdb-res');
+  if(box) box.innerHTML = `<div style="font-size:13px;padding:6px 2px;color:${rang||'var(--muted)'}">${html}</div>`;
+}
+
+async function tmdbSearch(){
+  const inp = document.getElementById('tmdb-q');
+  const box = document.getElementById('tmdb-res');
+  if(!inp || !box) return;
+
+  const q = inp.value.trim();
+  if(!q){ box.innerHTML = ''; return; }
+
+  const key = await getTmdbKey();
+  if(!key){
+    tmdbMsg("TMDB kaliti topilmadi. Firestore'da config/tmdb hujjatini tekshiring.", '#f87171');
+    return;
+  }
+
+  tmdbMsg('Qidirilmoqda...');
+  try{
+    const url = 'https://api.themoviedb.org/3/search/movie?api_key=' + key
+              + '&language=en-US&include_adult=false&query=' + encodeURIComponent(q);
+    const r = await fetch(url);
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const list = (d.results || []).slice(0, 8);
+
+    if(!list.length){ tmdbMsg('Hech narsa topilmadi.'); return; }
+
+    box.innerHTML = list.map(x => {
+      const yil = (x.release_date || '').slice(0, 4) || '\u2014';
+      const ball = (x.vote_average || 0).toFixed(1);
+      const p = x.poster_path ? 'https://image.tmdb.org/t/p/w92' + x.poster_path : '';
+      const rasm = p
+        ? `<img src="${p}" style="width:36px;height:54px;object-fit:cover;border-radius:4px;flex:none">`
+        : `<div style="width:36px;height:54px;background:var(--s1);border-radius:4px;flex:none"></div>`;
+      return `<div onclick="tmdbPick(${x.id})"
+                   style="display:flex;gap:10px;align-items:center;padding:8px;border-radius:8px;cursor:pointer;background:var(--s1);margin-bottom:6px">
+                ${rasm}
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;color:var(--text)">${esc(x.title || '')}</div>
+                  <div style="font-size:12px;color:var(--muted)">${yil} \u00b7 \u2b50 ${ball}</div>
+                </div>
+              </div>`;
+    }).join('');
+  }catch(e){
+    console.error('TMDB qidiruv xatosi:', e);
+    tmdbMsg('Qidirishda xato: ' + esc(e.message), '#f87171');
+  }
+}
+
+async function tmdbPick(tmdbId){
+  const key = await getTmdbKey();
+  if(!key) return;
+
+  tmdbMsg("Ma'lumot olinmoqda...");
+  try{
+    const baza = 'https://api.themoviedb.org/3/movie/' + tmdbId + '?api_key=' + key;
+    const [en, ru, vid] = await Promise.all([
+      fetch(baza + '&language=en-US').then(r => r.json()),
+      fetch(baza + '&language=ru-RU').then(r => r.json()),
+      fetch('https://api.themoviedb.org/3/movie/' + tmdbId + '/videos?api_key=' + key).then(r => r.json())
+    ]);
+
+    // force=false bo'lsa, faqat maydon bo'sh bo'lgandagina yoziladi
+    const set = (id, val, force) => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      if(force || !el.value.trim()) el.value = val || '';
+    };
+
+    set('f-mov-ten', en.title, true);
+    set('f-mov-tru', ru.title, true);
+    set('f-mov-tuz', en.title, false);   // o'zbekchani ustidan yozmaymiz
+    set('f-mov-den', en.overview, true);
+    set('f-mov-dru', ru.overview, true);
+    set('f-mov-year', (en.release_date || '').slice(0, 4), true);
+    set('f-mov-rating', en.vote_average ? en.vote_average.toFixed(1) : '', true);
+
+    // Karta rasmi 2:3 \u2192 poster, modal rasmi 16:9 \u2192 backdrop
+    const poster = en.poster_path   ? 'https://image.tmdb.org/t/p/w500' + en.poster_path : '';
+    const backdr = en.backdrop_path ? 'https://image.tmdb.org/t/p/original' + en.backdrop_path : '';
+    ['uz','ru','en'].forEach(l => {
+      set('f-mov-thumb-'  + l, poster, true);
+      set('f-mov-mthumb-' + l, backdr, true);
+    });
+
+    const vlar = vid.results || [];
+    const yt = vlar.find(v => v.site === 'YouTube' && v.type === 'Trailer') || vlar.find(v => v.site === 'YouTube');
+    if(yt) set('f-mov-trailer', 'https://www.youtube.com/watch?v=' + yt.key, true);
+
+    tmdbMsg("\u2705 To'ldirildi. O'zbekcha nom va tavsifni tekshiring \u2014 ular avtomatik tarjima qilinmaydi.", '#4ade80');
+  }catch(e){
+    console.error('TMDB olish xatosi:', e);
+    tmdbMsg("Ma'lumot olishda xato: " + esc(e.message), '#f87171');
+  }
 }
 
 function saveMovForm(){
