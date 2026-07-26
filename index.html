@@ -370,6 +370,60 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
 
 @keyframes fU{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fD{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ═══ KOMPYUTER UCHUN TUZILMA (≥1024px) ═══
+   Bu blok faqat keng ekranda ishlaydi.
+   Mobil va Telegram WebApp ko'rinishi butunlay o'zgarmaydi. */
+@media(min-width:1024px){
+  :root{--wrap:1240px}
+
+  /* Kontent butun ekran bo'ylab cho'zilmasin — markazga jamlanadi */
+  .hdr-row,
+  .srch-wrap,
+  .toolbar,
+  .sec-lbl,
+  .col-grid,
+  .mov-grid,
+  #global-results{
+    max-width:var(--wrap);
+    margin-left:auto;
+    margin-right:auto;
+    width:100%;
+  }
+
+  .hdr{padding:16px 24px 14px;order:-2}
+  .srch{max-width:560px}
+
+  /* Pastki panelni yuqoriga ko'chiramiz.
+     .screen — flex ustun bo'lgani uchun order yetarli, HTML o'zgarmaydi. */
+  .bnav{
+    order:-1;
+    position:static;
+    background:transparent;
+    backdrop-filter:none;
+    border-top:none;
+    border-bottom:1px solid var(--border);
+    padding:0;
+    justify-content:center;
+    gap:2px;
+  }
+  .ni{
+    flex:0 0 auto;
+    flex-direction:row;
+    align-items:center;
+    gap:8px;
+    padding:13px 20px;
+    border-bottom:2px solid transparent;
+  }
+  .ni:hover{background:var(--s1)}
+  .ni.active{border-bottom-color:var(--red)}
+  .ni-ico{font-size:15px}
+  .ni-lbl{font-size:14px}
+
+  /* Fixed panel yo'qolgani uchun pastdagi 100px bo'sh joy keraksiz */
+  .col-grid{padding-bottom:48px}
+  .mov-grid{padding-bottom:48px}
+}
 </style>
 </head>
 <body>
@@ -417,7 +471,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
     <!-- Global qidiruv natijalari -->
     <div id="global-results" style="display:none;padding:0 12px 100px"></div>
   </div>
-  <div style="padding:8px 14px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+  <div class="toolbar" style="padding:8px 14px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px">
     <span style="font-size:12px;color:var(--muted);flex-shrink:0" id="col-sec-lbl">Barcha kolleksiyalar</span>
     <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
       <button class="sort-chip active" id="sort-col-def" onclick="setColSort('def')">🔤 Alifbo ↑</button>
@@ -455,7 +509,7 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
       <input class="srch" id="mov-srch" type="text" placeholder="Film qidirish...">
     </div>
   </div>
-  <div style="padding:8px 14px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px">
+  <div class="toolbar" style="padding:8px 14px 4px;display:flex;align-items:center;justify-content:space-between;gap:8px">
     <span style="font-size:12px;color:var(--muted);flex-shrink:0" id="mov-sec-lbl"></span>
     <div style="display:flex;gap:6px;overflow-x:auto;scrollbar-width:none">
       <button class="sort-chip active" id="sort-chrono" onclick="setSort('chrono')">🎬 Xronologiya ↑</button>
