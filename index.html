@@ -7,6 +7,7 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
 <link rel="manifest" href="manifest.json">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@300;400;500;600&subset=latin,cyrillic&display=swap" rel="stylesheet">
@@ -476,8 +477,9 @@ html,body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;
   <div class="admin-logo">Admin Panel</div>
   <div class="admin-sub">Kino Kolleksiya · Boshqaruv tizimi</div>
   <div class="admin-form">
-    <input class="a-input" id="a-pass" type="password" placeholder="Parol..." onkeydown="if(event.key==='Enter')adminLogin()">
-    <button class="a-btn" onclick="adminLogin()">Kirish</button>
+    <input class="a-input" id="a-email" type="email" autocomplete="username" placeholder="Email..." onkeydown="if(event.key==='Enter')document.getElementById('a-pass').focus()">
+    <input class="a-input" id="a-pass" type="password" autocomplete="current-password" placeholder="Parol..." onkeydown="if(event.key==='Enter')adminLogin()">
+    <button class="a-btn" id="a-btn" onclick="adminLogin()">Kirish</button>
     <div class="a-err" id="a-err">Parol noto'g'ri!</div>
     <button style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;margin-top:4px" onclick="showScreen('screen-collections')">← Orqaga qaytish</button>
   </div>
@@ -679,9 +681,11 @@ const firebaseConfig = {
 
 // Firebase ni ishga tushirish
 let db;
+let auth;
 try {
   firebase.initializeApp(firebaseConfig);
   db = firebase.firestore();
+  auth = firebase.auth();
   // Offline cache yoqamiz — tezroq ishlaydi
   db.settings({ cacheSizeBytes: firebase.firestore.CACHE_SIZE_UNLIMITED });
   db.enablePersistence().catch(() => {});
@@ -689,10 +693,18 @@ try {
   console.error('Firebase init xatosi:', e);
 }
 
+
 const DB_KEY_COL = 'kk_col_backup';
 const DB_KEY_MOV = 'kk_mov_backup';
-const ADMIN_PASS = 'kino';
-let ADMIN_TOKEN = false; // Parol tasdiqlanganda true bo'ladi
+// ADMIN_PASS olib tashlandi — endi Firebase Authentication ishlatiladi.
+let ADMIN_TOKEN = false; // onAuthStateChanged tomonidan boshqariladi
+/* Admin huquqi endi FAQAT haqiqiy Firebase sessiyasidan kelib chiqadi.
+   Sessiya brauzerda saqlanadi — har safar qayta kirish shart emas. */
+if(auth){
+  auth.onAuthStateChanged(function(user){
+    ADMIN_TOKEN = !!user;
+  });
+}
 
 let COLLECTIONS = [];
 let MOVIES = [];
@@ -739,7 +751,7 @@ async function fetchCloudData(){
 }
 
 async function syncToCloud(){
-  if(!ADMIN_TOKEN){ showToast('Admin emas!'); return; }
+  if(!ADMIN_TOKEN || !(auth && auth.currentUser)){ showToast('Admin sessiyasi yo\'q!'); return; }
 
   // ── HIMOYA 1: bulut o'qilmagan bo'lsa, hech qachon yozmaymiz ──
   if(!CLOUD_OK){
@@ -915,8 +927,15 @@ function logoTap(){
   logoTapTimer=setTimeout(()=>logoTapCount=0,1500);
   if(logoTapCount>=5){
     logoTapCount=0;
-    document.getElementById('a-pass').value='';
     document.getElementById('a-err').style.display='none';
+    // Sessiya saqlangan bo'lsa — login ekranini o'tkazib yuboramiz
+    if(auth && auth.currentUser){
+      ADMIN_TOKEN = true;
+      showScreen('screen-admin');
+      switchAdminTab('collections');
+      return;
+    }
+    document.getElementById('a-pass').value='';
     showScreen('screen-admin-login');
   }
 }
@@ -924,24 +943,57 @@ function logoTap(){
 /* ═══════════════════════════════════════
    ADMIN AUTH
 ═══════════════════════════════════════ */
-async function adminLogin(){
-  const inputKey = document.getElementById('a-pass').value.trim();
-  const err = document.getElementById('a-err');
+const AUTH_XATO = {
+  'auth/invalid-email':          "Email formati noto'g'ri",
+  'auth/user-not-found':         "Bunday foydalanuvchi topilmadi",
+  'auth/wrong-password':         "Parol noto'g'ri",
+  'auth/invalid-credential':     "Email yoki parol noto'g'ri",
+  'auth/too-many-requests':      "Juda ko'p urinish — biroz kuting",
+  'auth/network-request-failed': "Tarmoq xatosi — internetni tekshiring",
+  'auth/user-disabled':          "Bu akkaunt o'chirilgan"
+};
 
-  // Hozircha oddiy parol. Firebase Authentication ga o'tgach yangilanadi.
-  if(inputKey === "kino") {
+async function adminLogin(){
+  const email = document.getElementById('a-email').value.trim();
+  const pass  = document.getElementById('a-pass').value;
+  const err   = document.getElementById('a-err');
+  const btn   = document.getElementById('a-btn');
+
+  err.style.display = 'none';
+
+  if(!email || !pass){
+    err.textContent = "Email va parolni kiriting";
+    err.style.display = 'block';
+    return;
+  }
+  if(!auth){
+    err.textContent = "Auth ishga tushmadi — sahifani yangilang";
+    err.style.display = 'block';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Tekshirilmoqda...';
+
+  try {
+    await auth.signInWithEmailAndPassword(email, pass);
     ADMIN_TOKEN = true;
     document.getElementById('a-pass').value = '';
     showScreen('screen-admin');
     switchAdminTab('collections');
-  } else {
-    err.textContent = "Parol noto'g'ri!";
+  } catch(e) {
+    err.textContent = AUTH_XATO[e.code] || ("Kirishda xato: " + e.code);
     err.style.display = 'block';
+    console.error('Login xatosi:', e);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Kirish';
   }
 }
 
-function adminLogout(){
-  ADMIN_TOKEN = null;
+async function adminLogout(){
+  try { if(auth) await auth.signOut(); } catch(e){ console.warn('Chiqishda xato:', e); }
+  ADMIN_TOKEN = false;
   showScreen('screen-collections');
 }
 
