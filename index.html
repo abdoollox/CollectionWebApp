@@ -2467,14 +2467,131 @@ function showNavPage(page){
 }
 function renderAdminSync(){
   const ct = document.getElementById('admin-content');
+  const nc = COLLECTIONS.length, nm = MOVIES.length, nd = loadDirectors().length;
+  const holat = CLOUD_OK
+    ? '<span style="color:#4ade80">✅ Bulut bilan aloqa bor</span>'
+    : '<span style="color:#f87171">⚠️ Bulut o\'qilmadi — saqlash bloklangan</span>';
+
   ct.innerHTML = `
     <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:8px">
-      <div style="font-size:14px;color:var(--text);font-weight:500;margin-bottom:6px">✅ Cloud sinxronizatsiya yoqilgan</div>
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px">${holat}</div>
       <div style="font-size:13px;color:var(--muted);line-height:1.6">
-        Admin paneldan qo'shgan kolleksiya va filmlaringiz barcha qurilmalarda avtomatik ko'rinadi.
+        Hozir bazada: <b>${nc}</b> kolleksiya · <b>${nm}</b> film · <b>${nd}</b> rejissyor
       </div>
     </div>
+
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:12px">
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px">💾 Zaxira nusxa olish</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px">
+        Butun bazani JSON fayl qilib yuklab oladi. Jiddiy o'zgarish kiritishdan oldin shuni bosib qo'ying.
+      </div>
+      <button class="a-btn" onclick="exportBackup()">⬇️ Zaxirani yuklab olish</button>
+    </div>
+
+    <div style="background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:16px;margin-top:12px">
+      <div style="font-size:14px;font-weight:500;margin-bottom:6px">♻️ Zaxiradan tiklash</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:12px">
+        Diqqat: bu amal hozirgi bazani tanlangan fayl bilan <b>butunlay almashtiradi</b>.
+        Fayl avval tekshiriladi va tasdiq so'raladi.
+      </div>
+      <input type="file" id="imp-file" accept="application/json,.json" style="display:none" onchange="handleImportFile(event)">
+      <button class="a-btn" style="background:#7f1d1d" onclick="document.getElementById('imp-file').click()">⬆️ Fayldan tiklash</button>
+    </div>
   `;
+}
+
+/* ═══ ZAXIRA: EXPORT ═══ */
+function exportBackup(){
+  try{
+    const dirs = loadDirectors();
+    const payload = {
+      app: 'kino-kolleksiya',
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      counts: { collections: COLLECTIONS.length, movies: MOVIES.length, directors: dirs.length },
+      collections: COLLECTIONS,
+      movies: MOVIES,
+      directors: dirs
+    };
+    const d = new Date();
+    const p = n => String(n).padStart(2, '0');
+    const nom = 'kino-backup-' + d.getFullYear() + '-' + p(d.getMonth()+1) + '-' + p(d.getDate())
+              + '-' + p(d.getHours()) + p(d.getMinutes()) + '.json';
+
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url; a.download = nom;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+    showToast('Zaxira yuklandi');
+  }catch(e){
+    console.error('Export xatosi:', e);
+    showToast('Zaxira olishda xato');
+  }
+}
+
+/* ═══ ZAXIRA: IMPORT ═══ */
+function readFileAsText(file){
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload  = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+    r.readAsText(file);
+  });
+}
+
+async function handleImportFile(ev){
+  const file = ev.target.files && ev.target.files[0];
+  ev.target.value = '';   // bir xil faylni qayta tanlash mumkin bo'lsin
+  if(!file) return;
+
+  if(!CLOUD_OK){
+    alert("Bulutdan ma'lumot o'qilmagan — hozir tiklash xavfli.\nSahifani yangilab qayta urinib ko'ring.");
+    return;
+  }
+
+  let data;
+  try{
+    data = JSON.parse(await readFileAsText(file));
+  }catch(e){
+    alert("Fayl JSON formatida emas yoki buzilgan.");
+    return;
+  }
+
+  if(!data || !Array.isArray(data.collections) || !Array.isArray(data.movies)){
+    alert("Fayl tuzilishi noto'g'ri: 'collections' va 'movies' massivlari topilmadi.");
+    return;
+  }
+
+  const yomonCol = data.collections.filter(c => !c || !c.id || !c.name);
+  const yomonMov = data.movies.filter(m => !m || m.id === undefined || m.id === null);
+  if(yomonCol.length || yomonMov.length){
+    alert("Faylda to'liqsiz yozuvlar bor:\n"
+        + yomonCol.length + " ta kolleksiya, " + yomonMov.length + " ta film.\n\nTiklash bekor qilindi.");
+    return;
+  }
+
+  const ok = confirm(
+    "ZAXIRADAN TIKLASH\n\n" +
+    "Hozirgi baza:  " + COLLECTIONS.length + " kolleksiya, " + MOVIES.length + " film\n" +
+    "Fayldagi baza: " + data.collections.length + " kolleksiya, " + data.movies.length + " film\n" +
+    (data.exportedAt ? "Fayl sanasi:   " + data.exportedAt + "\n" : "") +
+    "\nHozirgi baza butunlay almashtiriladi. Davom etilsinmi?"
+  );
+  if(!ok){ showToast('Bekor qilindi'); return; }
+
+  COLLECTIONS = data.collections;
+  MOVIES      = data.movies;
+
+  await syncToCloud();   // CLOUD_OK va kamayish himoyalari shu yerda ishlaydi
+  if(Array.isArray(data.directors)) await saveDirectors(data.directors);
+
+  renderCollections();
+  switchAdminTab('sync');
+  showToast('Zaxiradan tiklandi');
 }
 
 function openForm(){document.getElementById('form-ov').classList.add('open')}
